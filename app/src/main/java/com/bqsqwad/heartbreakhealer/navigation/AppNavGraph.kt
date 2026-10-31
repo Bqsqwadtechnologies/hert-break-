@@ -17,6 +17,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.bqsqwad.heartbreakhealer.core.ui.components.HeartMeter
 import com.bqsqwad.heartbreakhealer.feature.onboarding.OnboardingScreen
+import com.bqsqwad.heartbreakhealer.feature.sos.SosScreen
 
 object Routes {
     const val ONBOARDING = "onboarding"
@@ -49,10 +50,17 @@ fun AppNavGraph(navController: NavHostController) {
             )
         }
         composable(Routes.DASHBOARD) {
-            DashboardPlaceholder()
+            DashboardPlaceholder(
+                onSos = { navController.navigate(Routes.SOS) }
+            )
         }
         composable(Routes.JOURNAL) { PlaceholderScreen("Private Journal") }
-        composable(Routes.SOS) { PlaceholderScreen("Urge SOS") }
+        composable(Routes.SOS) {
+            SosScreen(
+                onNavigateToSupport = { navController.navigate(Routes.SUPPORT) },
+                onClose = { navController.popBackStack() }
+            )
+        }
         composable(Routes.NO_CONTACT) { PlaceholderScreen("No-Contact Tracker") }
         composable(Routes.REBUILD) { PlaceholderScreen("30-Day Rebuild Program") }
         composable(Routes.SELF_CARE) { PlaceholderScreen("Self-Care Planner") }
@@ -60,12 +68,14 @@ fun AppNavGraph(navController: NavHostController) {
         composable(Routes.SETTINGS) { PlaceholderScreen("Settings") }
         composable(Routes.MEMORIES) { PlaceholderScreen("Memories Box") }
         composable(Routes.HEARTS_SHOP) { PlaceholderScreen("Hearts Shop") }
-        composable(Routes.SUPPORT) { PlaceholderScreen("Need more support?") }
+        composable(Routes.SUPPORT) {
+            SupportScreen(onBack = { navController.popBackStack() })
+        }
     }
 }
 
 @Composable
-private fun DashboardPlaceholder() {
+private fun DashboardPlaceholder(onSos: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -92,6 +102,10 @@ private fun DashboardPlaceholder() {
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.tertiary
         )
+        Spacer(Modifier.height(32.dp))
+        androidx.compose.material3.Button(onClick = onSos) {
+            Text("Urge SOS")
+        }
     }
 }
 
@@ -105,5 +119,34 @@ fun PlaceholderScreen(title: String) {
             text = title,
             style = MaterialTheme.typography.headlineMedium
         )
+    }
+}
+
+@Composable
+fun SupportScreen(onBack: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Need more support?", style = MaterialTheme.typography.headlineMedium)
+        Spacer(Modifier.height(16.dp))
+        Text(
+            "This app is not therapy or a crisis service.",
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Spacer(Modifier.height(12.dp))
+        Text(
+            "If you feel unsafe or at risk of harming yourself, contact local emergency services right away.",
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Spacer(Modifier.height(16.dp))
+        Text("Find a helpline: findahelpline.com")
+        Text("US: 988 Suicide & Crisis Lifeline")
+        Spacer(Modifier.height(32.dp))
+        androidx.compose.material3.Button(onClick = onBack) {
+            Text("Back")
+        }
     }
 }
