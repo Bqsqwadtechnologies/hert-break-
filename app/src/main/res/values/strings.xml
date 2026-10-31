@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Heartbreak Healer</string>
+    <string name="channel_daily_name">Daily Reminders</string>
+    <string name="channel_daily_desc">Gentle daily check-in and affirmation reminders</string>
+    <string name="channel_tips_name">Healing Tips</string>
+    <string name="channel_tips_desc">Occasional supportive tips and encouragement</string>
+
+    <string name="continue_btn">Continue</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="done">Done</string>
+    <string name="back">Back</string>
+    <string name="settings">Settings</string>
+    <string name="need_more_support">Need more support?</string>
+
+    <string name="welcome_title">Welcome</string>
+    <string name="welcome_subtitle">A private space to heal, one day at a time</string>
+    <string name="nickname_prompt">What should we call you?</string>
+    <string name="breakup_date_prompt">When did the breakup happen?</string>
+    <string name="goals_prompt">What are you focusing on?</string>
+    <string name="goal_heal">Heal</string>
+    <string name="goal_no_contact">Stay no-contact</string>
+    <string name="goal_rebuild">Rebuild my life</string>
+    <string name="goal_closure">Find closure</string>
+
+    <string name="days_since">Days since</string>
+    <string name="hearts_balance">Hearts</string>
+    <string name="current_stage">Current stage</string>
+    <string name="stage_shock">Shock</string>
+    <string name="stage_hurt">Hurt</string>
+    <string name="stage_anger">Anger</string>
+    <string name="stage_acceptance">Acceptance</string>
+    <string name="stage_growth">Growth</string>
+
+    <string name="urge_sos">Urge SOS</string>
+    <string name="breathe">Breathe with me</string>
+    <string name="distraction_timer">5-minute distraction</string>
+    <string name="grounding">Grounding exercise</string>
+    <string name="reasons_better">Reasons I\'m better off</string>
+    <string name="dont_text">Don\'t text them</string>
+
+    <string name="not_therapy">This app is not therapy or a crisis service.</string>
+    <string name="if_unsafe">If you feel unsafe or at risk of harming yourself, contact local emergency services right away.</string>
+    <string name="find_help">Find a helpline: findahelpline.com</string>
+    <string name="us_988">US: 988 Suicide &amp; Crisis Lifeline</string>
+</resources>
