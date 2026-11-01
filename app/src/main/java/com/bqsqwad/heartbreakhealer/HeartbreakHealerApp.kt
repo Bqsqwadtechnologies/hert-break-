@@ -4,6 +4,7 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
+import com.google.android.gms.ads.MobileAds
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
@@ -11,6 +12,8 @@ class HeartbreakHealerApp : Application() {
     override fun onCreate() {
         super.onCreate()
         createNotificationChannels()
+        // Initialize ads in background – never blocks splash or first frame
+        MobileAds.initialize(this) { }
     }
 
     private fun createNotificationChannels() {
