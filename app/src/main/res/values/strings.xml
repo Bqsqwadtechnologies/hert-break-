@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Heartbreak Healer</string>
+    <string name="splash_tagline">Heal at your own pace.</string>
     <string name="channel_daily_name">Daily Reminders</string>
     <string name="channel_daily_desc">Gentle daily check-in and affirmation reminders</string>
     <string name="channel_tips_name">Healing Tips</string>
