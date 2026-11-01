@@ -28,17 +28,21 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Configure Gradle and caching
+      # This repository currently has gradle-wrapper.properties but no gradlew script
+      # or wrapper JAR. Install the exact Gradle distribution declared by the project.
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: '9.6.0'
 
-      - name: Verify Gradle wrapper
-        run: ./gradlew --version
+      - name: Verify Gradle installation
+        run: gradle --version
 
       - name: Run unit tests
-        run: ./gradlew test --continue --stacktrace
+        run: gradle test --continue --stacktrace
 
       - name: Assemble debug APK
-        run: ./gradlew :app:assembleDebug --stacktrace
+        run: gradle :app:assembleDebug --stacktrace
 
       - name: Verify APK output
         shell: bash
