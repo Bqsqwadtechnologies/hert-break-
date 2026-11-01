@@ -1,18 +1,22 @@
-# Branding / Logo
+# Branding / Logo – Heartbreak Healer
 
-Place the master logo here as `logo.png` (1024×1024, preferably with transparency).
+## Official logo (user-provided)
+- `logo.png` / `logo_1024.png` – glossy red healed heart (transparent background)
+- `logo_mono.png` – single-color silhouette for monochrome adaptive icon & notification small icon
 
-Optional: `logo_mono.png` (single-color silhouette for monochrome adaptive icon / notification).
+This healed heart is the **app icon**, **notification icon**, and **system splash icon**.
 
-A Gradle task (and GitHub Action) will automatically generate:
+The earlier blue glowing heart (if present) is superseded by this red healed heart per user request (1 Nov 2026).
 
-- Adaptive launcher icons (foreground, background, themed monochrome)
+## Automatic generation (to be completed)
+A Gradle task + GitHub Action will generate from `logo.png`:
+- Adaptive launcher (foreground + background + themed monochrome)
 - Legacy mipmaps
 - Notification small icon (white silhouette)
-- Splash screen icon
-- In-app header logo
-- 512px Play Store icon
+- Splash icon (healed heart)
+- 512 px Play Store icon
 
-Until the generated resources exist, the app uses a clean placeholder. All app code reads from the generated resources so replacing the logo updates everything without code changes.
+Until generated resources exist, the app uses placeholders that point to the healed heart assets.
 
-Current logo: provided by user (blue glowing heart).
+## Splash stages
+See `/branding/splash/` for the broken → cracked → healed animation assets. Stage 3 now uses this same healed heart.

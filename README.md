@@ -4,16 +4,23 @@
 **Company:** BQ Sqwad Technologies  
 **Contact:** bqsqwadtechnologies@bqsqwadai.com
 
-A private, supportive companion that helps people get through a breakup day by day, with tools to heal, stay strong and move forward.
+Private, supportive companion for healing after a breakup.
 
-## Status
+## Current status (main branch only)
 
-Full modular Android project is being built directly on **main**.
+- Modular Kotlin + Compose + Material 3 project
+- compileSdk / targetSdk **36**, minSdk 26
+- Design system, HeartMeter, Onboarding, Dashboard, SOS skeleton, Support screen
+- Room + DataStore foundations
+- Animated splash story (broken → cracked → healed)
+- **Official logo**: glossy red healed heart (used for app icon, notification icon, splash)
+- **Monetization**: AdMob only (test IDs). **No Play Billing / no payment SDKs** (per product rules)
 
-- Kotlin + Jetpack Compose + Material 3
-- Clean Architecture (app / core / feature modules)
-- Hilt, Room, DataStore, Navigation, WorkManager
-- Heart-themed UI, hearts economy, SOS, journal, no-contact, rebuild program, etc.
-- AdMob (test IDs), UMP, offline-first, no accounts
+## Play Console note
+If you see a warning about Play Billing Library 7.1.1 → 8.0.0, it does **not** apply to this app. This project deliberately contains **zero** Billing dependencies. The warning usually comes from another app or an old template. Do not add Billing.
 
-Work continues only on the `main` branch.
+## Logo
+See `branding/logo/`. The healed red heart is the source of truth for launcher and notification icons.
+
+## Next
+Full SOS, journal, no-contact, rebuild program, hearts shop, AdManager + UMP, notifications, legal pages, CI, signing.
