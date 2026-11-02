@@ -10,7 +10,15 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.bqsqwad.heartbreakhealer.core.ui.components.HeartMeter
+import com.bqsqwad.heartbreakhealer.feature.affirmations.AffirmationsScreen
+import com.bqsqwad.heartbreakhealer.feature.heartsshop.HeartsShopScreen
+import com.bqsqwad.heartbreakhealer.feature.journal.JournalScreen
+import com.bqsqwad.heartbreakhealer.feature.nocontact.NoContactScreen
 import com.bqsqwad.heartbreakhealer.feature.onboarding.OnboardingScreen
+import com.bqsqwad.heartbreakhealer.feature.rebuild.RebuildScreen
+import com.bqsqwad.heartbreakhealer.feature.selfcare.SelfCareScreen
+import com.bqsqwad.heartbreakhealer.feature.settings.SettingsScreen
+import com.bqsqwad.heartbreakhealer.feature.sos.SosScreen
 
 object Routes {
     const val ONBOARDING = "onboarding"
@@ -22,7 +30,6 @@ object Routes {
     const val SELF_CARE = "self_care"
     const val AFFIRMATIONS = "affirmations"
     const val SETTINGS = "settings"
-    const val MEMORIES = "memories"
     const val HEARTS_SHOP = "hearts_shop"
     const val SUPPORT = "support"
 }
@@ -32,61 +39,84 @@ fun AppNavGraph(navController: NavHostController) {
     NavHost(navController = navController, startDestination = Routes.ONBOARDING) {
         composable(Routes.ONBOARDING) {
             OnboardingScreen(onComplete = { _, _, _ ->
-                navController.navigate(Routes.DASHBOARD) { popUpTo(Routes.ONBOARDING) { inclusive = true } }
+                navController.navigate(Routes.DASHBOARD) {
+                    popUpTo(Routes.ONBOARDING) { inclusive = true }
+                }
             })
         }
         composable(Routes.DASHBOARD) {
-            Column(Modifier = Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Healing Dashboard", style = MaterialTheme.typography.headlineMedium)
-                Spacer(Modifier.height(24.dp))
-                HeartMeter(progress = 0.35f, label = "Day 12")
-                Spacer(Modifier.height(16.dp))
-                Text("Current stage: Hurt", style = MaterialTheme.typography.titleMedium)
-                Text("Hearts: 50", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.tertiary)
-                Spacer(Modifier.height(32.dp))
-                Button(onClick = { navController.navigate(Routes.SOS) }) { Text("Urge SOS") }
-            }
+            DashboardScreen(
+                onSos = { navController.navigate(Routes.SOS) },
+                onJournal = { navController.navigate(Routes.JOURNAL) },
+                onNoContact = { navController.navigate(Routes.NO_CONTACT) },
+                onSelfCare = { navController.navigate(Routes.SELF_CARE) },
+                onRebuild = { navController.navigate(Routes.REBUILD) },
+                onAffirmations = { navController.navigate(Routes.AFFIRMATIONS) },
+                onHeartsShop = { navController.navigate(Routes.HEARTS_SHOP) },
+                onSettings = { navController.navigate(Routes.SETTINGS) }
+            )
         }
         composable(Routes.SOS) {
-            // SOS placeholder until full screen is pushed
-            Column(modifier = Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Urge SOS", style = MaterialTheme.typography.headlineLarge)
-                Spacer(Modifier.height(16.dp))
-                Text("You're stronger than this moment.")
-                Spacer(Modifier.height(24.dp))
-                Button(onClick = { navController.navigate(Routes.SUPPORT) }) { Text("Need more support?") }
-                Spacer(Modifier.height(8.dp))
-                OutlinedButton(onClick = { navController.popBackStack() }) { Text("I'm okay for now") }
-            }
+            SosScreen(
+                onNavigateToSupport = { navController.navigate(Routes.SUPPORT) },
+                onClose = { navController.popBackStack() }
+            )
         }
-        composable(Routes.SUPPORT) {
-            Column(modifier = Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Need more support?", style = MaterialTheme.typography.headlineMedium)
-                Spacer(Modifier.height(16.dp))
-                Text("This app is not therapy or a crisis service.")
-                Spacer(Modifier.height(12.dp))
-                Text("If you feel unsafe or at risk of harming yourself, contact local emergency services right away.")
-                Spacer(Modifier.height(16.dp))
-                Text("Find a helpline: findahelpline.com")
-                Text("US: 988 Suicide & Crisis Lifeline")
-                Spacer(Modifier.height(32.dp))
-                Button(onClick = { navController.popBackStack() }) { Text("Back") }
-            }
+        composable(Routes.JOURNAL) { JournalScreen(onBack = { navController.popBackStack() }) }
+        composable(Routes.NO_CONTACT) { NoContactScreen(onBack = { navController.popBackStack() }) }
+        composable(Routes.SELF_CARE) { SelfCareScreen(onBack = { navController.popBackStack() }) }
+        composable(Routes.REBUILD) { RebuildScreen(onBack = { navController.popBackStack() }) }
+        composable(Routes.AFFIRMATIONS) { AffirmationsScreen(onBack = { navController.popBackStack() }) }
+        composable(Routes.HEARTS_SHOP) { HeartsShopScreen(onBack = { navController.popBackStack() }) }
+        composable(Routes.SETTINGS) {
+            SettingsScreen(
+                onNavigateToSupport = { navController.navigate(Routes.SUPPORT) },
+                onClearData = { },
+                onBack = { navController.popBackStack() }
+            )
         }
-        composable(Routes.JOURNAL) { Placeholder("Private Journal") }
-        composable(Routes.NO_CONTACT) { Placeholder("No-Contact Tracker") }
-        composable(Routes.REBUILD) { Placeholder("30-Day Rebuild Program") }
-        composable(Routes.SELF_CARE) { Placeholder("Self-Care Planner") }
-        composable(Routes.AFFIRMATIONS) { Placeholder("Daily Affirmations") }
-        composable(Routes.SETTINGS) { Placeholder("Settings") }
-        composable(Routes.MEMORIES) { Placeholder("Memories Box") }
-        composable(Routes.HEARTS_SHOP) { Placeholder("Hearts Shop") }
+        composable(Routes.SUPPORT) { SupportScreen(onBack = { navController.popBackStack() }) }
     }
 }
 
 @Composable
-private fun Placeholder(title: String) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(title, style = MaterialTheme.typography.headlineMedium)
+private fun DashboardScreen(
+    onSos: () -> Unit, onJournal: () -> Unit, onNoContact: () -> Unit,
+    onSelfCare: () -> Unit, onRebuild: () -> Unit, onAffirmations: () -> Unit,
+    onHeartsShop: () -> Unit, onSettings: () -> Unit
+) {
+    Column(modifier = Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("Healing Dashboard", style = MaterialTheme.typography.headlineMedium)
+        Spacer(Modifier.height(16.dp))
+        HeartMeter(progress = 0.35f, label = "Day 12")
+        Spacer(Modifier.height(8.dp))
+        Text("Current stage: Hurt", style = MaterialTheme.typography.titleMedium)
+        Text("Hearts: 50", color = MaterialTheme.colorScheme.tertiary)
+        Spacer(Modifier.height(24.dp))
+        Button(onClick = onSos, modifier = Modifier.fillMaxWidth()) { Text("Urge SOS") }
+        Spacer(Modifier.height(8.dp))
+        OutlinedButton(onClick = onJournal, modifier = Modifier.fillMaxWidth()) { Text("Journal") }
+        OutlinedButton(onClick = onNoContact, modifier = Modifier.fillMaxWidth()) { Text("No-Contact") }
+        OutlinedButton(onClick = onSelfCare, modifier = Modifier.fillMaxWidth()) { Text("Self-Care") }
+        OutlinedButton(onClick = onRebuild, modifier = Modifier.fillMaxWidth()) { Text("30-Day Rebuild") }
+        OutlinedButton(onClick = onAffirmations, modifier = Modifier.fillMaxWidth()) { Text("Affirmations") }
+        OutlinedButton(onClick = onHeartsShop, modifier = Modifier.fillMaxWidth()) { Text("Hearts Shop") }
+        TextButton(onClick = onSettings) { Text("Settings") }
+    }
+}
+
+@Composable
+fun SupportScreen(onBack: () -> Unit) {
+    Column(modifier = Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("Need more support?", style = MaterialTheme.typography.headlineMedium)
+        Spacer(Modifier.height(16.dp))
+        Text("This app is not therapy or a crisis service.")
+        Spacer(Modifier.height(12.dp))
+        Text("If you feel unsafe or at risk of harming yourself, contact local emergency services right away.")
+        Spacer(Modifier.height(16.dp))
+        Text("Find a helpline: findahelpline.com")
+        Text("US: 988 Suicide & Crisis Lifeline")
+        Spacer(Modifier.height(32.dp))
+        Button(onClick = onBack) { Text("Back") }
     }
 }
