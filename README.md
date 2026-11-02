@@ -2,25 +2,60 @@
 
 **Package:** `com.bqsqwad.heartbreakhealer`  
 **Company:** BQ Sqwad Technologies  
-**Contact:** bqsqwadtechnologies@bqsqwadai.com
+**Contact:** bqsqwadtechnologies@bqsqwadai.com  
+**Version:** 1.0.0 (versionCode 1)
 
-Private, supportive companion for healing after a breakup.
+Private, supportive companion that helps people get through a breakup day by day.
 
-## Current status (main branch only)
+## Tech
+- Kotlin, Jetpack Compose, Material 3
+- MVVM + Clean Architecture, Hilt, Room, DataStore, Navigation, WorkManager
+- compileSdk / targetSdk **36**, minSdk **26**
+- AdMob only (no Play Billing, no accounts)
 
-- Modular Kotlin + Compose + Material 3 project
-- compileSdk / targetSdk **36**, minSdk 26
-- Design system, HeartMeter, Onboarding, Dashboard, SOS skeleton, Support screen
-- Room + DataStore foundations
-- Animated splash story (broken → cracked → healed)
-- **Official logo**: glossy red healed heart (used for app icon, notification icon, splash)
-- **Monetization**: AdMob only (test IDs). **No Play Billing / no payment SDKs** (per product rules)
+## Logo & Splash
+- Official logo: glossy red healed heart (`branding/logo/`)
+- Animated splash: broken → cracked → healed (~2.4 s first launch)
+- System splash uses healed heart
 
-## Play Console note
-If you see a warning about Play Billing Library 7.1.1 → 8.0.0, it does **not** apply to this app. This project deliberately contains **zero** Billing dependencies. The warning usually comes from another app or an old template. Do not add Billing.
+## Ads (test IDs active)
+See `AdsConfig.kt` and `AdPlacementMap.kt`.
 
-## Logo
-See `branding/logo/`. The healed red heart is the source of truth for launcher and notification icons.
+**Create these units in AdMob:**
+| Type | Name |
+|------|------|
+| Banner | `hh_banner_home`, `hh_banner_lists` |
+| Native | `hh_native_affirmations`, `hh_native_rebuild` |
+| Interstitial | `hh_interstitial_task_complete` |
+| Rewarded | `hh_rewarded_hearts` |
+| App Open | `hh_app_open` |
 
-## Next
-Full SOS, journal, no-contact, rebuild program, hearts shop, AdManager + UMP, notifications, legal pages, CI, signing.
+Never show ads on: onboarding, journal, SOS, unsent letters, memories, support/crisis, settings.
+
+## Legal
+- Privacy: https://bqsqwadtechnologies.github.io/hert-break-/privacy.html
+- Terms: https://bqsqwadtechnologies.github.io/hert-break-/terms.html  
+Enable GitHub Pages from `/docs`.
+
+## Build
+```bash
+./gradlew :app:assembleDebug
+./gradlew :app:assembleRelease
+```
+
+## Release checklist
+1. Replace test AdMob IDs in `AdsConfig` + Manifest with real ones
+2. Ensure final logo is in `branding/logo/logo.png`
+3. Generate release keystore and store secrets in GitHub Actions
+4. Enable GitHub Pages for `/docs`
+5. Data safety form: data stays on device, AdMob, no accounts
+6. Content rating: 13+
+7. Enroll in Play App Signing
+8. Upload AAB
+
+## Signing
+```bash
+keytool -genkey -v -keystore heartbreak-healer-release.jks -keyalg RSA -keysize 4096 -validity 100000 -alias heartbreak_healer
+```
+Secrets: `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`.
+Never commit the keystore.
