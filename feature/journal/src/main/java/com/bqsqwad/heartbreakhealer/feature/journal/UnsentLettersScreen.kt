@@ -21,7 +21,7 @@ fun UnsentLettersScreen(
     var writing by remember { mutableStateOf(false) }
     var text by remember { mutableStateOf("") }
 
-    Column(Modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
