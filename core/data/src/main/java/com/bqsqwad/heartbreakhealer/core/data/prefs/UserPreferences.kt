@@ -6,7 +6,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -32,6 +31,10 @@ class UserPreferences @Inject constructor(
     val reduceMotion: Flow<Boolean> = ds.data.map { it[Keys.REDUCE_MOTION] ?: false }
     val isFirstLaunch: Flow<Boolean> = ds.data.map { it[Keys.FIRST_LAUNCH] ?: true }
     val ageConfirmed: Flow<Boolean> = ds.data.map { it[Keys.AGE_CONFIRMED] ?: false }
+    val urgePassedCount: Flow<Int> = ds.data.map { it[Keys.URGE_PASSED] ?: 0 }
+    val timeCapsuleText: Flow<String?> = ds.data.map { it[Keys.CAPSULE_TEXT] }
+    val timeCapsuleUnlock: Flow<String?> = ds.data.map { it[Keys.CAPSULE_UNLOCK] }
+    val breakupDayEpoch: Flow<Long?> = ds.data.map { it[Keys.BREAKUP_EPOCH] }
 
     suspend fun setOnboardingComplete(nickname: String, goals: Set<String>) {
         ds.edit {
@@ -68,6 +71,24 @@ class UserPreferences @Inject constructor(
         ds.edit { it[Keys.AGE_CONFIRMED] = confirmed }
     }
 
+    suspend fun incrementUrgePassed() {
+        ds.edit {
+            val c = it[Keys.URGE_PASSED] ?: 0
+            it[Keys.URGE_PASSED] = c + 1
+        }
+    }
+
+    suspend fun setTimeCapsule(text: String, unlockDate: String) {
+        ds.edit {
+            it[Keys.CAPSULE_TEXT] = text
+            it[Keys.CAPSULE_UNLOCK] = unlockDate
+        }
+    }
+
+    suspend fun setBreakupEpoch(epochDay: Long) {
+        ds.edit { it[Keys.BREAKUP_EPOCH] = epochDay }
+    }
+
     suspend fun clearAll() {
         ds.edit { it.clear() }
     }
@@ -82,5 +103,9 @@ class UserPreferences @Inject constructor(
         val REDUCE_MOTION = booleanPreferencesKey("reduce_motion")
         val FIRST_LAUNCH = booleanPreferencesKey("first_launch")
         val AGE_CONFIRMED = booleanPreferencesKey("age_confirmed")
+        val URGE_PASSED = intPreferencesKey("urge_passed")
+        val CAPSULE_TEXT = stringPreferencesKey("capsule_text")
+        val CAPSULE_UNLOCK = stringPreferencesKey("capsule_unlock")
+        val BREAKUP_EPOCH = androidx.datastore.preferences.core.longPreferencesKey("breakup_epoch")
     }
 }
