@@ -2,7 +2,6 @@ package com.bqsqwad.heartbreakhealer.core.domain.model
 
 import java.time.LocalDate
 
-enum class HealingStage { SHOCK, HURT, ANGER, ACCEPTANCE, GROWTH }
 enum class Goal { HEAL, NO_CONTACT, REBUILD, CLOSURE }
 enum class LetterStatus { DRAFT, BURNED, RELEASED, SAVED }
 
