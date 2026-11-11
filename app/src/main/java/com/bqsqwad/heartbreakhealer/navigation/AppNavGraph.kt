@@ -11,9 +11,18 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.bqsqwad.heartbreakhealer.core.domain.model.HealingStage
 import com.bqsqwad.heartbreakhealer.core.ui.components.DailyCheckIn
 import com.bqsqwad.heartbreakhealer.core.ui.components.HeartMeter
 import com.bqsqwad.heartbreakhealer.feature.affirmations.AffirmationsScreen
+import com.bqsqwad.heartbreakhealer.feature.dashboard.BoundaryScriptsScreen
+import com.bqsqwad.heartbreakhealer.feature.dashboard.CopingCardsScreen
+import com.bqsqwad.heartbreakhealer.feature.dashboard.EveningWindDownScreen
+import com.bqsqwad.heartbreakhealer.feature.dashboard.GriefVsContactScreen
+import com.bqsqwad.heartbreakhealer.feature.dashboard.SmallWinsScreen
+import com.bqsqwad.heartbreakhealer.feature.dashboard.StageTrackerCard
+import com.bqsqwad.heartbreakhealer.feature.dashboard.TimeCapsuleScreen
+import com.bqsqwad.heartbreakhealer.feature.dashboard.UrgePassedCard
 import com.bqsqwad.heartbreakhealer.feature.heartsshop.HeartsShopScreen
 import com.bqsqwad.heartbreakhealer.feature.journal.JournalScreen
 import com.bqsqwad.heartbreakhealer.feature.memories.MemoriesScreen
@@ -24,6 +33,7 @@ import com.bqsqwad.heartbreakhealer.feature.selfcare.SelfCareScreen
 import com.bqsqwad.heartbreakhealer.feature.settings.SettingsScreen
 import com.bqsqwad.heartbreakhealer.feature.settings.TriggersScreen
 import com.bqsqwad.heartbreakhealer.feature.sos.SosScreen
+import java.time.LocalDate
 
 object Routes {
     const val ONBOARDING = "onboarding"
@@ -39,6 +49,12 @@ object Routes {
     const val SUPPORT = "support"
     const val MEMORIES = "memories"
     const val TRIGGERS = "triggers"
+    const val COPING = "coping"
+    const val BOUNDARIES = "boundaries"
+    const val CAPSULE = "capsule"
+    const val WINS = "wins"
+    const val EVENING = "evening"
+    const val GRIEF_CONTACT = "grief_contact"
 }
 
 @Composable
@@ -63,7 +79,13 @@ fun AppNavGraph(navController: NavHostController) {
                 onSettings = { navController.navigate(Routes.SETTINGS) },
                 onMemories = { navController.navigate(Routes.MEMORIES) },
                 onTriggers = { navController.navigate(Routes.TRIGGERS) },
-                onCheckIn = { _, _ -> /* wire to JournalRepository + HeartsRepository */ }
+                onCoping = { navController.navigate(Routes.COPING) },
+                onBoundaries = { navController.navigate(Routes.BOUNDARIES) },
+                onCapsule = { navController.navigate(Routes.CAPSULE) },
+                onWins = { navController.navigate(Routes.WINS) },
+                onEvening = { navController.navigate(Routes.EVENING) },
+                onGriefContact = { navController.navigate(Routes.GRIEF_CONTACT) },
+                onCheckIn = { _, _ -> }
             )
         }
         composable(Routes.SOS) {
@@ -82,12 +104,34 @@ fun AppNavGraph(navController: NavHostController) {
             SettingsScreen(
                 onNavigateToSupport = { navController.navigate(Routes.SUPPORT) },
                 onClearData = { },
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack()
+                }
             )
         }
         composable(Routes.SUPPORT) { SupportScreen(onBack = { navController.popBackStack() }) }
         composable(Routes.MEMORIES) { MemoriesScreen(onBack = { navController.popBackStack() }) }
         composable(Routes.TRIGGERS) { TriggersScreen(onBack = { navController.popBackStack() }) }
+        composable(Routes.COPING) { CopingCardsScreen(onBack = { navController.popBackStack() }) }
+        composable(Routes.BOUNDARIES) { BoundaryScriptsScreen(onBack = { navController.popBackStack() }) }
+        composable(Routes.CAPSULE) {
+            TimeCapsuleScreen(
+                onSave = { _, _ -> },
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Routes.WINS) {
+            SmallWinsScreen(
+                wins = listOf("Opened the app and checked in", "Used Urge SOS", "Chose not to text"),
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Routes.EVENING) {
+            EveningWindDownScreen(
+                onSave = { _, _, _ -> },
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Routes.GRIEF_CONTACT) { GriefVsContactScreen(onBack = { navController.popBackStack() }) }
     }
 }
 
@@ -103,6 +147,12 @@ private fun DashboardScreen(
     onSettings: () -> Unit,
     onMemories: () -> Unit,
     onTriggers: () -> Unit,
+    onCoping: () -> Unit,
+    onBoundaries: () -> Unit,
+    onCapsule: () -> Unit,
+    onWins: () -> Unit,
+    onEvening: () -> Unit,
+    onGriefContact: () -> Unit,
     onCheckIn: (Int, String) -> Unit
 ) {
     Column(
@@ -116,13 +166,22 @@ private fun DashboardScreen(
         Spacer(Modifier.height(12.dp))
         HeartMeter(progress = 0.35f, label = "Day 12")
         Spacer(Modifier.height(8.dp))
-        Text("Current stage: Hurt", style = MaterialTheme.typography.titleMedium)
+        StageTrackerCard(stage = HealingStage.HURT, days = 12)
+        Spacer(Modifier.height(8.dp))
+        UrgePassedCard(count = 0, onLogged = { })
+        Spacer(Modifier.height(8.dp))
         Text("Hearts: 50", color = MaterialTheme.colorScheme.tertiary)
         Spacer(Modifier.height(16.dp))
         DailyCheckIn(onSubmit = onCheckIn)
         Spacer(Modifier.height(16.dp))
         Button(onClick = onSos, modifier = Modifier.fillMaxWidth()) { Text("Urge SOS") }
         Spacer(Modifier.height(8.dp))
+        OutlinedButton(onClick = onCoping, modifier = Modifier.fillMaxWidth()) { Text("Coping cards") }
+        OutlinedButton(onClick = onGriefContact, modifier = Modifier.fillMaxWidth()) { Text("Lonely or missing them?") }
+        OutlinedButton(onClick = onBoundaries, modifier = Modifier.fillMaxWidth()) { Text("Boundary scripts") }
+        OutlinedButton(onClick = onCapsule, modifier = Modifier.fillMaxWidth()) { Text("Letter to future you") }
+        OutlinedButton(onClick = onEvening, modifier = Modifier.fillMaxWidth()) { Text("Close the day") }
+        OutlinedButton(onClick = onWins, modifier = Modifier.fillMaxWidth()) { Text("Small wins") }
         OutlinedButton(onClick = onJournal, modifier = Modifier.fillMaxWidth()) { Text("Journal") }
         OutlinedButton(onClick = onNoContact, modifier = Modifier.fillMaxWidth()) { Text("No-Contact") }
         OutlinedButton(onClick = onSelfCare, modifier = Modifier.fillMaxWidth()) { Text("Self-Care") }
