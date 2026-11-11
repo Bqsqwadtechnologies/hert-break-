@@ -1,18 +1,14 @@
 name: Debug Build
 
+# Manual only — no automatic runs on push/PR
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:  # enables the "Run workflow" button
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -28,7 +24,6 @@ jobs:
       - name: Ensure Gradle Wrapper
         run: |
           if [ ! -f ./gradlew ]; then
-            echo "gradlew missing — generating wrapper"
             gradle wrapper --gradle-version 9.6.0
             chmod +x gradlew
           else
