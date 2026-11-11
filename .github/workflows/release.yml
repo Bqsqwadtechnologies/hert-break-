@@ -33,14 +33,11 @@ jobs:
         with:
           gradle-version: '8.14.7'
 
-      - name: Generate and validate Gradle Wrapper
-        run: |
-          gradle wrapper --gradle-version 8.14.7 --distribution-type bin
-          chmod +x ./gradlew
-          ./gradlew --version
+      - name: Verify Gradle
+        run: gradle --version
 
       - name: Build release APK and bundle
-        run: ./gradlew :app:assembleRelease :app:bundleRelease --stacktrace --no-daemon --warning-mode all
+        run: gradle :app:assembleRelease :app:bundleRelease --stacktrace --no-daemon --warning-mode all
 
       - name: Upload release artifacts
         uses: actions/upload-artifact@v7.0.2
