@@ -8,27 +8,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-private val sampleAffirmations = listOf(
-    "I deserve peace.",
-    "This feeling will pass.",
-    "I am rebuilding a life I love.",
-    "My worth is not defined by someone else.",
-    "I choose kindness toward myself today.",
-    "Healing is not linear, and that is okay.",
-    "I am allowed to take up space.",
-    "Every day I grow a little stronger."
-)
-
 @Composable
 fun AffirmationsScreen(onBack: () -> Unit = {}) {
+    val today = AffirmationBank.today()
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text("Daily Affirmations", style = MaterialTheme.typography.headlineMedium)
             TextButton(onClick = onBack) { Text("Back") }
         }
         Spacer(Modifier.height(12.dp))
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        ) {
+            Column(Modifier.padding(16.dp)) {
+                Text("Today", style = MaterialTheme.typography.labelLarge)
+                Spacer(Modifier.height(4.dp))
+                Text(today, style = MaterialTheme.typography.titleLarge)
+            }
+        }
+        Spacer(Modifier.height(16.dp))
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            itemsIndexed(sampleAffirmations) { _, text ->
+            itemsIndexed(AffirmationBank.all) { index, text ->
+                // Native ad slot every 8 items would go here via AdManager
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Text(text = text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(16.dp))
                 }
