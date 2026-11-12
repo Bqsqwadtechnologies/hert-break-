@@ -27,6 +27,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:domain"))
     implementation(project(":core:data"))
+    implementation(libs.room.runtime)
     implementation(libs.androidx.core.ktx)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
