@@ -44,6 +44,7 @@ class AdManager @Inject constructor() {
     private var isShowingFullScreenContent = false
     private var backgroundedAt = 0L
     private var appOpenEligible = false
+    private var eligibleForegroundCount = 0
 
     private val _adsAllowed = MutableStateFlow(false)
     val adsAllowed: StateFlow<Boolean> = _adsAllowed
@@ -222,9 +223,20 @@ class AdManager @Inject constructor() {
     }
 
     fun onAppForeground(activity: Activity) {
-        if (!canRequestAds() || !appOpenEligible || isShowingFullScreenContent) return
+        if (!canRequestAds() || isShowingFullScreenContent) return
+        if (!appOpenEligible) {
+            backgroundedAt = 0L
+            return
+        }
+        eligibleForegroundCount++
         val elapsedInBackground = if (backgroundedAt == 0L) 0L else System.currentTimeMillis() - backgroundedAt
         if (backgroundedAt == 0L || elapsedInBackground < AdsConfig.APP_OPEN_MIN_BACKGROUND_MS) {
+            backgroundedAt = 0L
+            return
+        }
+        // Let users become familiar with the app before the first app-open ad.
+        if (eligibleForegroundCount < 3) {
+            backgroundedAt = 0L
             return
         }
         backgroundedAt = 0L
