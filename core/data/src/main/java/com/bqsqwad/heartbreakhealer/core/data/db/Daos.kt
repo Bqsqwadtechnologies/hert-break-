@@ -44,6 +44,10 @@ interface TriggerDao {
 interface SelfCareDao {
     @Query("SELECT * FROM self_care_completions WHERE date = :date")
     fun getCompletionsForDate(date: String): Flow<List<SelfCareCompletionEntity>>
+    @Query("SELECT * FROM self_care_completions WHERE date = :date")
+    fun getCompletionsForDate(date: String): Flow<List<SelfCareCompletionEntity>>
+    @Query("SELECT EXISTS(SELECT 1 FROM self_care_completions WHERE taskIdDate = :key)")
+    suspend fun isCompleted(key: String): Boolean
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCompletion(completion: SelfCareCompletionEntity)
 }
@@ -52,6 +56,8 @@ interface SelfCareDao {
 interface RebuildDao {
     @Query("SELECT * FROM rebuild_progress")
     fun getAll(): Flow<List<RebuildProgressEntity>>
+    @Query("SELECT EXISTS(SELECT 1 FROM rebuild_progress WHERE day = :day AND completed = 1)")
+    suspend fun isCompleted(day: Int): Boolean
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(progress: RebuildProgressEntity)
 }
