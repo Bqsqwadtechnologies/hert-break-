@@ -90,7 +90,19 @@ jobs:
           APK="$(find app/build/outputs/apk/release -maxdepth 1 -name '*.apk' -print -quit)"
           AAB="$(find app/build/outputs/bundle/release -maxdepth 1 -name '*.aab' -print -quit)"
           test -n "$APK" && test -n "$AAB"
-          apksigner verify --verbose "$APK"
+
+          # Android Gradle Plugin installs build-tools in the SDK; apksigner
+          # is not guaranteed to be on PATH on GitHub-hosted runners.
+          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-$HOME/Android/Sdk}}"
+          APKSIGNER="$(find "$SDK_ROOT/build-tools" -type f -name apksigner -print 2>/dev/null | sort -V | tail -n 1)"
+          if [[ -z "$APKSIGNER" ]]; then
+            echo "::error::Could not locate apksigner under $SDK_ROOT/build-tools."
+            echo "Installed Android build-tools:"
+            find "$SDK_ROOT/build-tools" -mindepth 1 -maxdepth 1 -type d -printf '%f\\n' 2>/dev/null || true
+            exit 1
+          fi
+
+          "$APKSIGNER" verify --verbose "$APK"
           jarsigner -verify "$AAB" >/dev/null
           echo "Both release outputs have valid signatures."
 
