@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import javax.imageio.ImageIO
 
 plugins {
     alias(libs.plugins.android.application)
@@ -68,8 +69,18 @@ val generateOfficialBrandAssets by tasks.registering {
         val logoOutput = generatedRes.get().file("drawable-nodpi/official_healed_heart.png").asFile
         val monoOutput = generatedRes.get().file("drawable-nodpi/official_healed_heart_mono.png").asFile
         logoOutput.parentFile.mkdirs()
-        logoSource.copyTo(logoOutput, overwrite = true)
-        monoSource.copyTo(monoOutput, overwrite = true)
+        // The uploaded files carry a .png name but are JPEG-encoded.
+        // Decode by content and write genuine PNG resources for AAPT2.
+        val logoImage = ImageIO.read(logoSource)
+            ?: error("Unable to decode official logo: ${logoSource.path}")
+        val monoImage = ImageIO.read(monoSource)
+            ?: error("Unable to decode monochrome logo: ${monoSource.path}")
+        check(ImageIO.write(logoImage, "png", logoOutput)) {
+            "No PNG writer available for official logo"
+        }
+        check(ImageIO.write(monoImage, "png", monoOutput)) {
+            "No PNG writer available for monochrome logo"
+        }
     }
 }
 android.sourceSets.getByName("main").res.srcDir(layout.buildDirectory.dir("generated/res/officialBrand"))
