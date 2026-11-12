@@ -36,6 +36,8 @@ class DashboardViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
     val bestNoContactDays: StateFlow<Int> = noContactRepository.bestDays
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+    val unsentLetters = journalRepository.getLetters()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     val journalEntries = journalRepository.getEntries()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -70,6 +72,9 @@ class DashboardViewModel @Inject constructor(
             preferences.setTimeCapsule(text, LocalDate.now().plusDays(days.toLong()).toString())
         }
     }
+
+    fun saveUnsentLetter(content: String) { viewModelScope.launch { journalRepository.saveLetter(content) } }
+    fun releaseUnsentLetter(id: Long) { viewModelScope.launch { journalRepository.releaseLetter(id) } }
 
     fun addMemory(title: String, note: String) { viewModelScope.launch { preferences.addMemory(title, note) } }
     fun addTrigger(name: String, coping: String) { viewModelScope.launch { preferences.addTrigger(name, coping) } }
