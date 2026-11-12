@@ -27,7 +27,7 @@ class DailyReminderWorker(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val notification = NotificationCompat.Builder(applicationContext, HeartbreakHealerApp.CHANNEL_DAILY)
-            .setSmallIcon(R.drawable.ic_splash)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle("Heartbreak Healer")
             .setContentText(affirmation)
             .setStyle(NotificationCompat.BigTextStyle().bigText(affirmation))
