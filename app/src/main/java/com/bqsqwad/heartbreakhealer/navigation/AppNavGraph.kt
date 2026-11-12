@@ -167,13 +167,17 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
         }
         composable(Routes.WINS) {
             SmallWinsScreen(
-                wins = listOf("Opened the app and checked in", "Used Urge SOS", "Chose not to text"),
+                wins = buildList {
+                    if (journalEntries.isNotEmpty()) add("Made time to check in with yourself")
+                    if (noContactDays > 0) add("Built a no-contact streak of $noContactDays days")
+                    if (hearts > 50) add("Earned hearts through healing activities")
+                },
                 onBack = { navController.popBackStack() }
             )
         }
         composable(Routes.EVENING) {
             EveningWindDownScreen(
-                onSave = { _, _, _ -> },
+                onSave = dashboardViewModel::saveEveningReflection,
                 onBack = { navController.popBackStack() }
             )
         }
