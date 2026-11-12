@@ -37,6 +37,8 @@ import com.bqsqwad.heartbreakhealer.feature.heartsshop.HeartsShopScreen
 import com.bqsqwad.heartbreakhealer.feature.journal.JournalScreen
 import com.bqsqwad.heartbreakhealer.feature.journal.JournalUiEntry
 import com.bqsqwad.heartbreakhealer.feature.memories.MemoriesScreen
+import com.bqsqwad.heartbreakhealer.feature.memories.MemoryUi
+import com.bqsqwad.heartbreakhealer.feature.settings.TriggerUi
 import com.bqsqwad.heartbreakhealer.feature.nocontact.NoContactScreen
 import com.bqsqwad.heartbreakhealer.feature.onboarding.OnboardingScreen
 import com.bqsqwad.heartbreakhealer.feature.rebuild.RebuildScreen
@@ -81,6 +83,8 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
     val rebuildProgress by dashboardViewModel.rebuildProgress.collectAsState()
     val reduceMotion by dashboardViewModel.reduceMotion.collectAsState()
     val remindersEnabled by dashboardViewModel.dailyRemindersEnabled.collectAsState()
+    val savedMemories by dashboardViewModel.memories.collectAsState()
+    val savedTriggers by dashboardViewModel.triggers.collectAsState()
     val activity = LocalContext.current as? Activity
     NavHost(navController = navController, startDestination = Routes.ONBOARDING) {
         composable(Routes.ONBOARDING) {
@@ -176,8 +180,26 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
             )
         }
         composable(Routes.SUPPORT) { SupportScreen(onBack = { navController.popBackStack() }) }
-        composable(Routes.MEMORIES) { MemoriesScreen(onBack = { navController.popBackStack() }) }
-        composable(Routes.TRIGGERS) { TriggersScreen(onBack = { navController.popBackStack() }) }
+        composable(Routes.MEMORIES) {
+            MemoriesScreen(
+                memories = savedMemories.sorted().mapIndexed { index, item ->
+                    val parts = item.split("\\t", limit = 2)
+                    MemoryUi(index.toLong(), parts.firstOrNull().orEmpty(), parts.getOrElse(1) { "" })
+                },
+                onAdd = dashboardViewModel::addMemory,
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Routes.TRIGGERS) {
+            TriggersScreen(
+                triggers = savedTriggers.sorted().mapIndexed { index, item ->
+                    val parts = item.split("\\t", limit = 2)
+                    TriggerUi(index.toLong(), parts.firstOrNull().orEmpty(), parts.getOrElse(1) { "" })
+                },
+                onAdd = dashboardViewModel::addTrigger,
+                onBack = { navController.popBackStack() }
+            )
+        }
         composable(Routes.COPING) { CopingCardsScreen(onBack = { navController.popBackStack() }) }
         composable(Routes.BOUNDARIES) { BoundaryScriptsScreen(onBack = { navController.popBackStack() }) }
         composable(Routes.CAPSULE) {
