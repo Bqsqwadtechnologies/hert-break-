@@ -86,6 +86,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
     val savedMemories by dashboardViewModel.memories.collectAsState()
     val savedTriggers by dashboardViewModel.triggers.collectAsState()
     val activity = LocalContext.current as? Activity
+    val adsAllowed by adManager.adsAllowed.collectAsState()
     NavHost(navController = navController, startDestination = Routes.ONBOARDING) {
         composable(Routes.ONBOARDING) {
             OnboardingScreen(onComplete = { _, _, _ ->
@@ -142,6 +143,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
             SelfCareScreen(
                 completedTaskIds = selfCareCompleted.map { it.taskId }.toSet(),
                 onToggle = { taskId -> dashboardViewModel.completeSelfCare(taskId); activity?.let { host -> adManager.showInterstitialIfAllowed(host) } },
+                adsAllowed = adsAllowed,
                 onBack = { navController.popBackStack() }
             )
         }
@@ -149,10 +151,11 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
             RebuildScreen(
                 completedDays = rebuildProgress.filter { it.completed }.map { it.day }.toSet(),
                 onCompleteDay = { day -> dashboardViewModel.completeRebuildDay(day); activity?.let { host -> adManager.showInterstitialIfAllowed(host) } },
+                adsAllowed = adsAllowed,
                 onBack = { navController.popBackStack() }
             )
         }
-        composable(Routes.AFFIRMATIONS) { AffirmationsScreen(onBack = { navController.popBackStack() }) }
+        composable(Routes.AFFIRMATIONS) { AffirmationsScreen(onBack = { navController.popBackStack() }, adsAllowed = adsAllowed) }
         composable(Routes.HEARTS_SHOP) {
             HeartsShopScreen(
                 balance = hearts,
@@ -351,7 +354,8 @@ private fun DashboardScreen(
             Text("A little support helps us keep this app free", color = muted, style = MaterialTheme.typography.labelSmall)
             Spacer(Modifier.height(6.dp))
             com.bqsqwad.heartbreakhealer.core.ui.ads.BannerAdView(
-                unitId = com.bqsqwad.heartbreakhealer.core.common.ads.AdsConfig.BANNER_HOME
+                unitId = com.bqsqwad.heartbreakhealer.core.common.ads.AdsConfig.BANNER_HOME,
+                enabled = adsAllowed
             )
             Spacer(Modifier.height(10.dp))
         }
