@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import java.util.Base64
 
 plugins {
     alias(libs.plugins.android.application)
@@ -19,10 +18,12 @@ android {
         versionCode = 1
         versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["admobAppId"] = "ca-app-pub-2748789567113929~6610046816"
     }
     buildTypes {
         release {
             isMinifyEnabled = false
+            manifestPlaceholders["admobAppId"] = "ca-app-pub-2748789567113929~6610046816"
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -31,6 +32,7 @@ android {
         debug {
             isMinifyEnabled = false
             applicationIdSuffix = ".debug"
+            manifestPlaceholders["admobAppId"] = "ca-app-pub-3940256099942544~3347511713"
         }
     }
     compileOptions {
@@ -54,26 +56,24 @@ kotlin {
     }
 }
 
-
-val generateOfficialLogoResources by tasks.registering {
-    val logoSource = rootProject.file("core/ui/src/main/java/com/bqsqwad/heartbreakhealer/core/ui/components/HeartbreakHealerLogo.kt")
-    val generatedRes = layout.buildDirectory.dir("generated/res/officialLogo")
-    inputs.file(logoSource)
+val generateOfficialBrandAssets by tasks.registering {
+    val logoSource = rootProject.file("branding/logo/logo.png")
+    val monoSource = rootProject.file("branding/logo/logo_mono.png")
+    val generatedRes = layout.buildDirectory.dir("generated/res/officialBrand")
+    inputs.files(logoSource, monoSource)
     outputs.dir(generatedRes)
     doLast {
-        val source = logoSource.readText()
-        val encoded = Regex("""private const val OFFICIAL_LOGO_WEBP = "([^"]+)"""")
-            .find(source)?.groupValues?.get(1)
-            ?: error("Official embedded Heartbreak Healer logo was not found.")
-        val imageBytes = Base64.getDecoder().decode(encoded)
-        val imageFile = generatedRes.get().file("drawable-nodpi/official_healed_heart.webp").asFile
-        imageFile.parentFile.mkdirs()
-        imageFile.writeBytes(imageBytes)
+        require(logoSource.exists()) { "Missing official logo: branding/logo/logo.png" }
+        require(monoSource.exists()) { "Missing notification logo: branding/logo/logo_mono.png" }
+        val logoOutput = generatedRes.get().file("drawable-nodpi/official_healed_heart.png").asFile
+        val monoOutput = generatedRes.get().file("drawable-nodpi/official_healed_heart_mono.png").asFile
+        logoOutput.parentFile.mkdirs()
+        logoSource.copyTo(logoOutput, overwrite = true)
+        monoSource.copyTo(monoOutput, overwrite = true)
     }
 }
-
-android.sourceSets.getByName("main").res.srcDir(layout.buildDirectory.dir("generated/res/officialLogo"))
-tasks.named("preBuild").configure { dependsOn(generateOfficialLogoResources) }
+android.sourceSets.getByName("main").res.srcDir(layout.buildDirectory.dir("generated/res/officialBrand"))
+tasks.named("preBuild").configure { dependsOn(generateOfficialBrandAssets) }
 
 dependencies {
     implementation(project(":core:common"))
