@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.bqsqwad.heartbreakhealer.core.common.ads.AdsConfig
 import com.bqsqwad.heartbreakhealer.core.ui.ads.BannerAdView
+import com.bqsqwad.heartbreakhealer.core.ui.ads.NativeAdCard
 
 @Composable
 fun AffirmationsScreen(onBack: () -> Unit = {}) {
@@ -35,6 +36,7 @@ fun AffirmationsScreen(onBack: () -> Unit = {}) {
                 Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
                     Text(affirmation, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(16.dp))
                 }
+                if ((index + 1) % 8 == 0) NativeAdCard(unitId = AdsConfig.NATIVE_AFFIRMATIONS)
             }
         }
         Text("Support this free healing space", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
