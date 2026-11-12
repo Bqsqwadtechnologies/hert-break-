@@ -6,6 +6,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
@@ -17,6 +18,7 @@ fun SettingsScreen(
     onBack: () -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
+    var showClearDialog by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -25,7 +27,7 @@ fun SettingsScreen(
     ) {
         Text("Settings", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(16.dp))
-        SettingsItem("Theme") { }
+        SettingsItem("Theme · White") { }
         SettingsItem("Notifications") { }
         SettingsItem("Reduce motion") { }
         SettingsItem("Need more support?") { onNavigateToSupport() }
@@ -41,9 +43,18 @@ fun SettingsScreen(
         }
         SettingsItem("Open-source licenses") { }
         HorizontalDivider(Modifier.padding(vertical = 12.dp))
-        SettingsItem("Clear all data", destructive = true) { onClearData() }
+        SettingsItem("Clear all data", destructive = true) { showClearDialog = true }
         Spacer(Modifier.height(24.dp))
         TextButton(onClick = onBack) { Text("Back") }
+    }
+    if (showClearDialog) {
+        AlertDialog(
+            onDismissRequest = { showClearDialog = false },
+            title = { Text("Clear all app data?") },
+            text = { Text("This permanently removes your saved journal, letters, progress, and preferences from this device.") },
+            confirmButton = { TextButton(onClick = { showClearDialog = false; onClearData() }) { Text("Clear data", color = MaterialTheme.colorScheme.error) } },
+            dismissButton = { TextButton(onClick = { showClearDialog = false }) { Text("Cancel") } }
+        )
     }
 }
 
