@@ -10,6 +10,7 @@ import dagger.hilt.android.HiltAndroidApp
 class HeartbreakHealerApp : Application() {
     override fun onCreate() {
         super.onCreate()
+        CrashReportStore.install(this)
         createNotificationChannels()
     }
 
