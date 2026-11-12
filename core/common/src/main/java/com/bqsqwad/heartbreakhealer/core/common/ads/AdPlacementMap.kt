@@ -1,36 +1,39 @@
 package com.bqsqwad.heartbreakhealer.core.common.ads
 
 /**
- * Current code-backed ad inventory. Ads remain outside sensitive recovery flows.
+ * Auditable inventory of the 16 production AdMob units and their app placements.
+ * Ads stay out of sensitive recovery, privacy, and support flows.
  */
 object AdPlacementMap {
     val BANNER_SCREENS = listOf(
-        "Dashboard home — bottom of scroll content",
-        "Self-Care — bottom of task list",
-        "30-Day Rebuild — bottom of challenge list",
-        "Affirmations — bottom of list",
-        "Healing Library — bottom of article list",
-        "14-Day Healing Path — bottom of path list",
-        "Hearts Shop — bottom, separated from reward and purchase controls"
+        "BANNER_HOME — Dashboard bottom",
+        "BANNER_LIST — Self-Care, 30-Day Rebuild, and Affirmations bottom",
+        "BANNER_LIBRARY — Healing Library bottom",
+        "BANNER_PATHS — 14-Day Healing Path bottom",
+        "BANNER_HEARTS_SHOP — Hearts Shop bottom, separated from rewards"
     )
 
     val NATIVE_SCREENS = listOf(
-        "Affirmations — after every 8 affirmations",
-        "30-Day Rebuild — after every 8 challenges",
-        "Healing Library — after every 6 articles",
-        "14-Day Healing Path — after every 6 days",
-        "Weekly Review — below the progress summary"
+        "NATIVE_AFFIRMATIONS — after every 8 affirmations",
+        "NATIVE_REBUILD — after every 8 completed-program items",
+        "NATIVE_LIBRARY — within the article list at the designated interval",
+        "NATIVE_PATHS — within the 14-day path at the designated interval",
+        "NATIVE_WEEKLY_REVIEW — below the weekly progress summary"
     )
 
     val INTERSTITIAL_TRIGGERS = listOf(
-        "After completing a Self-Care task, subject to frequency cap",
-        "After completing a 30-Day Rebuild challenge, subject to frequency cap",
-        "After completing a 14-Day Healing Path day, subject to frequency cap"
+        "INTERSTITIAL — after a Self-Care task completion",
+        "INTERSTITIAL_PATH_DAY — after a 14-Day Healing Path day completion",
+        "INTERSTITIAL_WEEKLY — when the user finishes and exits Weekly Review"
     )
 
     val REWARDED_TRIGGERS = listOf(
-        "Hearts Shop — user-initiated reward video for bonus hearts"
+        "REWARDED_HEARTS — user-initiated Hearts Shop video; grant hearts only from the SDK reward callback",
+        "REWARDED_SHOP_EXTRA — separate optional user-initiated extra video; grant hearts only from the SDK reward callback"
     )
+
+    const val APP_OPEN_TRIGGER =
+        "APP_OPEN — eligible return after at least 30 minutes in background; never on cold start or sensitive screens"
 
     val NEVER_SHOW_ADS = listOf(
         "Onboarding",
@@ -45,11 +48,6 @@ object AdPlacementMap {
 
     const val INTERSTITIAL_MIN_INTERVAL_MS = 3 * 60 * 1000L
     const val INTERSTITIAL_MAX_PER_SESSION = 3
-    const val APP_OPEN_STATUS = "Reserved only; not active"
-
-    /** Suggested next placements; create only after owner approval and separate AdMob IDs. */
-    val PROPOSED_PLACEMENTS = listOf(
-        "A single native card at the end of the Healing Tools overview, outside SOS and crisis content",
-        "A single native card at the end of the completed-program catalogue, away from completion controls"
-    )
+    const val APP_OPEN_MIN_BACKGROUND_MS = 30 * 60 * 1000L
+    const val APP_OPEN_MAX_AD_AGE_MS = 4 * 60 * 60 * 1000L
 }
