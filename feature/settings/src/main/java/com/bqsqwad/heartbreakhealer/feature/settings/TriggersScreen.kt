@@ -21,7 +21,7 @@ fun TriggersScreen(
     var name by remember { mutableStateOf("") }
     var coping by remember { mutableStateOf("") }
 
-    Column(Modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text("Triggers", style = MaterialTheme.typography.headlineMedium)
             TextButton(onClick = onBack) { Text("Back") }
