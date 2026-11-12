@@ -35,6 +35,7 @@ import com.bqsqwad.heartbreakhealer.feature.dashboard.TimeCapsuleScreen
 import com.bqsqwad.heartbreakhealer.feature.dashboard.UrgePassedCard
 import com.bqsqwad.heartbreakhealer.feature.heartsshop.HeartsShopScreen
 import com.bqsqwad.heartbreakhealer.feature.journal.JournalScreen
+import com.bqsqwad.heartbreakhealer.feature.journal.JournalUiEntry
 import com.bqsqwad.heartbreakhealer.feature.memories.MemoriesScreen
 import com.bqsqwad.heartbreakhealer.feature.nocontact.NoContactScreen
 import com.bqsqwad.heartbreakhealer.feature.onboarding.OnboardingScreen
@@ -73,6 +74,9 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
     val capsuleText by dashboardViewModel.capsuleText.collectAsState()
     val capsuleUnlock by dashboardViewModel.capsuleUnlock.collectAsState()
     val hearts by dashboardViewModel.hearts.collectAsState()
+    val journalEntries by dashboardViewModel.journalEntries.collectAsState()
+    val bestNoContactDays by dashboardViewModel.bestNoContactDays.collectAsState()
+    val noContactDays by dashboardViewModel.noContactDays.collectAsState()
     val activity = LocalContext.current as? Activity
     NavHost(navController = navController, startDestination = Routes.ONBOARDING) {
         composable(Routes.ONBOARDING) {
@@ -85,7 +89,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
         composable(Routes.DASHBOARD) {
             DashboardScreen(
                 hearts = hearts,
-                noContactDays = dashboardViewModel.noContactDays.collectAsState().value,
+                noContactDays = noContactDays,
                 onSos = { navController.navigate(Routes.SOS) },
                 onJournal = { navController.navigate(Routes.JOURNAL) },
                 onNoContact = { navController.navigate(Routes.NO_CONTACT) },
@@ -111,8 +115,21 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                 onClose = { navController.popBackStack() }
             )
         }
-        composable(Routes.JOURNAL) { JournalScreen(onBack = { navController.popBackStack() }) }
-        composable(Routes.NO_CONTACT) { NoContactScreen(onBack = { navController.popBackStack() }) }
+        composable(Routes.JOURNAL) {
+            JournalScreen(
+                entries = journalEntries.map { JournalUiEntry(it.id, it.date, it.mood, it.content) },
+                onSaveEntry = dashboardViewModel::saveJournalEntry,
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Routes.NO_CONTACT) {
+            NoContactScreen(
+                currentDays = noContactDays,
+                bestDays = bestNoContactDays,
+                onSlip = dashboardViewModel::recordNoContactSlip,
+                onBack = { navController.popBackStack() }
+            )
+        }
         composable(Routes.SELF_CARE) { SelfCareScreen(onBack = { navController.popBackStack() }) }
         composable(Routes.REBUILD) { RebuildScreen(onBack = { navController.popBackStack() }) }
         composable(Routes.AFFIRMATIONS) { AffirmationsScreen(onBack = { navController.popBackStack() }) }
