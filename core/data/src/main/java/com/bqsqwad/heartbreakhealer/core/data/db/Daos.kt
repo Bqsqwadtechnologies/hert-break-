@@ -44,8 +44,6 @@ interface TriggerDao {
 interface SelfCareDao {
     @Query("SELECT * FROM self_care_completions WHERE date = :date")
     fun getCompletionsForDate(date: String): Flow<List<SelfCareCompletionEntity>>
-    @Query("SELECT * FROM self_care_completions WHERE date = :date")
-    fun getCompletionsForDate(date: String): Flow<List<SelfCareCompletionEntity>>
     @Query("SELECT EXISTS(SELECT 1 FROM self_care_completions WHERE taskIdDate = :key)")
     suspend fun isCompleted(key: String): Boolean
     @Insert(onConflict = OnConflictStrategy.REPLACE)
