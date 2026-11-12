@@ -24,6 +24,7 @@ fun SelfCareScreen(
     ),
     completedTaskIds: Set<String> = emptySet(),
     onToggle: (String) -> Unit = {},
+    adsAllowed: Boolean = false,
     onBack: () -> Unit = {}
 ) {
     val taskState = remember(tasks, completedTaskIds) { mutableStateListOf<CareTask>().apply { addAll(tasks.map { it.copy(done = it.id in completedTaskIds) }) } }
@@ -56,6 +57,6 @@ fun SelfCareScreen(
             }
         }
         Text("Support this free healing space", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        BannerAdView(unitId = AdsConfig.BANNER_LIST)
+        BannerAdView(unitId = AdsConfig.BANNER_LIST, enabled = adsAllowed)
     }
 }
