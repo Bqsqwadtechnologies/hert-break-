@@ -5,6 +5,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.bqsqwad.heartbreakhealer.feature.dashboard.DashboardViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -62,6 +66,9 @@ object Routes {
 
 @Composable
 fun AppNavGraph(navController: NavHostController) {
+    val dashboardViewModel: DashboardViewModel = hiltViewModel()
+    val capsuleText by dashboardViewModel.capsuleText.collectAsState()
+    val capsuleUnlock by dashboardViewModel.capsuleUnlock.collectAsState()
     NavHost(navController = navController, startDestination = Routes.ONBOARDING) {
         composable(Routes.ONBOARDING) {
             OnboardingScreen(onComplete = { _, _, _ ->
@@ -88,7 +95,7 @@ fun AppNavGraph(navController: NavHostController) {
                 onWins = { navController.navigate(Routes.WINS) },
                 onEvening = { navController.navigate(Routes.EVENING) },
                 onGriefContact = { navController.navigate(Routes.GRIEF_CONTACT) },
-                onCheckIn = { _, _ -> }
+                onCheckIn = dashboardViewModel::onCheckIn
             )
         }
         composable(Routes.SOS) {
@@ -106,7 +113,7 @@ fun AppNavGraph(navController: NavHostController) {
         composable(Routes.SETTINGS) {
             SettingsScreen(
                 onNavigateToSupport = { navController.navigate(Routes.SUPPORT) },
-                onClearData = { },
+                onClearData = dashboardViewModel::clearAll,
                 onBack = { navController.popBackStack()
                 }
             )
@@ -118,7 +125,9 @@ fun AppNavGraph(navController: NavHostController) {
         composable(Routes.BOUNDARIES) { BoundaryScriptsScreen(onBack = { navController.popBackStack() }) }
         composable(Routes.CAPSULE) {
             TimeCapsuleScreen(
-                onSave = { _, _ -> },
+                existing = capsuleText,
+                unlockDate = capsuleUnlock,
+                onSave = dashboardViewModel::saveCapsule,
                 onBack = { navController.popBackStack() }
             )
         }
