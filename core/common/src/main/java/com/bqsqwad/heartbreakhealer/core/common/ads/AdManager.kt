@@ -24,6 +24,7 @@ class AdManager @Inject constructor() {
     private var interstitialsShownThisSession = 0
     private var consentResolved = false
     private var adsEnabled = true
+    private var initialized = false
 
     fun initialize(context: Context) {
         MobileAds.initialize(context) {
@@ -31,9 +32,16 @@ class AdManager @Inject constructor() {
         }
     }
 
-    fun onConsentResolved(canShowAds: Boolean) {
+    fun onConsentResolved(context: Context, canShowAds: Boolean) {
         consentResolved = true
         adsEnabled = canShowAds
+        if (!canShowAds || initialized) return
+        initialized = true
+        MobileAds.initialize(context.applicationContext) {
+            loadInterstitial(context.applicationContext)
+            loadRewarded(context.applicationContext)
+            Log.d(TAG, "MobileAds initialized after consent resolution")
+        }
     }
 
     fun canShowInterstitial(): Boolean {
