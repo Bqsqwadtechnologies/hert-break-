@@ -9,6 +9,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bqsqwad.heartbreakhealer.feature.dashboard.DashboardViewModel
+import android.app.Activity
+import androidx.compose.ui.platform.LocalContext
+import com.bqsqwad.heartbreakhealer.core.common.ads.AdManager
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -65,10 +68,12 @@ object Routes {
 }
 
 @Composable
-fun AppNavGraph(navController: NavHostController) {
+fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
     val dashboardViewModel: DashboardViewModel = hiltViewModel()
     val capsuleText by dashboardViewModel.capsuleText.collectAsState()
     val capsuleUnlock by dashboardViewModel.capsuleUnlock.collectAsState()
+    val hearts by dashboardViewModel.hearts.collectAsState()
+    val activity = LocalContext.current as? Activity
     NavHost(navController = navController, startDestination = Routes.ONBOARDING) {
         composable(Routes.ONBOARDING) {
             OnboardingScreen(onComplete = { _, _, _ ->
@@ -109,7 +114,17 @@ fun AppNavGraph(navController: NavHostController) {
         composable(Routes.SELF_CARE) { SelfCareScreen(onBack = { navController.popBackStack() }) }
         composable(Routes.REBUILD) { RebuildScreen(onBack = { navController.popBackStack() }) }
         composable(Routes.AFFIRMATIONS) { AffirmationsScreen(onBack = { navController.popBackStack() }) }
-        composable(Routes.HEARTS_SHOP) { HeartsShopScreen(onBack = { navController.popBackStack() }) }
+        composable(Routes.HEARTS_SHOP) {
+            HeartsShopScreen(
+                balance = hearts,
+                onWatchRewarded = {
+                    activity?.let { host ->
+                        adManager.showRewarded(host, onRewarded = dashboardViewModel::onRewardedHearts)
+                    }
+                },
+                onBack = { navController.popBackStack() }
+            )
+        }
         composable(Routes.SETTINGS) {
             SettingsScreen(
                 onNavigateToSupport = { navController.navigate(Routes.SUPPORT) },
