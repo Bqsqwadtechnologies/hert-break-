@@ -73,6 +73,9 @@ object Routes {
     const val WINS = "wins"
     const val EVENING = "evening"
     const val GRIEF_CONTACT = "grief_contact"
+    const val LIBRARY = "library"
+    const val PATH = "path"
+    const val WEEKLY = "weekly"
 }
 
 @Composable
@@ -120,6 +123,9 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                 onWins = { navController.navigate(Routes.WINS) },
                 onEvening = { navController.navigate(Routes.EVENING) },
                 onGriefContact = { navController.navigate(Routes.GRIEF_CONTACT) },
+                onLibrary = { navController.navigate(Routes.LIBRARY) },
+                onPath = { navController.navigate(Routes.PATH) },
+                onWeekly = { navController.navigate(Routes.WEEKLY) },
                 onCheckIn = dashboardViewModel::onCheckIn
             )
         }
@@ -244,6 +250,9 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
             )
         }
         composable(Routes.GRIEF_CONTACT) { GriefVsContactScreen(onBack = { navController.popBackStack() }) }
+        composable(Routes.LIBRARY) { HealingLibraryScreen(onBack = { navController.popBackStack() }, adsAllowed = adsAllowed) }
+        composable(Routes.PATH) { HealingPathScreen(onBack = { navController.popBackStack() }, adsAllowed = adsAllowed) }
+        composable(Routes.WEEKLY) { WeeklyReviewScreen(checkIns = journalEntries.count { runCatching { java.time.LocalDate.parse(it.date).isAfter(java.time.LocalDate.now().minusDays(7)) }.getOrDefault(false) }, noContactDays = noContactDays, onBack = { navController.popBackStack() }, adsAllowed = adsAllowed) }
     }
 }
 
@@ -267,6 +276,9 @@ private fun DashboardScreen(
     onWins: () -> Unit,
     onEvening: () -> Unit,
     onGriefContact: () -> Unit,
+    onLibrary: () -> Unit,
+    onPath: () -> Unit,
+    onWeekly: () -> Unit,
     onCheckIn: (Int, String) -> Unit
 ) {
     val ink = androidx.compose.ui.graphics.Color(0xFF17172A)
@@ -353,7 +365,10 @@ private fun DashboardScreen(
                 "Letter to Future You" to onCapsule,
                 "Small Wins" to onWins,
                 "Evening Wind-Down" to onEvening,
-                "Lonely or Missing Them?" to onGriefContact
+                "Lonely or Missing Them?" to onGriefContact,
+                "Healing Library" to onLibrary,
+                "14-Day Healing Path" to onPath,
+                "Weekly Review" to onWeekly
             ).forEach { (label, action) ->
                 Card(onClick = action, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), shape = RoundedCornerShape(15.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F8FC))) {
                     Row(Modifier.fillMaxWidth().padding(15.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
