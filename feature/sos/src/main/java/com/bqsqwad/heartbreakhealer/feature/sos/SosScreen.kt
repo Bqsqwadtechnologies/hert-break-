@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 
 @Composable
-fun SosScreen(onNavigateToSupport: () -> Unit, onClose: () -> Unit) {
+fun SosScreen(onNavigateToSupport: () -> Unit, onClose: () -> Unit, onUrgePassed: () -> Unit = {}) {
     var mode by remember { mutableStateOf(0) }
     when (mode) {
         0 -> Column(
@@ -51,10 +51,10 @@ fun SosScreen(onNavigateToSupport: () -> Unit, onClose: () -> Unit) {
             OutlinedButton(onClick = onClose, Modifier.fillMaxWidth()) { Text("I'm okay for now") }
         }
         1 -> Breathing(onDone = { mode = 0 })
-        2 -> Timer5(onDone = { mode = 0 })
-        3 -> Grounding(onDone = { mode = 0 })
+        2 -> Timer5(onDone = { mode = 0 }, onPassed = onUrgePassed)
+        3 -> Grounding(onDone = { onUrgePassed(); mode = 0 })
         4 -> Reasons(onDone = { mode = 0 })
-        5 -> DontText(onDone = { mode = 0 })
+        5 -> DontText(onDone = { mode = 0 }, onPassed = onUrgePassed)
     }
 }
 
@@ -85,7 +85,7 @@ private fun Breathing(onDone: () -> Unit) {
 }
 
 @Composable
-private fun Timer5(onDone: () -> Unit) {
+private fun Timer5(onDone: () -> Unit, onPassed: () -> Unit) {
     var left by remember { mutableIntStateOf(300) }
     LaunchedEffect(Unit) { while (left > 0) { delay(1000); left-- } }
     Column(Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
@@ -95,7 +95,7 @@ private fun Timer5(onDone: () -> Unit) {
         Spacer(Modifier.height(16.dp))
         Text("This feeling will pass.", textAlign = TextAlign.Center)
         Spacer(Modifier.height(32.dp))
-        Button(onClick = onDone) { Text(if (left == 0) "I made it" else "Stop early") }
+        Button(onClick = { if (left == 0) onPassed(); onDone() }) { Text(if (left == 0) "I made it" else "Stop early") }
     }
 }
 
@@ -130,7 +130,7 @@ private fun Reasons(onDone: () -> Unit) {
 }
 
 @Composable
-private fun DontText(onDone: () -> Unit) {
+private fun DontText(onDone: () -> Unit, onPassed: () -> Unit) {
     var left by remember { mutableIntStateOf(600) }
     LaunchedEffect(Unit) { while (left > 0) { delay(1000); left-- } }
     Column(Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
@@ -140,6 +140,6 @@ private fun DontText(onDone: () -> Unit) {
         Spacer(Modifier.height(24.dp))
         Text("%d:%02d".format(left / 60, left % 60), style = MaterialTheme.typography.displayLarge)
         Spacer(Modifier.height(32.dp))
-        Button(onClick = onDone) { Text(if (left == 0) "I didn't text" else "I'm still holding on") }
+        Button(onClick = { if (left == 0) onPassed(); onDone() }) { Text(if (left == 0) "I didn't text" else "I'm still holding on") }
     }
 }
