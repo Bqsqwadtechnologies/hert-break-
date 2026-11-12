@@ -16,7 +16,8 @@ import com.google.android.gms.ads.nativead.NativeAdView
 
 /** Compact, clearly-labelled native placement for approved list screens only. */
 @Composable
-fun NativeAdCard(unitId: String, modifier: Modifier = Modifier) {
+fun NativeAdCard(unitId: String, modifier: Modifier = Modifier, enabled: Boolean = true) {
+    if (!enabled) return
     var nativeAd by remember(unitId) { mutableStateOf<NativeAd?>(null) }
     val context = androidx.compose.ui.platform.LocalContext.current
     DisposableEffect(unitId) {
