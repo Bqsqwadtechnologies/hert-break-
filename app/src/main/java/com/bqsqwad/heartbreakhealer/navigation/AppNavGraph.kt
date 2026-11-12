@@ -210,7 +210,7 @@ private fun DashboardScreen(
             Spacer(Modifier.height(18.dp))
             Text("Quick access", style = MaterialTheme.typography.titleLarge, color = ink, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
             Spacer(Modifier.height(10.dp))
-            @Composable fun FeatureTile(emoji: String, title: String, action: () -> Unit) {
+            @Composable fun androidx.compose.foundation.layout.RowScope.FeatureTile(emoji: String, title: String, action: () -> Unit) {
                 Card(onClick = action, modifier = Modifier.weight(1f), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = blush)) {
                     Column(Modifier.fillMaxWidth().padding(vertical = 16.dp, horizontal = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(emoji, style = MaterialTheme.typography.headlineMedium)
