@@ -28,6 +28,7 @@ class UserPreferences @Inject constructor(
     val heartsBalance: Flow<Int> = ds.data.map { it[Keys.HEARTS] ?: 50 }
     val noContactDays: Flow<Int> = ds.data.map { it[Keys.NC_DAYS] ?: 0 }
     val noContactBest: Flow<Int> = ds.data.map { it[Keys.NC_BEST] ?: 0 }
+    val noContactStartEpoch: Flow<Long?> = ds.data.map { it[Keys.NC_START_EPOCH] }
     val reduceMotion: Flow<Boolean> = ds.data.map { it[Keys.REDUCE_MOTION] ?: false }
     val dailyRemindersEnabled: Flow<Boolean> = ds.data.map { it[Keys.DAILY_REMINDERS] ?: false }
     val isFirstLaunch: Flow<Boolean> = ds.data.map { it[Keys.FIRST_LAUNCH] ?: true }
@@ -57,6 +58,10 @@ class UserPreferences @Inject constructor(
             val current = it[Keys.HEARTS] ?: 50
             it[Keys.HEARTS] = (current + amount).coerceAtLeast(0)
         }
+    }
+
+    suspend fun setNoContactStartEpoch(epochDay: Long) {
+        ds.edit { it[Keys.NC_START_EPOCH] = epochDay }
     }
 
     suspend fun setNoContactDays(days: Int, best: Int) {
@@ -121,6 +126,7 @@ class UserPreferences @Inject constructor(
         val HEARTS = intPreferencesKey("hearts_balance")
         val NC_DAYS = intPreferencesKey("nc_days")
         val NC_BEST = intPreferencesKey("nc_best")
+        val NC_START_EPOCH = androidx.datastore.preferences.core.longPreferencesKey("nc_start_epoch")
         val REDUCE_MOTION = booleanPreferencesKey("reduce_motion")
         val DAILY_REMINDERS = booleanPreferencesKey("daily_reminders_enabled")
         val MEMORIES = stringSetPreferencesKey("saved_memories")
