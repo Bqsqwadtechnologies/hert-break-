@@ -121,9 +121,13 @@ fun WeeklyReviewScreen(
                 )
             }
         }
+        if (adsAllowed) {
+            Spacer(Modifier.height(16.dp))
+            NativeAdCard(unitId = AdsConfig.NATIVE_WEEKLY_REVIEW, enabled = true)
+        }
         Spacer(Modifier.height(24.dp))
         TextButton(onClick = onBack) { Text("Back") }
         Spacer(Modifier.weight(1f))
-        BannerAdView(unitId = AdsConfig.BANNER_LIST, enabled = adsAllowed)
+        // Weekly Review now uses its dedicated native unit above; no duplicate banner here.
     }
 }
