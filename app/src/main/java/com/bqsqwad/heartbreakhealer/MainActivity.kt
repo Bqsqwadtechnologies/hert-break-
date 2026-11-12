@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     } else {
-                        HeartbreakHealerAppContent()
+                        HeartbreakHealerAppContent(adManager)
                     }
                 }
             }
@@ -69,7 +69,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun HeartbreakHealerAppContent() {
+fun HeartbreakHealerAppContent(adManager: AdManager) {
     val navController = rememberNavController()
-    AppNavGraph(navController = navController)
+    AppNavGraph(navController = navController, adManager = adManager)
 }
