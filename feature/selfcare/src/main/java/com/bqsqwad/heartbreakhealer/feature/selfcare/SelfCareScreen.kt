@@ -48,7 +48,7 @@ fun SelfCareScreen(
                         Checkbox(checked = task.done, onCheckedChange = {
                             val index = taskState.indexOfFirst { item -> item.id == task.id }
                             if (index >= 0) taskState[index] = task.copy(done = it)
-                            onToggle(task.id)
+                            if (it) onToggle(task.id)
                         })
                     }
                 }
