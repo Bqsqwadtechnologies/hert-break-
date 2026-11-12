@@ -1,37 +1,46 @@
 package com.bqsqwad.heartbreakhealer.core.common.ads
 
+import com.bqsqwad.heartbreakhealer.core.common.BuildConfig
+
 /**
- * Single place for all AdMob unit IDs.
- * Production IDs — BQ Sqwad Technologies / Heartbreak Healer.
+ * One source of truth for all AdMob unit IDs.
+ * Debug builds always use Google's official test units; release builds use the
+ * production units configured for Heartbreak Healer.
  */
 object AdsConfig {
-    // App ID: ca-app-pub-2748789567113929~6610046816
+    private const val TEST_BANNER = "ca-app-pub-3940256099942544/6300978111"
+    private const val TEST_NATIVE = "ca-app-pub-3940256099942544/2247696110"
+    private const val TEST_INTERSTITIAL = "ca-app-pub-3940256099942544/1033173712"
+    private const val TEST_REWARDED = "ca-app-pub-3940256099942544/5224354917"
 
-    // Banners
-    const val BANNER_HOME = "ca-app-pub-2748789567113929/3089925002"
-    const val BANNER_LIST = "ca-app-pub-2748789567113929/3102192435"
-    const val BANNER_LIBRARY = "ca-app-pub-2748789567113929/9564493151"
-    const val BANNER_PATHS = "ca-app-pub-2748789567113929/5625248140"
+    private fun unit(test: String, production: String): String =
+        if (BuildConfig.DEBUG) test else production
 
-    // Native
-    const val NATIVE_AFFIRMATIONS = "ca-app-pub-2748789567113929/1789110768"
-    const val NATIVE_REBUILD = "ca-app-pub-2748789567113929/2336080683"
-    const val NATIVE_LIBRARY = "ca-app-pub-2748789567113929/4336217202"
-    const val NATIVE_PATHS = "ca-app-pub-2748789567113929/6591020463"
+    // Banner placements
+    val BANNER_HOME get() = unit(TEST_BANNER, "ca-app-pub-2748789567113929/3089925002")
+    val BANNER_LIST get() = unit(TEST_BANNER, "ca-app-pub-2748789567113929/3102192435")
+    val BANNER_LIBRARY get() = unit(TEST_BANNER, "ca-app-pub-2748789567113929/9564493151")
+    val BANNER_PATHS get() = unit(TEST_BANNER, "ca-app-pub-2748789567113929/5625248140")
 
-    // Interstitial
-    const val INTERSTITIAL = "ca-app-pub-2748789567113929/7820166648"
-    const val INTERSTITIAL_PATH_DAY = "ca-app-pub-2748789567113929/1318191688"
-    const val INTERSTITIAL_WEEKLY = "ca-app-pub-2748789567113929/6399448775"
+    // Native placements
+    val NATIVE_AFFIRMATIONS get() = unit(TEST_NATIVE, "ca-app-pub-2748789567113929/1789110768")
+    val NATIVE_REBUILD get() = unit(TEST_NATIVE, "ca-app-pub-2748789567113929/2336080683")
+    val NATIVE_LIBRARY get() = unit(TEST_NATIVE, "ca-app-pub-2748789567113929/4336217202")
+    val NATIVE_PATHS get() = unit(TEST_NATIVE, "ca-app-pub-2748789567113929/6591020463")
 
-    // Rewarded
-    const val REWARDED_HEARTS = "ca-app-pub-2748789567113929/1334649343"
-    const val REWARDED_SHOP_EXTRA = "ca-app-pub-2748789567113929/4144645513"
+    // Full-screen placements
+    val INTERSTITIAL get() = unit(TEST_INTERSTITIAL, "ca-app-pub-2748789567113929/7820166648")
+    val INTERSTITIAL_PATH_DAY get() = unit(TEST_INTERSTITIAL, "ca-app-pub-2748789567113929/1318191688")
+    val INTERSTITIAL_WEEKLY get() = unit(TEST_INTERSTITIAL, "ca-app-pub-2748789567113929/6399448775")
 
-    // App Open
+    // Optional reward placements
+    val REWARDED_HEARTS get() = unit(TEST_REWARDED, "ca-app-pub-2748789567113929/1334649343")
+    val REWARDED_SHOP_EXTRA get() = unit(TEST_REWARDED, "ca-app-pub-2748789567113929/4144645513")
+
+    // App-open inventory is reserved; no app-open format is currently shown.
     const val APP_OPEN = "ca-app-pub-2748789567113929/7628594951"
 
-    // Frequency caps
+    // Conservative full-screen frequency caps.
     const val INTERSTITIAL_MIN_INTERVAL_MS = 3 * 60 * 1000L
     const val INTERSTITIAL_MAX_PER_SESSION = 3
     const val APP_OPEN_MIN_BACKGROUND_MS = 4 * 60 * 60 * 1000L
