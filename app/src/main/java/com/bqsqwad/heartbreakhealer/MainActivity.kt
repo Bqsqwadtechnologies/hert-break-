@@ -32,11 +32,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         consentHelper.requestConsent(this) { canShowAds ->
-            adManager.onConsentResolved(canShowAds)
-            if (canShowAds) {
-                adManager.loadInterstitial(this)
-                adManager.loadRewarded(this)
-            }
+            adManager.onConsentResolved(this, canShowAds)
         }
 
         var keepSplash = true
