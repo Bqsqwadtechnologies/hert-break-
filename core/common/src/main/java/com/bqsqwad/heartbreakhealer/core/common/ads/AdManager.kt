@@ -44,7 +44,7 @@ class AdManager @Inject constructor() {
     }
 
     fun loadInterstitial(context: Context) {
-        if (!adsEnabled) return
+        if (!consentResolved || !adsEnabled) return
         val request = AdRequest.Builder().build()
         InterstitialAd.load(context, AdsConfig.INTERSTITIAL, request, object : InterstitialAdLoadCallback() {
             override fun onAdLoaded(ad: InterstitialAd) { interstitial = ad }
@@ -93,7 +93,7 @@ class AdManager @Inject constructor() {
 
     fun showRewarded(activity: Activity, onRewarded: () -> Unit, onDismissed: () -> Unit = {}) {
         val ad = rewarded
-        if (ad == null || !adsEnabled) {
+        if (ad == null || !consentResolved || !adsEnabled) {
             onDismissed()
             return
         }
