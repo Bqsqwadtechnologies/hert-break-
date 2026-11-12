@@ -5,12 +5,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.bqsqwad.heartbreakhealer.core.common.ads.AdsConfig
+import com.bqsqwad.heartbreakhealer.core.ui.ads.BannerAdView
 
 @Composable
 fun HeartsShopScreen(
     balance: Int = 50,
     onWatchRewarded: () -> Unit = {},
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    adsAllowed: Boolean = false
 ) {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -31,5 +34,8 @@ fun HeartsShopScreen(
         }
         Spacer(Modifier.height(16.dp))
         Text("Coming soon: unlock themes, extra programs, affirmation packs.", style = MaterialTheme.typography.bodyMedium)
+        Spacer(Modifier.weight(1f))
+        // Dedicated banner unit, separated from purchases and reward controls.
+        BannerAdView(unitId = AdsConfig.BANNER_HEARTS_SHOP, enabled = adsAllowed)
     }
 }
