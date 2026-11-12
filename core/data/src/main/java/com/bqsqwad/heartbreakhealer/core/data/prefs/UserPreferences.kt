@@ -53,6 +53,19 @@ class UserPreferences @Inject constructor(
         ds.edit { it[Keys.HEARTS] = balance.coerceAtLeast(0) }
     }
 
+    suspend fun spendHearts(amount: Int): Boolean {
+        if (amount <= 0) return false
+        var spent = false
+        ds.edit {
+            val current = it[Keys.HEARTS] ?: 50
+            if (current >= amount) {
+                it[Keys.HEARTS] = current - amount
+                spent = true
+            }
+        }
+        return spent
+    }
+
     suspend fun addHearts(amount: Int) {
         ds.edit {
             val current = it[Keys.HEARTS] ?: 50
