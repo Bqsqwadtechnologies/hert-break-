@@ -14,6 +14,10 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun SettingsScreen(
     onNavigateToSupport: () -> Unit,
+    notificationsEnabled: Boolean,
+    reduceMotionEnabled: Boolean,
+    onNotificationsChanged: (Boolean) -> Unit,
+    onReduceMotionChanged: (Boolean) -> Unit,
     onClearData: () -> Unit,
     onBack: () -> Unit
 ) {
@@ -28,8 +32,8 @@ fun SettingsScreen(
         Text("Settings", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(16.dp))
         SettingsItem("Theme · White") { }
-        SettingsItem("Notifications") { }
-        SettingsItem("Reduce motion") { }
+        ListItem(headlineContent = { Text("Daily reminders") }, supportingContent = { Text("A gentle daily check-in notification") }, trailingContent = { Switch(checked = notificationsEnabled, onCheckedChange = onNotificationsChanged) })
+        ListItem(headlineContent = { Text("Reduce motion") }, supportingContent = { Text("Limit animated transitions") }, trailingContent = { Switch(checked = reduceMotionEnabled, onCheckedChange = onReduceMotionChanged) })
         SettingsItem("Need more support?") { onNavigateToSupport() }
         HorizontalDivider(Modifier.padding(vertical = 12.dp))
         SettingsItem("Privacy Policy") {
