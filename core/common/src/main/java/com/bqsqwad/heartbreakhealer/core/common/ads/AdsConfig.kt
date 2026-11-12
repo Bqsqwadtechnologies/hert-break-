@@ -21,12 +21,14 @@ object AdsConfig {
     val BANNER_LIST get() = unit(TEST_BANNER, "ca-app-pub-2748789567113929/3102192435")
     val BANNER_LIBRARY get() = unit(TEST_BANNER, "ca-app-pub-2748789567113929/9564493151")
     val BANNER_PATHS get() = unit(TEST_BANNER, "ca-app-pub-2748789567113929/5625248140")
+    val BANNER_HEARTS_SHOP get() = unit(TEST_BANNER, "ca-app-pub-2748789567113929/3611051218")
 
     // Native placements
     val NATIVE_AFFIRMATIONS get() = unit(TEST_NATIVE, "ca-app-pub-2748789567113929/1789110768")
     val NATIVE_REBUILD get() = unit(TEST_NATIVE, "ca-app-pub-2748789567113929/2336080683")
     val NATIVE_LIBRARY get() = unit(TEST_NATIVE, "ca-app-pub-2748789567113929/4336217202")
     val NATIVE_PATHS get() = unit(TEST_NATIVE, "ca-app-pub-2748789567113929/6591020463")
+    val NATIVE_WEEKLY_REVIEW get() = unit(TEST_NATIVE, "ca-app-pub-2748789567113929/8089498068")
 
     // Full-screen placements
     val INTERSTITIAL get() = unit(TEST_INTERSTITIAL, "ca-app-pub-2748789567113929/7820166648")
