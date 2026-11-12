@@ -207,7 +207,8 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                         adManager.showRewarded(host, onRewarded = dashboardViewModel::onRewardedHearts)
                     }
                 },
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                adsAllowed = adsAllowed
             )
         }
         composable(Routes.SETTINGS) {
