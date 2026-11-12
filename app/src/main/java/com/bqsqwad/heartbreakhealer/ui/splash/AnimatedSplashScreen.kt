@@ -141,30 +141,9 @@ fun AnimatedSplashScreen(
                     .semantics { contentDescription = "Heartbreak Healer logo, a healed heart" },
                 contentAlignment = Alignment.Center
             ) {
-                Canvas(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .semantics { contentDescription = "Animated healed heart" }
-                ) {
-                    val heart = Path().apply {
-                        moveTo(size.width * 0.5f, size.height * 0.88f)
-                        cubicTo(size.width * 0.40f, size.height * 0.78f, size.width * 0.08f, size.height * 0.56f, size.width * 0.08f, size.height * 0.32f)
-                        cubicTo(size.width * 0.08f, size.height * 0.08f, size.width * 0.38f, size.height * 0.02f, size.width * 0.5f, size.height * 0.25f)
-                        cubicTo(size.width * 0.62f, size.height * 0.02f, size.width * 0.92f, size.height * 0.08f, size.width * 0.92f, size.height * 0.32f)
-                        cubicTo(size.width * 0.92f, size.height * 0.56f, size.width * 0.60f, size.height * 0.78f, size.width * 0.5f, size.height * 0.88f)
-                        close()
-                    }
-                    val heartBrush = when (phase) {
-                        0 -> Brush.linearGradient(listOf(Color(0xFFFF8A9B), Color(0xFFE85D75)))
-                        1 -> Brush.linearGradient(listOf(Color(0xFFFF9EAC), Color(0xFFEC6680)))
-                        else -> Brush.linearGradient(listOf(Color(0xFFFFB3C1), Color(0xFFE84A70)))
-                    }
-                    drawPath(heart, brush = heartBrush)
-                    if (phase == 0) {
-                        drawLine(Color.White.copy(alpha = 0.9f), Offset(size.width * 0.53f, size.height * 0.27f), Offset(size.width * 0.43f, size.height * 0.48f), strokeWidth = 5.dp.toPx())
-                        drawLine(Color.White.copy(alpha = 0.9f), Offset(size.width * 0.43f, size.height * 0.48f), Offset(size.width * 0.55f, size.height * 0.57f), strokeWidth = 5.dp.toPx())
-                    }
-                }
+                com.bqsqwad.heartbreakhealer.core.ui.components.HeartbreakHealerLogo(
+                    modifier = Modifier.fillMaxSize()
+                )
                 if (phase >= 2 && !reduceMotion && sparkleProgress.value > 0f) {
                     SparkleCanvas(progress = sparkleProgress.value)
                 }
