@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Base64
 
 plugins {
     alias(libs.plugins.android.application)
@@ -64,7 +65,7 @@ val generateOfficialLogoResources by tasks.registering {
         val encoded = Regex("""private const val OFFICIAL_LOGO_WEBP = "([^"]+)"""")
             .find(source)?.groupValues?.get(1)
             ?: error("Official embedded Heartbreak Healer logo was not found.")
-        val imageBytes = java.util.Base64.getDecoder().decode(encoded)
+        val imageBytes = Base64.getDecoder().decode(encoded)
         val imageFile = generatedRes.get().file("drawable-nodpi/official_healed_heart.webp").asFile
         imageFile.parentFile.mkdirs()
         imageFile.writeBytes(imageBytes)
