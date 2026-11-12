@@ -12,6 +12,7 @@ import com.bqsqwad.heartbreakhealer.core.ui.ads.BannerAdView
 fun HeartsShopScreen(
     balance: Int = 50,
     onWatchRewarded: () -> Unit = {},
+    onWatchExtraRewarded: () -> Unit = {},
     onBack: () -> Unit = {},
     adsAllowed: Boolean = false
 ) {
@@ -28,7 +29,11 @@ fun HeartsShopScreen(
                 Text("Earn more hearts", style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(8.dp))
                 Button(onClick = onWatchRewarded, modifier = Modifier.fillMaxWidth()) {
-                    Text("Watch a short video to earn hearts")
+                    Text("Watch a video to earn 15 hearts")
+                }
+                Spacer(Modifier.height(10.dp))
+                OutlinedButton(onClick = onWatchExtraRewarded, modifier = Modifier.fillMaxWidth()) {
+                    Text("Watch an optional extra video for 15 hearts")
                 }
             }
         }
