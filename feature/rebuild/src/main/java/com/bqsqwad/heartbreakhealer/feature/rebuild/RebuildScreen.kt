@@ -19,10 +19,11 @@ fun RebuildScreen(
     days: List<RebuildDayUi> = (1..30).map {
         RebuildDayUi(it, "Day $it challenge", listOf("Fitness","Hobby","Social","Confidence","Finance")[it % 5], false)
     },
+    completedDays: Set<Int> = emptySet(),
     onCompleteDay: (Int) -> Unit = {},
     onBack: () -> Unit = {}
 ) {
-    val dayState = remember { mutableStateListOf<RebuildDayUi>().apply { addAll(days) } }
+    val dayState = remember(days, completedDays) { mutableStateListOf<RebuildDayUi>().apply { addAll(days.map { it.copy(done = it.day in completedDays) }) } }
     Column(Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 12.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text("30-Day Rebuild", style = MaterialTheme.typography.headlineMedium)
