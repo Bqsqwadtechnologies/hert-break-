@@ -12,6 +12,8 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,6 +27,8 @@ class AdManager @Inject constructor() {
     private var consentResolved = false
     private var adsEnabled = true
     private var initialized = false
+    private val _adsAllowed = MutableStateFlow(false)
+    val adsAllowed: StateFlow<Boolean> = _adsAllowed
 
     fun initialize(context: Context) {
         MobileAds.initialize(context) {
@@ -35,6 +39,7 @@ class AdManager @Inject constructor() {
     fun onConsentResolved(context: Context, canShowAds: Boolean) {
         consentResolved = true
         adsEnabled = canShowAds
+        _adsAllowed.value = canShowAds
         if (!canShowAds || initialized) return
         initialized = true
         MobileAds.initialize(context.applicationContext) {
