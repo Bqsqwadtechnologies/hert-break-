@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   release:
-    name: Build release APK and AAB
+    name: Build signed release APK and AAB
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -30,6 +30,26 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Decode and validate release keystore
+        env:
+          BQ_RELEASE_KEYSTORE_BASE64: ${{ secrets.BQ_RELEASE_KEYSTORE_BASE64 }}
+          BQ_RELEASE_STORE_PASSWORD: ${{ secrets.BQ_RELEASE_STORE_PASSWORD }}
+          BQ_RELEASE_KEY_ALIAS: ${{ secrets.BQ_RELEASE_KEY_ALIAS }}
+          BQ_RELEASE_KEY_PASSWORD: ${{ secrets.BQ_RELEASE_KEY_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in BQ_RELEASE_KEYSTORE_BASE64 BQ_RELEASE_STORE_PASSWORD BQ_RELEASE_KEY_ALIAS BQ_RELEASE_KEY_PASSWORD; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "::error::Required signing secret $name is missing or unavailable to this workflow."
+              exit 1
+            fi
+          done
+          printf '%s' "$BQ_RELEASE_KEYSTORE_BASE64" | base64 --decode > app/release-key.jks
+          test -s app/release-key.jks
+          keytool -list -keystore app/release-key.jks -storepass "$BQ_RELEASE_STORE_PASSWORD" -alias "$BQ_RELEASE_KEY_ALIAS" >/dev/null
+          echo "Release keystore and configured alias validated."
+
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6.4.1
         with:
@@ -38,15 +58,34 @@ jobs:
       - name: Verify Gradle
         run: gradle --version
 
-      - name: Build release APK and bundle
+      - name: Build signed release APK and bundle
+        env:
+          BQ_RELEASE_STORE_PASSWORD: ${{ secrets.BQ_RELEASE_STORE_PASSWORD }}
+          BQ_RELEASE_KEY_ALIAS: ${{ secrets.BQ_RELEASE_KEY_ALIAS }}
+          BQ_RELEASE_KEY_PASSWORD: ${{ secrets.BQ_RELEASE_KEY_PASSWORD }}
         run: gradle :app:assembleRelease :app:bundleRelease --stacktrace --no-daemon --warning-mode all
+
+      - name: Verify APK and AAB signatures
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="$(find app/build/outputs/apk/release -maxdepth 1 -name '*.apk' -print -quit)"
+          AAB="$(find app/build/outputs/bundle/release -maxdepth 1 -name '*.aab' -print -quit)"
+          test -n "$APK" && test -n "$AAB"
+          apksigner verify --verbose "$APK"
+          jarsigner -verify "$AAB" >/dev/null
+          echo "Both release outputs have valid signatures."
 
       - name: Upload release artifacts
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: release-artifacts
+          name: signed-release-artifacts
           path: |
             app/build/outputs/apk/release/*.apk
             app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
           retention-days: 30
+
+      - name: Remove temporary keystore
+        if: always()
+        run: rm -f app/release-key.jks
