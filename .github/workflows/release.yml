@@ -32,10 +32,10 @@ jobs:
 
       - name: Decode and validate release keystore
         env:
-          BQ_RELEASE_KEYSTORE_BASE64: ${{ secrets.BQ_RELEASE_KEYSTORE_BASE64 }}
-          BQ_RELEASE_STORE_PASSWORD: ${{ secrets.BQ_RELEASE_STORE_PASSWORD }}
-          BQ_RELEASE_KEY_ALIAS: ${{ secrets.BQ_RELEASE_KEY_ALIAS }}
-          BQ_RELEASE_KEY_PASSWORD: ${{ secrets.BQ_RELEASE_KEY_PASSWORD }}
+          BQ_RELEASE_KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          BQ_RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          BQ_RELEASE_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          BQ_RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         shell: bash
         run: |
           set -euo pipefail
@@ -60,9 +60,9 @@ jobs:
 
       - name: Build signed release APK and bundle
         env:
-          BQ_RELEASE_STORE_PASSWORD: ${{ secrets.BQ_RELEASE_STORE_PASSWORD }}
-          BQ_RELEASE_KEY_ALIAS: ${{ secrets.BQ_RELEASE_KEY_ALIAS }}
-          BQ_RELEASE_KEY_PASSWORD: ${{ secrets.BQ_RELEASE_KEY_PASSWORD }}
+          BQ_RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          BQ_RELEASE_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          BQ_RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: gradle :app:assembleRelease :app:bundleRelease --stacktrace --no-daemon --warning-mode all
 
       - name: Verify APK and AAB signatures
