@@ -21,8 +21,18 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders["admobAppId"] = "ca-app-pub-2748789567113929~6610046816"
     }
+    signingConfigs {
+        create("release") {
+            // Credentials are supplied only by GitHub Actions secrets; never commit them.
+            storeFile = rootProject.file("app/release-key.jks")
+            storePassword = System.getenv("BQ_RELEASE_STORE_PASSWORD") ?: ""
+            keyAlias = System.getenv("BQ_RELEASE_KEY_ALIAS") ?: ""
+            keyPassword = System.getenv("BQ_RELEASE_KEY_PASSWORD") ?: ""
+        }
+    }
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             manifestPlaceholders["admobAppId"] = "ca-app-pub-2748789567113929~6610046816"
             proguardFiles(
