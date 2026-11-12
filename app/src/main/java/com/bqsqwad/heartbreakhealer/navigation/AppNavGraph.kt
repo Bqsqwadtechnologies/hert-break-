@@ -125,6 +125,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
             DashboardScreen(
                 hearts = hearts,
                 noContactDays = noContactDays,
+                urgePassedCount = urgePassedCount,
                 adsAllowed = adsAllowed,
                 onSos = { navController.navigate(Routes.SOS) },
                 onJournal = { navController.navigate(Routes.JOURNAL) },
@@ -290,6 +291,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
 private fun DashboardScreen(
     hearts: Int,
     noContactDays: Int,
+    urgePassedCount: Int,
     adsAllowed: Boolean,
     onSos: () -> Unit,
     onJournal: () -> Unit,
