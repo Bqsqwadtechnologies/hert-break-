@@ -281,7 +281,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
         composable(Routes.GRIEF_CONTACT) { GriefVsContactScreen(onBack = { navController.popBackStack() }) }
         composable(Routes.LIBRARY) { HealingLibraryScreen(onBack = { navController.popBackStack() }, adsAllowed = adsAllowed) }
         composable(Routes.PATH) { HealingPathScreen(onBack = { navController.popBackStack() }, adsAllowed = adsAllowed) }
-        composable(Routes.WEEKLY) { WeeklyReviewScreen(checkIns = journalEntries.count { runCatching { java.time.LocalDate.parse(it.date).isAfter(java.time.LocalDate.now().minusDays(7)) }.getOrDefault(false) }, noContactDays = noContactDays, onBack = { navController.popBackStack() }, adsAllowed = adsAllowed) }
+        composable(Routes.WEEKLY) { WeeklyReviewScreen(checkIns = journalEntries.count { runCatching { java.time.LocalDate.parse(it.date).isAfter(java.time.LocalDate.now().minusDays(7)) }.getOrDefault(false) }, urgesRodeOut = urgePassedCount, noContactDays = noContactDays, onBack = { navController.popBackStack() }, adsAllowed = adsAllowed) }
     }
 }
 
@@ -428,8 +428,8 @@ private fun DashboardScreen(
                     onClick = when (index) {
                         3 -> onHeartsShop
                         4 -> onSettings
-                        1 -> onWins
-                        2 -> onAffirmations
+                        1 -> onWeekly
+                        2 -> onLibrary
                         else -> onSos
                     },
                     icon = { Text(item.second, style = MaterialTheme.typography.titleLarge) },
