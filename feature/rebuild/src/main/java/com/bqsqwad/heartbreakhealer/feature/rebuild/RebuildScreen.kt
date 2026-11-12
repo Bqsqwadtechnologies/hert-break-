@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.bqsqwad.heartbreakhealer.core.common.ads.AdsConfig
 import com.bqsqwad.heartbreakhealer.core.ui.ads.BannerAdView
+import com.bqsqwad.heartbreakhealer.core.ui.ads.NativeAdCard
 
 data class RebuildDayUi(val day: Int, val title: String, val category: String, val done: Boolean)
 
@@ -52,6 +53,7 @@ fun RebuildScreen(
                         }) { Text("Complete") }
                     }
                 }
+                if (day.day % 8 == 0) NativeAdCard(unitId = AdsConfig.NATIVE_REBUILD)
             }
         }
         Text("Support this free healing space", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
