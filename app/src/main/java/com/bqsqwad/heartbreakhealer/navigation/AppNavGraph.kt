@@ -115,6 +115,21 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
             navController.navigate(Routes.DASHBOARD) { popUpTo(Routes.ONBOARDING) { inclusive = true } }
         }
     }
+    LaunchedEffect(backStackEntry?.destination?.route) {
+        val route = backStackEntry?.destination?.route
+        adManager.setAppOpenEligible(
+            route in setOf(
+                Routes.DASHBOARD,
+                Routes.SELF_CARE,
+                Routes.REBUILD,
+                Routes.AFFIRMATIONS,
+                Routes.HEARTS_SHOP,
+                Routes.LIBRARY,
+                Routes.PATH,
+                Routes.WEEKLY
+            )
+        )
+    }
     NavHost(navController = navController, startDestination = Routes.ONBOARDING) {
         composable(Routes.ONBOARDING) {
             OnboardingScreen(onComplete = { nickname, breakupDate, goals ->
