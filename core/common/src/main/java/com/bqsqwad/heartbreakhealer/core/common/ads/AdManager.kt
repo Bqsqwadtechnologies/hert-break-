@@ -35,6 +35,7 @@ class AdManager @Inject constructor() {
     private val interstitials = mutableMapOf<InterstitialPlacement, InterstitialAd?>()
     private val rewardedAds = mutableMapOf<RewardedPlacement, RewardedAd?>()
     private var appOpenAd: AppOpenAd? = null
+    private var appOpenLoadedAt = 0L
     private var lastInterstitialShownAt = 0L
     private var interstitialsShownThisSession = 0
     private var consentResolved = false
@@ -202,6 +203,7 @@ class AdManager @Inject constructor() {
             object : AppOpenAd.AppOpenAdLoadCallback() {
                 override fun onAdLoaded(ad: AppOpenAd) {
                     appOpenAd = ad
+                    appOpenLoadedAt = System.currentTimeMillis()
                     Log.d(TAG, "Loaded app-open ad")
                 }
 
@@ -222,7 +224,10 @@ class AdManager @Inject constructor() {
         }
         backgroundedAt = 0L
         val ad = appOpenAd
-        if (ad == null) {
+        val adAge = System.currentTimeMillis() - appOpenLoadedAt
+        if (ad == null || adAge >= AdsConfig.APP_OPEN_MAX_AD_AGE_MS) {
+            appOpenAd = null
+            appOpenLoadedAt = 0L
             loadAppOpen(activity)
             return
         }
@@ -230,6 +235,7 @@ class AdManager @Inject constructor() {
             override fun onAdShowedFullScreenContent() {
                 isShowingFullScreenContent = true
                 appOpenAd = null
+                appOpenLoadedAt = 0L
             }
 
             override fun onAdDismissedFullScreenContent() {
@@ -240,6 +246,7 @@ class AdManager @Inject constructor() {
             override fun onAdFailedToShowFullScreenContent(error: AdError) {
                 isShowingFullScreenContent = false
                 appOpenAd = null
+                appOpenLoadedAt = 0L
                 Log.w(TAG, "App-open ad failed to show: ${error.message}")
                 loadAppOpen(activity)
             }
