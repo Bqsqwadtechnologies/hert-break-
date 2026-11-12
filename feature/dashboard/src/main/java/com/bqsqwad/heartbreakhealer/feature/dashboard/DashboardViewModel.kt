@@ -10,6 +10,7 @@ import com.bqsqwad.heartbreakhealer.core.data.db.AppDatabase
 import java.time.LocalDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -29,6 +30,10 @@ class DashboardViewModel @Inject constructor(
 
     val noContactDays: StateFlow<Int> = noContactRepository.currentDays
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+    val bestNoContactDays: StateFlow<Int> = noContactRepository.bestDays
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+    val journalEntries = journalRepository.getEntries()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val capsuleText: StateFlow<String?> = preferences.timeCapsuleText
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
@@ -53,6 +58,17 @@ class DashboardViewModel @Inject constructor(
             journalRepository.saveEntry(mood, note.ifBlank { "Check-in" })
             heartsRepository.earnFromCheckIn()
         }
+    }
+
+    fun saveJournalEntry(mood: Int, content: String) {
+        viewModelScope.launch {
+            journalRepository.saveEntry(mood, content)
+            heartsRepository.earnFromJournal()
+        }
+    }
+
+    fun recordNoContactSlip() {
+        viewModelScope.launch { noContactRepository.recordSlip() }
     }
 
     fun onRewardedHearts() {
