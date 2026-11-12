@@ -104,6 +104,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
     val remindersEnabled by dashboardViewModel.dailyRemindersEnabled.collectAsState()
     val savedMemories by dashboardViewModel.memories.collectAsState()
     val savedTriggers by dashboardViewModel.triggers.collectAsState()
+    val completedPathDays by dashboardViewModel.completedPathDays.collectAsState()
     val activity = LocalContext.current as? Activity
     val adsAllowed by adManager.adsAllowed.collectAsState()
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -282,7 +283,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
         }
         composable(Routes.GRIEF_CONTACT) { GriefVsContactScreen(onBack = { navController.popBackStack() }) }
         composable(Routes.LIBRARY) { HealingLibraryScreen(onBack = { navController.popBackStack() }, adsAllowed = adsAllowed) }
-        composable(Routes.PATH) { HealingPathScreen(onBack = { navController.popBackStack() }, adsAllowed = adsAllowed) }
+        composable(Routes.PATH) { HealingPathScreen(days = (1..14).map { com.bqsqwad.heartbreakhealer.feature.dashboard.PathDay(it, "Day $it — one small act of care", it.toString() in completedPathDays) }, onCompleteDay = { day -> dashboardViewModel.completePathDay(day); activity?.let { adManager.showInterstitialIfAllowed(it) } }, onBack = { navController.popBackStack() }, adsAllowed = adsAllowed) }
         composable(Routes.WEEKLY) { WeeklyReviewScreen(checkIns = journalEntries.count { runCatching { java.time.LocalDate.parse(it.date).isAfter(java.time.LocalDate.now().minusDays(7)) }.getOrDefault(false) }, urgesRodeOut = urgePassedCount, noContactDays = noContactDays, onBack = { navController.popBackStack() }, adsAllowed = adsAllowed) }
     }
 }
