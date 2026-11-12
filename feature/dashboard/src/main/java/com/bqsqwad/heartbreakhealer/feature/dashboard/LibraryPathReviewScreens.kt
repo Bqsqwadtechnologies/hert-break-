@@ -25,7 +25,7 @@ private val libraryArticles = listOf(
 
 @Composable
 fun HealingLibraryScreen(onBack: () -> Unit) {
-    Column(Modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.weight(1f).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -62,7 +62,7 @@ fun HealingPathScreen(
     onCompleteDay: (Int) -> Unit = {},
     onBack: () -> Unit
 ) {
-    Column(Modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.weight(1f).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
