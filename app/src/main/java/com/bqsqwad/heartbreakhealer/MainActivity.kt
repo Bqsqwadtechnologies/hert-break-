@@ -19,13 +19,25 @@ import com.bqsqwad.heartbreakhealer.core.ui.theme.HeartbreakHealerTheme
 import com.bqsqwad.heartbreakhealer.navigation.AppNavGraph
 import com.bqsqwad.heartbreakhealer.ui.splash.AnimatedSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+import com.bqsqwad.heartbreakhealer.core.common.ads.AdManager
+import com.bqsqwad.heartbreakhealer.core.common.ads.ConsentHelper
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject lateinit var consentHelper: ConsentHelper
+    @Inject lateinit var adManager: AdManager
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        consentHelper.requestConsent(this) { canShowAds ->
+            adManager.onConsentResolved(canShowAds)
+            if (canShowAds) {
+                adManager.loadInterstitial(this)
+                adManager.loadRewarded(this)
+            }
+        }
 
         var keepSplash = true
         splashScreen.setKeepOnScreenCondition { keepSplash }
