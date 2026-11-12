@@ -26,6 +26,9 @@ class DashboardViewModel @Inject constructor(
     private val database: AppDatabase
 ) : ViewModel() {
 
+    val onboardingComplete = preferences.onboardingComplete
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
     val hearts: StateFlow<Int> = heartsRepository.balance
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 50)
 
@@ -53,6 +56,14 @@ class DashboardViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
     val capsuleUnlock: StateFlow<String?> = preferences.timeCapsuleUnlock
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    fun completeOnboarding(nickname: String, breakupDate: LocalDate, goals: Set<com.bqsqwad.heartbreakhealer.core.domain.model.Goal>) {
+        viewModelScope.launch {
+            preferences.setOnboardingComplete(nickname, goals.map { it.name }.toSet())
+            preferences.setBreakupEpoch(breakupDate.toEpochDay())
+            preferences.setNoContactStartEpoch(LocalDate.now().toEpochDay())
+        }
+    }
 
     fun saveCapsule(text: String, days: Int) {
         viewModelScope.launch {
