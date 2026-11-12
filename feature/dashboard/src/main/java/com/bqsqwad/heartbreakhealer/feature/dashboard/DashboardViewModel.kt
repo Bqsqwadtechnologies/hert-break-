@@ -42,6 +42,10 @@ class DashboardViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     val reduceMotion = preferences.reduceMotion
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+    val memories = preferences.savedMemories
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+    val triggers = preferences.savedTriggers
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
     val dailyRemindersEnabled = preferences.dailyRemindersEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
@@ -55,6 +59,9 @@ class DashboardViewModel @Inject constructor(
             preferences.setTimeCapsule(text, LocalDate.now().plusDays(days.toLong()).toString())
         }
     }
+
+    fun addMemory(title: String, note: String) { viewModelScope.launch { preferences.addMemory(title, note) } }
+    fun addTrigger(name: String, coping: String) { viewModelScope.launch { preferences.addTrigger(name, coping) } }
 
     fun setReduceMotion(enabled: Boolean) { viewModelScope.launch { preferences.setReduceMotion(enabled) } }
     fun setDailyRemindersEnabled(enabled: Boolean) { viewModelScope.launch { preferences.setDailyRemindersEnabled(enabled) } }
