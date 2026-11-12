@@ -36,6 +36,7 @@ class UserPreferences @Inject constructor(
     val urgePassedCount: Flow<Int> = ds.data.map { it[Keys.URGE_PASSED] ?: 0 }
     val savedMemories: Flow<Set<String>> = ds.data.map { it[Keys.MEMORIES] ?: emptySet() }
     val savedTriggers: Flow<Set<String>> = ds.data.map { it[Keys.TRIGGERS] ?: emptySet() }
+    val completedPathDays: Flow<Set<String>> = ds.data.map { it[Keys.PATH_DAYS] ?: emptySet() }
     val timeCapsuleText: Flow<String?> = ds.data.map { it[Keys.CAPSULE_TEXT] }
     val timeCapsuleUnlock: Flow<String?> = ds.data.map { it[Keys.CAPSULE_UNLOCK] }
     val breakupDayEpoch: Flow<Long?> = ds.data.map { it[Keys.BREAKUP_EPOCH] }
@@ -103,6 +104,10 @@ class UserPreferences @Inject constructor(
         }
     }
 
+    suspend fun completePathDay(day: Int) {
+        ds.edit { data -> data[Keys.PATH_DAYS] = (data[Keys.PATH_DAYS] ?: emptySet()) + day.toString() }
+    }
+
     suspend fun addMemory(title: String, note: String) {
         ds.edit { data ->
             val current = data[Keys.MEMORIES] ?: emptySet()
@@ -144,6 +149,7 @@ class UserPreferences @Inject constructor(
         val DAILY_REMINDERS = booleanPreferencesKey("daily_reminders_enabled")
         val MEMORIES = stringSetPreferencesKey("saved_memories")
         val TRIGGERS = stringSetPreferencesKey("saved_triggers")
+        val PATH_DAYS = stringSetPreferencesKey("completed_path_days")
         val FIRST_LAUNCH = booleanPreferencesKey("first_launch")
         val AGE_CONFIRMED = booleanPreferencesKey("age_confirmed")
         val URGE_PASSED = intPreferencesKey("urge_passed")
