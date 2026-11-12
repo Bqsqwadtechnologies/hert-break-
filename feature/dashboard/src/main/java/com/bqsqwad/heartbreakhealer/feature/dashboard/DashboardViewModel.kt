@@ -45,6 +45,8 @@ class DashboardViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     val rebuildProgress = database.rebuildDao().getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val urgePassedCount = preferences.urgePassedCount
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
     val reduceMotion = preferences.reduceMotion
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
     val memories = preferences.savedMemories
@@ -75,6 +77,8 @@ class DashboardViewModel @Inject constructor(
 
     fun saveUnsentLetter(content: String) { viewModelScope.launch { journalRepository.saveLetter(content) } }
     fun releaseUnsentLetter(id: Long) { viewModelScope.launch { journalRepository.releaseLetter(id) } }
+
+    fun logUrgePassed() { viewModelScope.launch { preferences.incrementUrgePassed() } }
 
     fun addMemory(title: String, note: String) { viewModelScope.launch { preferences.addMemory(title, note) } }
     fun addTrigger(name: String, coping: String) { viewModelScope.launch { preferences.addTrigger(name, coping) } }
