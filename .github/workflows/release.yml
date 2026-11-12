@@ -30,7 +30,7 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Decode and validate release keystore
+      - name: Restore and validate release keystore
         env:
           BQ_RELEASE_KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           BQ_RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -45,8 +45,11 @@ jobs:
               exit 1
             fi
           done
-          if ! printf '%s' "$BQ_RELEASE_KEYSTORE_BASE64" | tr -d '\\r\\n ' | base64 --decode > app/release-key.jks; then
-            echo "::error::KEYSTORE_BASE64 is not valid Base64. Re-encode the original .jks file as Base64 and update that secret."
+
+          # GitHub secrets are text. Remove whitespace only; never strip Base64 letters.
+          if ! printf '%s' "$BQ_RELEASE_KEYSTORE_BASE64" | python3 -c 'import base64,sys; s="".join(sys.stdin.read().split()); sys.stdout.buffer.write(base64.b64decode(s, validate=True))' > app/release-key.jks; then
+            rm -f app/release-key.jks
+            echo "::error::KEYSTORE_BASE64 is malformed or incomplete. Paste the complete contents of the matching Base64 keystore file into that secret."
             exit 1
           fi
           if [[ ! -s app/release-key.jks ]]; then
@@ -55,11 +58,11 @@ jobs:
           fi
           if ! keytool -list -keystore app/release-key.jks -storepass "$BQ_RELEASE_STORE_PASSWORD" > /tmp/keystore-list.txt 2>&1; then
             cat /tmp/keystore-list.txt
-            echo "::error::The keystore could not be opened. Check that KEYSTORE_BASE64 is the matching JKS file and KEYSTORE_PASSWORD is its store password."
+            echo "::error::The keystore could not be opened. Check that KEYSTORE_BASE64 and KEYSTORE_PASSWORD belong to the same JKS file."
             exit 1
           fi
           if ! keytool -list -keystore app/release-key.jks -storepass "$BQ_RELEASE_STORE_PASSWORD" -alias "$BQ_RELEASE_KEY_ALIAS" >/dev/null 2>&1; then
-            echo "::error::The keystore opens, but KEY_ALIAS was not found. Check the alias in the original keystore."
+            echo "::error::The keystore opens, but KEY_ALIAS was not found. Check the alias in the matching keystore."
             keytool -list -keystore app/release-key.jks -storepass "$BQ_RELEASE_STORE_PASSWORD" | sed -n '1,20p'
             exit 1
           fi
