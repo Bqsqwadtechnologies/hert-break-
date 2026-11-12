@@ -19,8 +19,10 @@ import com.google.android.gms.ads.AdView
 @Composable
 fun BannerAdView(
     unitId: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
 ) {
+    if (!enabled) return
     AndroidView(
         modifier = modifier
             .fillMaxWidth()
