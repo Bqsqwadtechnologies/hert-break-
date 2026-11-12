@@ -21,6 +21,7 @@ fun RebuildScreen(
     },
     completedDays: Set<Int> = emptySet(),
     onCompleteDay: (Int) -> Unit = {},
+    adsAllowed: Boolean = false,
     onBack: () -> Unit = {}
 ) {
     val dayState = remember(days, completedDays) { mutableStateListOf<RebuildDayUi>().apply { addAll(days.map { it.copy(done = it.day in completedDays) }) } }
@@ -54,10 +55,10 @@ fun RebuildScreen(
                         }) { Text("Complete") }
                     }
                 }
-                if (day.day % 8 == 0) NativeAdCard(unitId = AdsConfig.NATIVE_REBUILD)
+                if (day.day % 8 == 0) NativeAdCard(unitId = AdsConfig.NATIVE_REBUILD, enabled = adsAllowed)
             }
         }
         Text("Support this free healing space", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        BannerAdView(unitId = AdsConfig.BANNER_LIST)
+        BannerAdView(unitId = AdsConfig.BANNER_LIST, enabled = adsAllowed)
     }
 }
