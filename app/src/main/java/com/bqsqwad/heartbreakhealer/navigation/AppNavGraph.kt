@@ -84,6 +84,8 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
         }
         composable(Routes.DASHBOARD) {
             DashboardScreen(
+                hearts = hearts,
+                noContactDays = dashboardViewModel.noContactDays.collectAsState().value,
                 onSos = { navController.navigate(Routes.SOS) },
                 onJournal = { navController.navigate(Routes.JOURNAL) },
                 onNoContact = { navController.navigate(Routes.NO_CONTACT) },
@@ -164,6 +166,8 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
 
 @Composable
 private fun DashboardScreen(
+    hearts: Int,
+    noContactDays: Int,
     onSos: () -> Unit,
     onJournal: () -> Unit,
     onNoContact: () -> Unit,
@@ -196,6 +200,7 @@ private fun DashboardScreen(
                     Column {
                         Text("Heartbreak", style = MaterialTheme.typography.titleLarge, color = ink, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
                         Text("HEALER", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold, letterSpacing = 2.sp)
+                        Text("$hearts hearts", style = MaterialTheme.typography.labelSmall, color = muted)
                     }
                 }
                 TextButton(onClick = onSettings) { Text("⚙ Settings", color = ink) }
@@ -215,14 +220,14 @@ private fun DashboardScreen(
                     Spacer(Modifier.height(12.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(contentAlignment = Alignment.Center, modifier = Modifier.size(92.dp)) {
-                            CircularProgressIndicator(progress = { 0.72f }, modifier = Modifier.fillMaxSize(), strokeWidth = 9.dp, color = MaterialTheme.colorScheme.primary, trackColor = blush)
-                            Text("72%", color = ink, style = MaterialTheme.typography.titleLarge, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                            CircularProgressIndicator(progress = { (noContactDays.coerceAtMost(30) / 30f) }, modifier = Modifier.fillMaxSize(), strokeWidth = 9.dp, color = MaterialTheme.colorScheme.primary, trackColor = blush)
+                            Text("${noContactDays.coerceAtMost(30)}", color = ink, style = MaterialTheme.typography.titleLarge, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
                         }
                         Spacer(Modifier.width(16.dp))
                         Column(Modifier.weight(1f)) {
                             Text("Keep going!", color = ink, style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
                             Text("Every small step counts.", color = muted)
-                            Text("Day 12 of your journey", color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.labelMedium)
+                            Text("$noContactDays days logged", color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.labelMedium)
                         }
                     }
                 }
