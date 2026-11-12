@@ -1,5 +1,7 @@
 package com.bqsqwad.heartbreakhealer.ui.splash
 
+import com.bqsqwad.heartbreakhealer.R
+
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
