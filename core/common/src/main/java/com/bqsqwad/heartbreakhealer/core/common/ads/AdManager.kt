@@ -8,6 +8,7 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.appopen.AppOpenAd
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.gms.ads.rewarded.RewardedAd
@@ -17,112 +18,242 @@ import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
+enum class InterstitialPlacement(val unitId: String) {
+    SELF_CARE_COMPLETION(AdsConfig.INTERSTITIAL),
+    PATH_DAY_COMPLETION(AdsConfig.INTERSTITIAL_PATH_DAY),
+    WEEKLY_REVIEW_EXIT(AdsConfig.INTERSTITIAL_WEEKLY)
+}
+
+enum class RewardedPlacement(val unitId: String) {
+    HEARTS_REWARD(AdsConfig.REWARDED_HEARTS),
+    SHOP_EXTRA_REWARD(AdsConfig.REWARDED_SHOP_EXTRA)
+}
+
 @Singleton
 class AdManager @Inject constructor() {
 
-    private var interstitial: InterstitialAd? = null
-    private var rewarded: RewardedAd? = null
+    private val interstitials = mutableMapOf<InterstitialPlacement, InterstitialAd?>()
+    private val rewardedAds = mutableMapOf<RewardedPlacement, RewardedAd?>()
+    private var appOpenAd: AppOpenAd? = null
     private var lastInterstitialShownAt = 0L
     private var interstitialsShownThisSession = 0
     private var consentResolved = false
-    private var adsEnabled = true
+    private var adsEnabled = false
     private var initialized = false
+    private var isShowingFullScreenContent = false
+    private var backgroundedAt = 0L
+
     private val _adsAllowed = MutableStateFlow(false)
     val adsAllowed: StateFlow<Boolean> = _adsAllowed
 
-    fun initialize(context: Context) {
-        MobileAds.initialize(context) {
-            Log.d(TAG, "MobileAds initialized")
-        }
-    }
-
+    /** Call once after the consent SDK has resolved the user's ad eligibility. */
     fun onConsentResolved(context: Context, canShowAds: Boolean) {
         consentResolved = true
         adsEnabled = canShowAds
         _adsAllowed.value = canShowAds
         if (!canShowAds || initialized) return
+
         initialized = true
         MobileAds.initialize(context.applicationContext) {
-            loadInterstitial(context.applicationContext)
-            loadRewarded(context.applicationContext)
-            Log.d(TAG, "MobileAds initialized after consent resolution")
+            val appContext = context.applicationContext
+            InterstitialPlacement.values().forEach { loadInterstitial(appContext, it) }
+            RewardedPlacement.values().forEach { loadRewarded(appContext, it) }
+            loadAppOpen(appContext)
+            Log.d(TAG, "Mobile Ads initialized; all registered full-screen placements requested")
         }
     }
 
     fun canShowInterstitial(): Boolean {
-        if (!consentResolved || !adsEnabled) return false
+        if (!canRequestAds()) return false
+        if (isShowingFullScreenContent) return false
         if (interstitialsShownThisSession >= AdsConfig.INTERSTITIAL_MAX_PER_SESSION) return false
-        val elapsed = System.currentTimeMillis() - lastInterstitialShownAt
-        return elapsed >= AdsConfig.INTERSTITIAL_MIN_INTERVAL_MS
+        return System.currentTimeMillis() - lastInterstitialShownAt >= AdsConfig.INTERSTITIAL_MIN_INTERVAL_MS
     }
 
-    fun loadInterstitial(context: Context) {
-        if (!consentResolved || !adsEnabled) return
-        val request = AdRequest.Builder().build()
-        InterstitialAd.load(context, AdsConfig.INTERSTITIAL, request, object : InterstitialAdLoadCallback() {
-            override fun onAdLoaded(ad: InterstitialAd) { interstitial = ad }
-            override fun onAdFailedToLoad(error: LoadAdError) {
-                interstitial = null
-                Log.w(TAG, "Interstitial failed: ${error.message}")
+    fun loadInterstitial(context: Context, placement: InterstitialPlacement) {
+        if (!canRequestAds()) return
+        InterstitialAd.load(
+            context.applicationContext,
+            placement.unitId,
+            AdRequest.Builder().build(),
+            object : InterstitialAdLoadCallback() {
+                override fun onAdLoaded(ad: InterstitialAd) {
+                    interstitials[placement] = ad
+                    Log.d(TAG, "Loaded interstitial placement: $placement")
+                }
+
+                override fun onAdFailedToLoad(error: LoadAdError) {
+                    interstitials[placement] = null
+                    Log.w(TAG, "Interstitial $placement failed to load: ${error.message}")
+                }
             }
-        })
+        )
     }
 
-    fun showInterstitialIfAllowed(activity: Activity, onDismissed: () -> Unit = {}) {
+    fun showInterstitialIfAllowed(
+        activity: Activity,
+        placement: InterstitialPlacement,
+        onDismissed: () -> Unit = {}
+    ) {
         if (!canShowInterstitial()) {
             onDismissed()
             return
         }
-        val ad = interstitial
+        val ad = interstitials[placement]
         if (ad == null) {
-            loadInterstitial(activity)
+            loadInterstitial(activity, placement)
             onDismissed()
             return
         }
+
         ad.fullScreenContentCallback = object : FullScreenContentCallback() {
-            override fun onAdDismissedFullScreenContent() {
-                interstitial = null
+            override fun onAdShowedFullScreenContent() {
+                isShowingFullScreenContent = true
                 lastInterstitialShownAt = System.currentTimeMillis()
                 interstitialsShownThisSession++
-                loadInterstitial(activity)
+            }
+
+            override fun onAdDismissedFullScreenContent() {
+                isShowingFullScreenContent = false
+                interstitials[placement] = null
+                loadInterstitial(activity, placement)
                 onDismissed()
             }
+
             override fun onAdFailedToShowFullScreenContent(error: AdError) {
-                interstitial = null
+                isShowingFullScreenContent = false
+                interstitials[placement] = null
+                Log.w(TAG, "Interstitial $placement failed to show: ${error.message}")
+                loadInterstitial(activity, placement)
                 onDismissed()
             }
         }
         ad.show(activity)
     }
 
-    fun loadRewarded(context: Context) {
-        if (!consentResolved || !adsEnabled) return
-        val request = AdRequest.Builder().build()
-        RewardedAd.load(context, AdsConfig.REWARDED_HEARTS, request, object : RewardedAdLoadCallback() {
-            override fun onAdLoaded(ad: RewardedAd) { rewarded = ad }
-            override fun onAdFailedToLoad(error: LoadAdError) { rewarded = null }
-        })
+    fun loadRewarded(context: Context, placement: RewardedPlacement) {
+        if (!canRequestAds()) return
+        RewardedAd.load(
+            context.applicationContext,
+            placement.unitId,
+            AdRequest.Builder().build(),
+            object : RewardedAdLoadCallback() {
+                override fun onAdLoaded(ad: RewardedAd) {
+                    rewardedAds[placement] = ad
+                    Log.d(TAG, "Loaded rewarded placement: $placement")
+                }
+
+                override fun onAdFailedToLoad(error: LoadAdError) {
+                    rewardedAds[placement] = null
+                    Log.w(TAG, "Rewarded $placement failed to load: ${error.message}")
+                }
+            }
+        )
     }
 
-    fun showRewarded(activity: Activity, onRewarded: () -> Unit, onDismissed: () -> Unit = {}) {
-        val ad = rewarded
-        if (ad == null || !consentResolved || !adsEnabled) {
+    /** Only call from an explicit user action; reward is granted solely by the SDK reward callback. */
+    fun showRewarded(
+        activity: Activity,
+        placement: RewardedPlacement,
+        onRewarded: () -> Unit,
+        onDismissed: () -> Unit = {}
+    ) {
+        if (!canRequestAds() || isShowingFullScreenContent) {
             onDismissed()
             return
         }
+        val ad = rewardedAds[placement]
+        if (ad == null) {
+            loadRewarded(activity, placement)
+            onDismissed()
+            return
+        }
+
         ad.fullScreenContentCallback = object : FullScreenContentCallback() {
+            override fun onAdShowedFullScreenContent() {
+                isShowingFullScreenContent = true
+            }
+
             override fun onAdDismissedFullScreenContent() {
-                rewarded = null
-                loadRewarded(activity)
+                isShowingFullScreenContent = false
+                rewardedAds[placement] = null
+                loadRewarded(activity, placement)
                 onDismissed()
             }
+
             override fun onAdFailedToShowFullScreenContent(error: AdError) {
-                rewarded = null
+                isShowingFullScreenContent = false
+                rewardedAds[placement] = null
+                Log.w(TAG, "Rewarded $placement failed to show: ${error.message}")
+                loadRewarded(activity, placement)
                 onDismissed()
             }
         }
         ad.show(activity) { onRewarded() }
     }
+
+    private fun loadAppOpen(context: Context) {
+        if (!canRequestAds()) return
+        AppOpenAd.load(
+            context.applicationContext,
+            AdsConfig.APP_OPEN,
+            AdRequest.Builder().build(),
+            AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT,
+            object : AppOpenAd.AppOpenAdLoadCallback() {
+                override fun onAdLoaded(ad: AppOpenAd) {
+                    appOpenAd = ad
+                    Log.d(TAG, "Loaded app-open ad")
+                }
+
+                override fun onAdFailedToLoad(error: LoadAdError) {
+                    appOpenAd = null
+                    Log.w(TAG, "App-open ad failed to load: ${error.message}")
+                }
+            }
+        )
+    }
+
+    /** Called by MainActivity onStart. The first cold launch never interrupts onboarding. */
+    fun onAppForeground(activity: Activity) {
+        if (!canRequestAds() || isShowingFullScreenContent) return
+        val elapsedInBackground = if (backgroundedAt == 0L) 0L else System.currentTimeMillis() - backgroundedAt
+        if (backgroundedAt == 0L || elapsedInBackground < AdsConfig.APP_OPEN_MIN_BACKGROUND_MS) {
+            return
+        }
+        backgroundedAt = 0L
+        val ad = appOpenAd
+        if (ad == null) {
+            loadAppOpen(activity)
+            return
+        }
+        ad.fullScreenContentCallback = object : FullScreenContentCallback() {
+            override fun onAdShowedFullScreenContent() {
+                isShowingFullScreenContent = true
+                appOpenAd = null
+            }
+
+            override fun onAdDismissedFullScreenContent() {
+                isShowingFullScreenContent = false
+                loadAppOpen(activity)
+            }
+
+            override fun onAdFailedToShowFullScreenContent(error: AdError) {
+                isShowingFullScreenContent = false
+                appOpenAd = null
+                Log.w(TAG, "App-open ad failed to show: ${error.message}")
+                loadAppOpen(activity)
+            }
+        }
+        ad.show(activity)
+    }
+
+    /** Called by MainActivity onStop; full-screen ad transitions are not treated as app exits. */
+    fun onAppBackground() {
+        if (isShowingFullScreenContent || !canRequestAds()) return
+        backgroundedAt = System.currentTimeMillis()
+    }
+
+    private fun canRequestAds(): Boolean = consentResolved && adsEnabled
 
     companion object {
         private const val TAG = "AdManager"
