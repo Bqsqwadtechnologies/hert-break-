@@ -34,6 +34,9 @@ import com.bqsqwad.heartbreakhealer.feature.dashboard.BoundaryScriptsScreen
 import com.bqsqwad.heartbreakhealer.feature.dashboard.CopingCardsScreen
 import com.bqsqwad.heartbreakhealer.feature.dashboard.EveningWindDownScreen
 import com.bqsqwad.heartbreakhealer.feature.dashboard.GriefVsContactScreen
+import com.bqsqwad.heartbreakhealer.feature.dashboard.HealingLibraryScreen
+import com.bqsqwad.heartbreakhealer.feature.dashboard.HealingPathScreen
+import com.bqsqwad.heartbreakhealer.feature.dashboard.WeeklyReviewScreen
 import com.bqsqwad.heartbreakhealer.feature.dashboard.SmallWinsScreen
 import com.bqsqwad.heartbreakhealer.feature.dashboard.StageTrackerCard
 import com.bqsqwad.heartbreakhealer.feature.dashboard.TimeCapsuleScreen
