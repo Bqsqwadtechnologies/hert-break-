@@ -19,6 +19,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.compose.ui.platform.LocalContext
 import com.bqsqwad.heartbreakhealer.core.common.ads.AdManager
+import com.bqsqwad.heartbreakhealer.core.common.ads.InterstitialPlacement
+import com.bqsqwad.heartbreakhealer.core.common.ads.RewardedPlacement
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -185,7 +187,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
         composable(Routes.SELF_CARE) {
             SelfCareScreen(
                 completedTaskIds = selfCareCompleted.map { it.taskId }.toSet(),
-                onToggle = { taskId -> dashboardViewModel.completeSelfCare(taskId); activity?.let { host -> adManager.showInterstitialIfAllowed(host) } },
+                onToggle = { taskId -> dashboardViewModel.completeSelfCare(taskId); activity?.let { host -> adManager.showInterstitialIfAllowed(host, InterstitialPlacement.SELF_CARE_COMPLETION) } },
                 adsAllowed = adsAllowed,
                 onBack = { navController.popBackStack() }
             )
@@ -193,7 +195,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
         composable(Routes.REBUILD) {
             RebuildScreen(
                 completedDays = rebuildProgress.filter { it.completed }.map { it.day }.toSet(),
-                onCompleteDay = { day -> dashboardViewModel.completeRebuildDay(day); activity?.let { host -> adManager.showInterstitialIfAllowed(host) } },
+                onCompleteDay = { day -> dashboardViewModel.completeRebuildDay(day) },
                 adsAllowed = adsAllowed,
                 onBack = { navController.popBackStack() }
             )
@@ -204,7 +206,12 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                 balance = hearts,
                 onWatchRewarded = {
                     activity?.let { host ->
-                        adManager.showRewarded(host, onRewarded = dashboardViewModel::onRewardedHearts)
+                        adManager.showRewarded(host, RewardedPlacement.HEARTS_REWARD, onRewarded = dashboardViewModel::onRewardedHearts)
+                    }
+                },
+                onWatchExtraRewarded = {
+                    activity?.let { host ->
+                        adManager.showRewarded(host, RewardedPlacement.SHOP_EXTRA_REWARD, onRewarded = dashboardViewModel::onRewardedHearts)
                     }
                 },
                 onBack = { navController.popBackStack() },
@@ -284,8 +291,8 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
         }
         composable(Routes.GRIEF_CONTACT) { GriefVsContactScreen(onBack = { navController.popBackStack() }) }
         composable(Routes.LIBRARY) { HealingLibraryScreen(onBack = { navController.popBackStack() }, adsAllowed = adsAllowed) }
-        composable(Routes.PATH) { HealingPathScreen(days = (1..14).map { com.bqsqwad.heartbreakhealer.feature.dashboard.PathDay(it, "Day $it — one small act of care", it.toString() in completedPathDays) }, onCompleteDay = { day -> dashboardViewModel.completePathDay(day); activity?.let { adManager.showInterstitialIfAllowed(it) } }, onBack = { navController.popBackStack() }, adsAllowed = adsAllowed) }
-        composable(Routes.WEEKLY) { WeeklyReviewScreen(checkIns = journalEntries.count { runCatching { java.time.LocalDate.parse(it.date).isAfter(java.time.LocalDate.now().minusDays(7)) }.getOrDefault(false) }, urgesRodeOut = urgePassedCount, noContactDays = noContactDays, onBack = { navController.popBackStack() }, adsAllowed = adsAllowed) }
+        composable(Routes.PATH) { HealingPathScreen(days = (1..14).map { com.bqsqwad.heartbreakhealer.feature.dashboard.PathDay(it, "Day $it — one small act of care", it.toString() in completedPathDays) }, onCompleteDay = { day -> dashboardViewModel.completePathDay(day); activity?.let { adManager.showInterstitialIfAllowed(it, InterstitialPlacement.PATH_DAY_COMPLETION) } }, onBack = { navController.popBackStack() }, adsAllowed = adsAllowed) }
+        composable(Routes.WEEKLY) { WeeklyReviewScreen(checkIns = journalEntries.count { runCatching { java.time.LocalDate.parse(it.date).isAfter(java.time.LocalDate.now().minusDays(7)) }.getOrDefault(false) }, urgesRodeOut = urgePassedCount, noContactDays = noContactDays, onBack = { if (activity != null) adManager.showInterstitialIfAllowed(activity, InterstitialPlacement.WEEKLY_REVIEW_EXIT) { navController.popBackStack() } else navController.popBackStack() }, adsAllowed = adsAllowed) }
     }
 }
 
