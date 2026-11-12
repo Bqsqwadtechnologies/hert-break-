@@ -5,6 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.bqsqwad.heartbreakhealer.core.data.repo.HeartsRepository
 import com.bqsqwad.heartbreakhealer.core.data.repo.JournalRepository
 import com.bqsqwad.heartbreakhealer.core.data.repo.NoContactRepository
+import com.bqsqwad.heartbreakhealer.core.data.prefs.UserPreferences
+import com.bqsqwad.heartbreakhealer.core.data.db.AppDatabase
+import java.time.LocalDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +19,9 @@ import javax.inject.Inject
 class DashboardViewModel @Inject constructor(
     private val heartsRepository: HeartsRepository,
     private val journalRepository: JournalRepository,
-    private val noContactRepository: NoContactRepository
+    private val noContactRepository: NoContactRepository,
+    private val preferences: UserPreferences,
+    private val database: AppDatabase
 ) : ViewModel() {
 
     val hearts: StateFlow<Int> = heartsRepository.balance
@@ -24,6 +29,24 @@ class DashboardViewModel @Inject constructor(
 
     val noContactDays: StateFlow<Int> = noContactRepository.currentDays
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val capsuleText: StateFlow<String?> = preferences.timeCapsuleText
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+    val capsuleUnlock: StateFlow<String?> = preferences.timeCapsuleUnlock
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    fun saveCapsule(text: String, days: Int) {
+        viewModelScope.launch {
+            preferences.setTimeCapsule(text, LocalDate.now().plusDays(days.toLong()).toString())
+        }
+    }
+
+    fun clearAll() {
+        viewModelScope.launch {
+            database.clearAllTables()
+            preferences.clearAll()
+        }
+    }
 
     fun onCheckIn(mood: Int, note: String) {
         viewModelScope.launch {
