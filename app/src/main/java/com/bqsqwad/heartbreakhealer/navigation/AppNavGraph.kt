@@ -46,6 +46,8 @@ import com.bqsqwad.heartbreakhealer.feature.dashboard.UrgePassedCard
 import com.bqsqwad.heartbreakhealer.feature.heartsshop.HeartsShopScreen
 import com.bqsqwad.heartbreakhealer.feature.journal.JournalScreen
 import com.bqsqwad.heartbreakhealer.feature.journal.JournalUiEntry
+import com.bqsqwad.heartbreakhealer.feature.journal.UnsentLettersScreen
+import com.bqsqwad.heartbreakhealer.feature.journal.LetterUi
 import com.bqsqwad.heartbreakhealer.feature.memories.MemoriesScreen
 import com.bqsqwad.heartbreakhealer.feature.memories.MemoryUi
 import com.bqsqwad.heartbreakhealer.feature.settings.TriggerUi
@@ -62,6 +64,7 @@ object Routes {
     const val ONBOARDING = "onboarding"
     const val DASHBOARD = "dashboard"
     const val JOURNAL = "journal"
+    const val LETTERS = "unsent_letters"
     const val SOS = "sos"
     const val NO_CONTACT = "no_contact"
     const val REBUILD = "rebuild"
@@ -91,6 +94,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
     val capsuleUnlock by dashboardViewModel.capsuleUnlock.collectAsState()
     val hearts by dashboardViewModel.hearts.collectAsState()
     val journalEntries by dashboardViewModel.journalEntries.collectAsState()
+    val unsentLetters by dashboardViewModel.unsentLetters.collectAsState()
     val bestNoContactDays by dashboardViewModel.bestNoContactDays.collectAsState()
     val noContactDays by dashboardViewModel.noContactDays.collectAsState()
     val selfCareCompleted by dashboardViewModel.selfCareCompleted.collectAsState()
@@ -122,6 +126,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                 noContactDays = noContactDays,
                 onSos = { navController.navigate(Routes.SOS) },
                 onJournal = { navController.navigate(Routes.JOURNAL) },
+                onLetters = { navController.navigate(Routes.LETTERS) },
                 onNoContact = { navController.navigate(Routes.NO_CONTACT) },
                 onSelfCare = { navController.navigate(Routes.SELF_CARE) },
                 onRebuild = { navController.navigate(Routes.REBUILD) },
@@ -152,6 +157,14 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
             JournalScreen(
                 entries = journalEntries.map { JournalUiEntry(it.id, it.date, it.mood, it.content) },
                 onSaveEntry = dashboardViewModel::saveJournalEntry,
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Routes.LETTERS) {
+            UnsentLettersScreen(
+                letters = unsentLetters.map { LetterUi(it.id, it.content, it.status) },
+                onSave = dashboardViewModel::saveUnsentLetter,
+                onRelease = dashboardViewModel::releaseUnsentLetter,
                 onBack = { navController.popBackStack() }
             )
         }
@@ -275,6 +288,7 @@ private fun DashboardScreen(
     noContactDays: Int,
     onSos: () -> Unit,
     onJournal: () -> Unit,
+    onLetters: () -> Unit,
     onNoContact: () -> Unit,
     onSelfCare: () -> Unit,
     onRebuild: () -> Unit,
