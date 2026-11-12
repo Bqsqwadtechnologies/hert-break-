@@ -50,7 +50,6 @@ object AdPlacementMap {
     /** Suggested next placements; create only after owner approval and separate AdMob IDs. */
     val PROPOSED_PLACEMENTS = listOf(
         "A single native card at the end of the Healing Tools overview, outside SOS and crisis content",
-        "A single native card at the end of the completed-program catalogue, away from completion controls",
-        "A single banner at the bottom of the Memories overview only if the screen is informational and not emotionally sensitive"
+        "A single native card at the end of the completed-program catalogue, away from completion controls"
     )
 }
