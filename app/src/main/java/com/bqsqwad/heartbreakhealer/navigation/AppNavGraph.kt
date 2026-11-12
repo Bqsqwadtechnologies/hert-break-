@@ -8,6 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -155,42 +158,124 @@ private fun DashboardScreen(
     onGriefContact: () -> Unit,
     onCheckIn: (Int, String) -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Healing Dashboard", style = MaterialTheme.typography.headlineMedium)
-        Spacer(Modifier.height(12.dp))
-        HeartMeter(progress = 0.35f, label = "Day 12")
-        Spacer(Modifier.height(8.dp))
-        StageTrackerCard(stage = HealingStage.HURT, days = 12)
-        Spacer(Modifier.height(8.dp))
-        UrgePassedCard(count = 0, onLogged = { })
-        Spacer(Modifier.height(8.dp))
-        Text("Hearts: 50", color = MaterialTheme.colorScheme.tertiary)
-        Spacer(Modifier.height(16.dp))
-        DailyCheckIn(onSubmit = onCheckIn)
-        Spacer(Modifier.height(16.dp))
-        Button(onClick = onSos, modifier = Modifier.fillMaxWidth()) { Text("Urge SOS") }
-        Spacer(Modifier.height(8.dp))
-        OutlinedButton(onClick = onCoping, modifier = Modifier.fillMaxWidth()) { Text("Coping cards") }
-        OutlinedButton(onClick = onGriefContact, modifier = Modifier.fillMaxWidth()) { Text("Lonely or missing them?") }
-        OutlinedButton(onClick = onBoundaries, modifier = Modifier.fillMaxWidth()) { Text("Boundary scripts") }
-        OutlinedButton(onClick = onCapsule, modifier = Modifier.fillMaxWidth()) { Text("Letter to future you") }
-        OutlinedButton(onClick = onEvening, modifier = Modifier.fillMaxWidth()) { Text("Close the day") }
-        OutlinedButton(onClick = onWins, modifier = Modifier.fillMaxWidth()) { Text("Small wins") }
-        OutlinedButton(onClick = onJournal, modifier = Modifier.fillMaxWidth()) { Text("Journal") }
-        OutlinedButton(onClick = onNoContact, modifier = Modifier.fillMaxWidth()) { Text("No-Contact") }
-        OutlinedButton(onClick = onSelfCare, modifier = Modifier.fillMaxWidth()) { Text("Self-Care") }
-        OutlinedButton(onClick = onRebuild, modifier = Modifier.fillMaxWidth()) { Text("30-Day Rebuild") }
-        OutlinedButton(onClick = onAffirmations, modifier = Modifier.fillMaxWidth()) { Text("Affirmations") }
-        OutlinedButton(onClick = onHeartsShop, modifier = Modifier.fillMaxWidth()) { Text("Hearts Shop") }
-        OutlinedButton(onClick = onMemories, modifier = Modifier.fillMaxWidth()) { Text("Memories Box") }
-        OutlinedButton(onClick = onTriggers, modifier = Modifier.fillMaxWidth()) { Text("Triggers") }
-        TextButton(onClick = onSettings) { Text("Settings") }
+    val ink = androidx.compose.ui.graphics.Color(0xFF17172A)
+    val muted = androidx.compose.ui.graphics.Color(0xFF666477)
+    val blush = androidx.compose.ui.graphics.Color(0xFFFFF0F3)
+    Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 18.dp, vertical = 14.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    com.bqsqwad.heartbreakhealer.core.ui.components.HeartbreakHealerLogo(Modifier.size(46.dp))
+                    Spacer(Modifier.width(10.dp))
+                    Column {
+                        Text("Heartbreak", style = MaterialTheme.typography.titleLarge, color = ink, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                        Text("HEALER", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold, letterSpacing = 2.sp)
+                    }
+                }
+                TextButton(onClick = onSettings) { Text("⚙ Settings", color = ink) }
+            }
+            Spacer(Modifier.height(18.dp))
+            Card(colors = CardDefaults.cardColors(containerColor = blush), shape = RoundedCornerShape(22.dp), modifier = Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(18.dp)) {
+                    Text("You are not alone ❤️", style = MaterialTheme.typography.titleLarge, color = ink, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                    Spacer(Modifier.height(4.dp))
+                    Text("You are stronger than your pain. Take today one gentle step at a time.", color = muted)
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+            Card(shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(2.dp), modifier = Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(18.dp)) {
+                    Text("Your healing progress", style = MaterialTheme.typography.titleMedium, color = ink, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                    Spacer(Modifier.height(12.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(92.dp)) {
+                            CircularProgressIndicator(progress = { 0.72f }, modifier = Modifier.fillMaxSize(), strokeWidth = 9.dp, color = MaterialTheme.colorScheme.primary, trackColor = blush)
+                            Text("72%", color = ink, style = MaterialTheme.typography.titleLarge, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                        }
+                        Spacer(Modifier.width(16.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text("Keep going!", color = ink, style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                            Text("Every small step counts.", color = muted)
+                            Text("Day 12 of your journey", color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.labelMedium)
+                        }
+                    }
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+            Button(onClick = onSos, modifier = Modifier.fillMaxWidth().height(58.dp), shape = RoundedCornerShape(18.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE51D3E))) {
+                Text("⚡  URGE SOS   •   Get help now", fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+            }
+            Spacer(Modifier.height(18.dp))
+            Text("Quick access", style = MaterialTheme.typography.titleLarge, color = ink, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+            Spacer(Modifier.height(10.dp))
+            @Composable fun FeatureTile(emoji: String, title: String, action: () -> Unit) {
+                Card(onClick = action, modifier = Modifier.weight(1f), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = blush)) {
+                    Column(Modifier.fillMaxWidth().padding(vertical = 16.dp, horizontal = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(emoji, style = MaterialTheme.typography.headlineMedium)
+                        Spacer(Modifier.height(5.dp))
+                        Text(title, color = ink, style = MaterialTheme.typography.labelLarge, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
+                    }
+                }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                FeatureTile("📓", "Journal", onJournal)
+                FeatureTile("🌷", "Self-Care", onSelfCare)
+                FeatureTile("🖼️", "Memories", onMemories)
+            }
+            Spacer(Modifier.height(10.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                FeatureTile("✨", "Affirmations", onAffirmations)
+                FeatureTile("🧭", "Triggers", onTriggers)
+                FeatureTile("🛍️", "Hearts Shop", onHeartsShop)
+            }
+            Spacer(Modifier.height(18.dp))
+            Text("Your healing toolkit", style = MaterialTheme.typography.titleLarge, color = ink, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+            Spacer(Modifier.height(8.dp))
+            listOf(
+                "No-Contact" to onNoContact,
+                "30-Day Rebuild" to onRebuild,
+                "Coping Cards" to onCoping,
+                "Boundary Scripts" to onBoundaries,
+                "Letter to Future You" to onCapsule,
+                "Small Wins" to onWins,
+                "Evening Wind-Down" to onEvening,
+                "Lonely or Missing Them?" to onGriefContact
+            ).forEach { (label, action) ->
+                Card(onClick = action, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), shape = RoundedCornerShape(15.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F8FC))) {
+                    Row(Modifier.fillMaxWidth().padding(15.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Text(label, color = ink, style = MaterialTheme.typography.bodyLarge, fontWeight = androidx.compose.ui.text.font.FontWeight.Medium)
+                        Text("›", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.headlineMedium)
+                    }
+                }
+            }
+            Spacer(Modifier.height(14.dp))
+            DailyCheckIn(onSubmit = onCheckIn)
+            Spacer(Modifier.height(18.dp))
+            Text("A little support helps us keep this app free", color = muted, style = MaterialTheme.typography.labelSmall)
+            Spacer(Modifier.height(6.dp))
+            com.bqsqwad.heartbreakhealer.core.ui.ads.BannerAdView(
+                unitId = com.bqsqwad.heartbreakhealer.core.common.ads.AdsConfig.BANNER_HOME
+            )
+            Spacer(Modifier.height(10.dp))
+        }
+        NavigationBar(containerColor = Color.White, tonalElevation = 8.dp) {
+            listOf("Home" to "⌂", "Progress" to "◔", "Library" to "▤", "Shop" to "♡", "Settings" to "⚙").forEachIndexed { index, item ->
+                NavigationBarItem(
+                    selected = index == 0,
+                    onClick = when (index) {
+                        3 -> onHeartsShop
+                        4 -> onSettings
+                        1 -> onWins
+                        2 -> onAffirmations
+                        else -> onSos
+                    },
+                    icon = { Text(item.second, style = MaterialTheme.typography.titleLarge) },
+                    label = { Text(item.first) }
+                )
+            }
+        }
     }
 }
 
