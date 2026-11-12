@@ -10,6 +10,11 @@ import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bqsqwad.heartbreakhealer.feature.dashboard.DashboardViewModel
 import android.app.Activity
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.compose.ui.platform.LocalContext
 import com.bqsqwad.heartbreakhealer.core.common.ads.AdManager
 import androidx.compose.ui.Alignment
@@ -174,7 +179,16 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                 reduceMotionEnabled = reduceMotion,
                 onNotificationsChanged = { enabled ->
                     dashboardViewModel.setDailyRemindersEnabled(enabled)
-                    activity?.let { host -> if (enabled) com.bqsqwad.heartbreakhealer.notifications.NotificationScheduler.scheduleDaily(host) else com.bqsqwad.heartbreakhealer.notifications.NotificationScheduler.cancel(host) }
+                    activity?.let { host ->
+                        if (enabled) {
+                            if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(host, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                                ActivityCompat.requestPermissions(host, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 7001)
+                            }
+                            com.bqsqwad.heartbreakhealer.notifications.NotificationScheduler.scheduleDaily(host)
+                        } else {
+                            com.bqsqwad.heartbreakhealer.notifications.NotificationScheduler.cancel(host)
+                        }
+                    }
                 },
                 onReduceMotionChanged = dashboardViewModel::setReduceMotion,
                 onClearData = dashboardViewModel::clearAll,
