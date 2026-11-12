@@ -60,6 +60,13 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
+    fun saveEveningReflection(gratitude: String, release: String, hope: String) {
+        viewModelScope.launch {
+            val content = listOf("Grateful: $gratitude", "Release: $release", "Hope: $hope").joinToString("\\n")
+            journalRepository.saveEntry(3, content)
+        }
+    }
+
     fun saveJournalEntry(mood: Int, content: String) {
         viewModelScope.launch {
             journalRepository.saveEntry(mood, content)
