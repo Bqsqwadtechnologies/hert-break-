@@ -18,13 +18,7 @@ class HeartsRepository @Inject constructor(
     suspend fun earnFromNoContactMilestone() = prefs.addHearts(10)
     suspend fun earnFromRewardedAd() = prefs.addHearts(15)
 
-    suspend fun spend(amount: Int): Boolean {
-        if (amount <= 0) return false
-        val current = prefs.heartsBalance.first()
-        if (current < amount) return false
-        prefs.setHearts(current - amount)
-        return true
-    }
+    suspend fun spend(amount: Int): Boolean = prefs.spendHearts(amount)
 
     suspend fun setBalance(value: Int) = prefs.setHearts(value)
 }
