@@ -93,6 +93,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
     val capsuleText by dashboardViewModel.capsuleText.collectAsState()
     val capsuleUnlock by dashboardViewModel.capsuleUnlock.collectAsState()
     val hearts by dashboardViewModel.hearts.collectAsState()
+    val urgePassedCount by dashboardViewModel.urgePassedCount.collectAsState()
     val journalEntries by dashboardViewModel.journalEntries.collectAsState()
     val unsentLetters by dashboardViewModel.unsentLetters.collectAsState()
     val bestNoContactDays by dashboardViewModel.bestNoContactDays.collectAsState()
@@ -136,6 +137,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                 onMemories = { navController.navigate(Routes.MEMORIES) },
                 onTriggers = { navController.navigate(Routes.TRIGGERS) },
                 onCoping = { navController.navigate(Routes.COPING) },
+                onLogUrge = dashboardViewModel::logUrgePassed,
                 onBoundaries = { navController.navigate(Routes.BOUNDARIES) },
                 onCapsule = { navController.navigate(Routes.CAPSULE) },
                 onWins = { navController.navigate(Routes.WINS) },
@@ -150,6 +152,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
         composable(Routes.SOS) {
             SosScreen(
                 onNavigateToSupport = { navController.navigate(Routes.SUPPORT) },
+                onUrgePassed = dashboardViewModel::logUrgePassed,
                 onClose = { navController.popBackStack() }
             )
         }
@@ -298,6 +301,7 @@ private fun DashboardScreen(
     onMemories: () -> Unit,
     onTriggers: () -> Unit,
     onCoping: () -> Unit,
+    onLogUrge: () -> Unit,
     onBoundaries: () -> Unit,
     onCapsule: () -> Unit,
     onWins: () -> Unit,
@@ -405,6 +409,8 @@ private fun DashboardScreen(
                 }
             }
             Spacer(Modifier.height(14.dp))
+            UrgePassedCard(count = urgePassedCount, onLogged = onLogUrge)
+            Spacer(Modifier.height(12.dp))
             DailyCheckIn(onSubmit = onCheckIn)
             Spacer(Modifier.height(18.dp))
             Text("A little support helps us keep this app free", color = muted, style = MaterialTheme.typography.labelSmall)
