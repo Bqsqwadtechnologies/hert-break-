@@ -32,7 +32,7 @@ fun AffirmationsScreen(onBack: () -> Unit = {}) {
         Text("Words to remind you of your strength", style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(8.dp))
         LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            itemsIndexed(AffirmationBank.all) { _, affirmation ->
+            itemsIndexed(AffirmationBank.all) { index, affirmation ->
                 Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
                     Text(affirmation, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(16.dp))
                 }
