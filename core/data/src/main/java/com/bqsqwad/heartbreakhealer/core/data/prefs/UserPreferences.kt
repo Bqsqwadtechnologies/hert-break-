@@ -29,6 +29,7 @@ class UserPreferences @Inject constructor(
     val noContactDays: Flow<Int> = ds.data.map { it[Keys.NC_DAYS] ?: 0 }
     val noContactBest: Flow<Int> = ds.data.map { it[Keys.NC_BEST] ?: 0 }
     val reduceMotion: Flow<Boolean> = ds.data.map { it[Keys.REDUCE_MOTION] ?: false }
+    val dailyRemindersEnabled: Flow<Boolean> = ds.data.map { it[Keys.DAILY_REMINDERS] ?: false }
     val isFirstLaunch: Flow<Boolean> = ds.data.map { it[Keys.FIRST_LAUNCH] ?: true }
     val ageConfirmed: Flow<Boolean> = ds.data.map { it[Keys.AGE_CONFIRMED] ?: false }
     val urgePassedCount: Flow<Int> = ds.data.map { it[Keys.URGE_PASSED] ?: 0 }
@@ -61,6 +62,10 @@ class UserPreferences @Inject constructor(
             it[Keys.NC_DAYS] = days.coerceAtLeast(0)
             it[Keys.NC_BEST] = best.coerceAtLeast(0)
         }
+    }
+
+    suspend fun setDailyRemindersEnabled(enabled: Boolean) {
+        ds.edit { it[Keys.DAILY_REMINDERS] = enabled }
     }
 
     suspend fun setReduceMotion(enabled: Boolean) {
@@ -101,6 +106,7 @@ class UserPreferences @Inject constructor(
         val NC_DAYS = intPreferencesKey("nc_days")
         val NC_BEST = intPreferencesKey("nc_best")
         val REDUCE_MOTION = booleanPreferencesKey("reduce_motion")
+        val DAILY_REMINDERS = booleanPreferencesKey("daily_reminders_enabled")
         val FIRST_LAUNCH = booleanPreferencesKey("first_launch")
         val AGE_CONFIRMED = booleanPreferencesKey("age_confirmed")
         val URGE_PASSED = intPreferencesKey("urge_passed")
