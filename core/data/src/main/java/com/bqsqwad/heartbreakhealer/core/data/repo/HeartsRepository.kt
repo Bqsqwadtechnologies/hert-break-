@@ -2,6 +2,7 @@ package com.bqsqwad.heartbreakhealer.core.data.repo
 
 import com.bqsqwad.heartbreakhealer.core.data.prefs.UserPreferences
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -18,15 +19,11 @@ class HeartsRepository @Inject constructor(
     suspend fun earnFromRewardedAd() = prefs.addHearts(15)
 
     suspend fun spend(amount: Int): Boolean {
-        var ok = false
-        prefs.heartsBalance.collect { current ->
-            if (current >= amount) {
-                prefs.setHearts(current - amount)
-                ok = true
-            }
-            return@collect
-        }
-        return ok
+        if (amount <= 0) return false
+        val current = prefs.heartsBalance.first()
+        if (current < amount) return false
+        prefs.setHearts(current - amount)
+        return true
     }
 
     suspend fun setBalance(value: Int) = prefs.setHearts(value)
