@@ -10,7 +10,6 @@ import com.bqsqwad.heartbreakhealer.core.data.db.AppDatabase
 import com.bqsqwad.heartbreakhealer.core.data.db.SelfCareCompletionEntity
 import com.bqsqwad.heartbreakhealer.core.data.db.RebuildProgressEntity
 import java.time.LocalDate
-import java.time.LocalDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
