@@ -22,10 +22,11 @@ fun SelfCareScreen(
         CareTask("friend", "Message a friend", false),
         CareTask("food", "Eat something nourishing", false)
     ),
+    completedTaskIds: Set<String> = emptySet(),
     onToggle: (String) -> Unit = {},
     onBack: () -> Unit = {}
 ) {
-    val taskState = remember { mutableStateListOf<CareTask>().apply { addAll(tasks) } }
+    val taskState = remember(tasks, completedTaskIds) { mutableStateListOf<CareTask>().apply { addAll(tasks.map { it.copy(done = it.id in completedTaskIds) }) } }
     Column(Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 12.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text("Self-Care", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
