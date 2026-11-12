@@ -77,6 +77,10 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
     val journalEntries by dashboardViewModel.journalEntries.collectAsState()
     val bestNoContactDays by dashboardViewModel.bestNoContactDays.collectAsState()
     val noContactDays by dashboardViewModel.noContactDays.collectAsState()
+    val selfCareCompleted by dashboardViewModel.selfCareCompleted.collectAsState()
+    val rebuildProgress by dashboardViewModel.rebuildProgress.collectAsState()
+    val reduceMotion by dashboardViewModel.reduceMotion.collectAsState()
+    val remindersEnabled by dashboardViewModel.dailyRemindersEnabled.collectAsState()
     val activity = LocalContext.current as? Activity
     NavHost(navController = navController, startDestination = Routes.ONBOARDING) {
         composable(Routes.ONBOARDING) {
@@ -132,13 +136,15 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
         }
         composable(Routes.SELF_CARE) {
             SelfCareScreen(
-                onToggle = { _ -> activity?.let { host -> adManager.showInterstitialIfAllowed(host) } },
+                completedTaskIds = selfCareCompleted.map { it.taskId }.toSet(),
+                onToggle = { taskId -> dashboardViewModel.completeSelfCare(taskId); activity?.let { host -> adManager.showInterstitialIfAllowed(host) } },
                 onBack = { navController.popBackStack() }
             )
         }
         composable(Routes.REBUILD) {
             RebuildScreen(
-                onCompleteDay = { _ -> activity?.let { host -> adManager.showInterstitialIfAllowed(host) } },
+                completedDays = rebuildProgress.filter { it.completed }.map { it.day }.toSet(),
+                onCompleteDay = { day -> dashboardViewModel.completeRebuildDay(day); activity?.let { host -> adManager.showInterstitialIfAllowed(host) } },
                 onBack = { navController.popBackStack() }
             )
         }
@@ -157,6 +163,13 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
         composable(Routes.SETTINGS) {
             SettingsScreen(
                 onNavigateToSupport = { navController.navigate(Routes.SUPPORT) },
+                notificationsEnabled = remindersEnabled,
+                reduceMotionEnabled = reduceMotion,
+                onNotificationsChanged = { enabled ->
+                    dashboardViewModel.setDailyRemindersEnabled(enabled)
+                    activity?.let { host -> if (enabled) com.bqsqwad.heartbreakhealer.notifications.NotificationScheduler.scheduleDaily(host) else com.bqsqwad.heartbreakhealer.notifications.NotificationScheduler.cancel(host) }
+                },
+                onReduceMotionChanged = dashboardViewModel::setReduceMotion,
                 onClearData = dashboardViewModel::clearAll,
                 onBack = { navController.popBackStack()
                 }
