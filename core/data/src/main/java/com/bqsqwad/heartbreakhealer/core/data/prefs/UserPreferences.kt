@@ -33,6 +33,8 @@ class UserPreferences @Inject constructor(
     val isFirstLaunch: Flow<Boolean> = ds.data.map { it[Keys.FIRST_LAUNCH] ?: true }
     val ageConfirmed: Flow<Boolean> = ds.data.map { it[Keys.AGE_CONFIRMED] ?: false }
     val urgePassedCount: Flow<Int> = ds.data.map { it[Keys.URGE_PASSED] ?: 0 }
+    val savedMemories: Flow<Set<String>> = ds.data.map { it[Keys.MEMORIES] ?: emptySet() }
+    val savedTriggers: Flow<Set<String>> = ds.data.map { it[Keys.TRIGGERS] ?: emptySet() }
     val timeCapsuleText: Flow<String?> = ds.data.map { it[Keys.CAPSULE_TEXT] }
     val timeCapsuleUnlock: Flow<String?> = ds.data.map { it[Keys.CAPSULE_UNLOCK] }
     val breakupDayEpoch: Flow<Long?> = ds.data.map { it[Keys.BREAKUP_EPOCH] }
@@ -83,6 +85,20 @@ class UserPreferences @Inject constructor(
         }
     }
 
+    suspend fun addMemory(title: String, note: String) {
+        ds.edit { data ->
+            val current = data[Keys.MEMORIES] ?: emptySet()
+            data[Keys.MEMORIES] = current + "${title.replace("\\t", " ").replace("\\n", " ")}\\t${note.replace("\\t", " ").replace("\\n", " ")}"
+        }
+    }
+
+    suspend fun addTrigger(name: String, coping: String) {
+        ds.edit { data ->
+            val current = data[Keys.TRIGGERS] ?: emptySet()
+            data[Keys.TRIGGERS] = current + "${name.replace("\\t", " ").replace("\\n", " ")}\\t${coping.replace("\\t", " ").replace("\\n", " ")}"
+        }
+    }
+
     suspend fun setTimeCapsule(text: String, unlockDate: String) {
         ds.edit {
             it[Keys.CAPSULE_TEXT] = text
@@ -107,6 +123,8 @@ class UserPreferences @Inject constructor(
         val NC_BEST = intPreferencesKey("nc_best")
         val REDUCE_MOTION = booleanPreferencesKey("reduce_motion")
         val DAILY_REMINDERS = booleanPreferencesKey("daily_reminders_enabled")
+        val MEMORIES = stringSetPreferencesKey("saved_memories")
+        val TRIGGERS = stringSetPreferencesKey("saved_triggers")
         val FIRST_LAUNCH = booleanPreferencesKey("first_launch")
         val AGE_CONFIRMED = booleanPreferencesKey("age_confirmed")
         val URGE_PASSED = intPreferencesKey("urge_passed")
