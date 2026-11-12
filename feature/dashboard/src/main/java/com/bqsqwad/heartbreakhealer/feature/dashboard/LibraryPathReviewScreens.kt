@@ -126,8 +126,8 @@ fun WeeklyReviewScreen(
             NativeAdCard(unitId = AdsConfig.NATIVE_WEEKLY_REVIEW, enabled = true)
         }
         Spacer(Modifier.height(24.dp))
-        TextButton(onClick = onBack) { Text("Back") }
+        TextButton(onClick = onBack) { Text("Finish review") }
         Spacer(Modifier.weight(1f))
-        // Weekly Review now uses its dedicated native unit above; no duplicate banner here.
+        // Weekly Review uses its dedicated native unit above; no duplicate banner here.
     }
 }
