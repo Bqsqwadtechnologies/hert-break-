@@ -7,6 +7,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bqsqwad.heartbreakhealer.feature.dashboard.DashboardViewModel
 import android.app.Activity
@@ -84,6 +86,7 @@ object Routes {
 @Composable
 fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
     val dashboardViewModel: DashboardViewModel = hiltViewModel()
+    val onboardingComplete by dashboardViewModel.onboardingComplete.collectAsState()
     val capsuleText by dashboardViewModel.capsuleText.collectAsState()
     val capsuleUnlock by dashboardViewModel.capsuleUnlock.collectAsState()
     val hearts by dashboardViewModel.hearts.collectAsState()
@@ -98,9 +101,16 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
     val savedTriggers by dashboardViewModel.triggers.collectAsState()
     val activity = LocalContext.current as? Activity
     val adsAllowed by adManager.adsAllowed.collectAsState()
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    LaunchedEffect(onboardingComplete, backStackEntry?.destination?.route) {
+        if (onboardingComplete && backStackEntry?.destination?.route == Routes.ONBOARDING) {
+            navController.navigate(Routes.DASHBOARD) { popUpTo(Routes.ONBOARDING) { inclusive = true } }
+        }
+    }
     NavHost(navController = navController, startDestination = Routes.ONBOARDING) {
         composable(Routes.ONBOARDING) {
-            OnboardingScreen(onComplete = { _, _, _ ->
+            OnboardingScreen(onComplete = { nickname, breakupDate, goals ->
+                dashboardViewModel.completeOnboarding(nickname, breakupDate, goals)
                 navController.navigate(Routes.DASHBOARD) {
                     popUpTo(Routes.ONBOARDING) { inclusive = true }
                 }
