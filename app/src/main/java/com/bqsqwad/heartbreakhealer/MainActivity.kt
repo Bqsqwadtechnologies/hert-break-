@@ -40,8 +40,9 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var consentHelper: ConsentHelper
     @Inject lateinit var adManager: AdManager
     override fun onCreate(savedInstanceState: Bundle?) {
-        val splashScreen = installSplashScreen()
+        installSplashScreen()
         super.onCreate(savedInstanceState)
+        val pendingCrashReport = CrashReportStore.read(this)
         enableEdgeToEdge()
         consentHelper.requestConsent(this) { canShowAds ->
             adManager.onConsentResolved(this, canShowAds)
