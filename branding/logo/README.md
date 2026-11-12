@@ -1,22 +1,20 @@
-# Branding / Logo – Heartbreak Healer
+# Heartbreak Healer — Official Brand Assets
 
-## Official logo (user-provided)
-- `logo.png` / `logo_1024.png` – glossy red healed heart (transparent background)
-- `logo_mono.png` – single-color silhouette for monochrome adaptive icon & notification small icon
+The two uploaded files in this folder are the only approved logo masters:
 
-This healed heart is the **app icon**, **notification icon**, and **system splash icon**.
+- `logo.png` — official full-colour healed-heart logo.
+- `logo_mono.png` — official monochrome artwork for Android notification and themed-icon use.
 
-The earlier blue glowing heart (if present) is superseded by this red healed heart per user request (1 Nov 2026).
+## Where they are used
 
-## Automatic generation (to be completed)
-A Gradle task + GitHub Action will generate from `logo.png`:
-- Adaptive launcher (foreground + background + themed monochrome)
-- Legacy mipmaps
-- Notification small icon (white silhouette)
-- Splash icon (healed heart)
-- 512 px Play Store icon
+- Animated Compose splash screen: `logo.png` through the shared `HeartbreakHealerLogo` component.
+- Dashboard and any other in-app logo using that component: `logo.png`.
+- Android system splash icon: `logo.png`.
+- Adaptive launcher icon and round launcher icon: `logo.png`, with `logo_mono.png` for Android themed icons.
+- Notification small icon (top-left status area): `logo_mono.png`.
 
-Until generated resources exist, the app uses placeholders that point to the healed heart assets.
+## Build integration
 
-## Splash stages
-See `/branding/splash/` for the broken → cracked → healed animation assets. Stage 3 now uses this same healed heart.
+Gradle generates Android resources directly from these files. The splash animation, timing, sparkles, and movement are unchanged. Do not embed another copy of the logo in Kotlin source or replace these assets with approximations.
+
+To update the branding later, replace these two files while keeping their filenames.
