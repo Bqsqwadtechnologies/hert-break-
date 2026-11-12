@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.bqsqwad.heartbreakhealer.core.common.ads.AdsConfig
 import com.bqsqwad.heartbreakhealer.core.ui.ads.BannerAdView
+import com.bqsqwad.heartbreakhealer.core.ui.ads.NativeAdCard
 
 data class LibraryArticle(val id: String, val title: String, val body: String)
 
@@ -24,7 +25,7 @@ private val libraryArticles = listOf(
 )
 
 @Composable
-fun HealingLibraryScreen(onBack: () -> Unit) {
+fun HealingLibraryScreen(onBack: () -> Unit, adsAllowed: Boolean = false) {
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.weight(1f).padding(16.dp),
@@ -37,8 +38,7 @@ fun HealingLibraryScreen(onBack: () -> Unit) {
             }
             itemsIndexed(libraryArticles) { index, article ->
                 if (index > 0 && index % 6 == 0) {
-                    // Native slot every ~6 items — wire NativeAd when ready
-                    Text("Ad", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                    NativeAdCard(unitId = AdsConfig.NATIVE_LIBRARY, enabled = adsAllowed)
                 }
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(16.dp)) {
@@ -50,7 +50,7 @@ fun HealingLibraryScreen(onBack: () -> Unit) {
             }
             item { TextButton(onClick = onBack) { Text("Back") } }
         }
-        BannerAdView(unitId = AdsConfig.BANNER_LIBRARY)
+        BannerAdView(unitId = AdsConfig.BANNER_LIBRARY, enabled = adsAllowed)
     }
 }
 
@@ -60,7 +60,8 @@ data class PathDay(val day: Int, val title: String, val done: Boolean)
 fun HealingPathScreen(
     days: List<PathDay> = (1..14).map { PathDay(it, "Day $it — one small act of care", false) },
     onCompleteDay: (Int) -> Unit = {},
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    adsAllowed: Boolean = false
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -74,7 +75,7 @@ fun HealingPathScreen(
             }
             itemsIndexed(days) { index, d ->
                 if (index > 0 && index % 6 == 0) {
-                    Text("Ad", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                    NativeAdCard(unitId = AdsConfig.NATIVE_PATHS, enabled = adsAllowed)
                 }
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Row(
@@ -92,7 +93,7 @@ fun HealingPathScreen(
             }
             item { TextButton(onClick = onBack) { Text("Back") } }
         }
-        BannerAdView(unitId = AdsConfig.BANNER_PATHS)
+        BannerAdView(unitId = AdsConfig.BANNER_PATHS, enabled = adsAllowed)
     }
 }
 
@@ -101,7 +102,8 @@ fun WeeklyReviewScreen(
     checkIns: Int = 0,
     urgesRodeOut: Int = 0,
     noContactDays: Int = 0,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    adsAllowed: Boolean = false
 ) {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Text("This week", style = MaterialTheme.typography.headlineMedium)
@@ -122,6 +124,6 @@ fun WeeklyReviewScreen(
         Spacer(Modifier.height(24.dp))
         TextButton(onClick = onBack) { Text("Back") }
         Spacer(Modifier.weight(1f))
-        BannerAdView(unitId = AdsConfig.BANNER_LIST)
+        BannerAdView(unitId = AdsConfig.BANNER_LIST, enabled = adsAllowed)
     }
 }
