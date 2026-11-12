@@ -10,7 +10,6 @@ import com.bqsqwad.heartbreakhealer.core.data.db.AppDatabase
 import java.time.LocalDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -62,7 +61,7 @@ class DashboardViewModel @Inject constructor(
 
     fun saveEveningReflection(gratitude: String, release: String, hope: String) {
         viewModelScope.launch {
-            val content = listOf("Grateful: $gratitude", "Release: $release", "Hope: $hope").joinToString("\\n")
+            val content = listOf("Grateful: $gratitude", "Release: $release", "Hope: $hope").joinToString("\n")
             journalRepository.saveEntry(3, content)
         }
     }
