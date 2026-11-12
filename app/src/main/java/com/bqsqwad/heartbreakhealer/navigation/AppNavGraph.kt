@@ -130,8 +130,18 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                 onBack = { navController.popBackStack() }
             )
         }
-        composable(Routes.SELF_CARE) { SelfCareScreen(onBack = { navController.popBackStack() }) }
-        composable(Routes.REBUILD) { RebuildScreen(onBack = { navController.popBackStack() }) }
+        composable(Routes.SELF_CARE) {
+            SelfCareScreen(
+                onToggle = { _ -> activity?.let { host -> adManager.showInterstitialIfAllowed(host) } },
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Routes.REBUILD) {
+            RebuildScreen(
+                onCompleteDay = { _ -> activity?.let { host -> adManager.showInterstitialIfAllowed(host) } },
+                onBack = { navController.popBackStack() }
+            )
+        }
         composable(Routes.AFFIRMATIONS) { AffirmationsScreen(onBack = { navController.popBackStack() }) }
         composable(Routes.HEARTS_SHOP) {
             HeartsShopScreen(
