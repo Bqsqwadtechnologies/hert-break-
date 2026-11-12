@@ -3,7 +3,6 @@ package com.bqsqwad.heartbreakhealer.ui.splash
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -27,9 +26,9 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -38,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.HapticFeedbackConstantsCompat
 import androidx.core.view.ViewCompat
-import com.bqsqwad.heartbreakhealer.R
 import kotlinx.coroutines.delay
 import kotlin.random.Random
 
@@ -141,16 +139,30 @@ fun AnimatedSplashScreen(
                     .semantics { contentDescription = "Heartbreak Healer logo, a healed heart" },
                 contentAlignment = Alignment.Center
             ) {
-                val res = when (phase) {
-                    0 -> R.drawable.heart_stage1
-                    1 -> R.drawable.heart_stage2
-                    else -> R.drawable.heart_stage3
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .semantics { contentDescription = "Animated healed heart" }
+                ) {
+                    val heart = Path().apply {
+                        moveTo(size.width * 0.5f, size.height * 0.88f)
+                        cubicTo(size.width * 0.40f, size.height * 0.78f, size.width * 0.08f, size.height * 0.56f, size.width * 0.08f, size.height * 0.32f)
+                        cubicTo(size.width * 0.08f, size.height * 0.08f, size.width * 0.38f, size.height * 0.02f, size.width * 0.5f, size.height * 0.25f)
+                        cubicTo(size.width * 0.62f, size.height * 0.02f, size.width * 0.92f, size.height * 0.08f, size.width * 0.92f, size.height * 0.32f)
+                        cubicTo(size.width * 0.92f, size.height * 0.56f, size.width * 0.60f, size.height * 0.78f, size.width * 0.5f, size.height * 0.88f)
+                        close()
+                    }
+                    val heartBrush = when (phase) {
+                        0 -> Brush.linearGradient(listOf(Color(0xFFFF8A9B), Color(0xFFE85D75)))
+                        1 -> Brush.linearGradient(listOf(Color(0xFFFF9EAC), Color(0xFFEC6680)))
+                        else -> Brush.linearGradient(listOf(Color(0xFFFFB3C1), Color(0xFFE84A70)))
+                    }
+                    drawPath(heart, brush = heartBrush)
+                    if (phase == 0) {
+                        drawLine(Color.White.copy(alpha = 0.9f), Offset(size.width * 0.53f, size.height * 0.27f), Offset(size.width * 0.43f, size.height * 0.48f), strokeWidth = 5.dp.toPx())
+                        drawLine(Color.White.copy(alpha = 0.9f), Offset(size.width * 0.43f, size.height * 0.48f), Offset(size.width * 0.55f, size.height * 0.57f), strokeWidth = 5.dp.toPx())
+                    }
                 }
-                Image(
-                    painter = painterResource(res),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize()
-                )
                 if (phase >= 2 && !reduceMotion && sparkleProgress.value > 0f) {
                     SparkleCanvas(progress = sparkleProgress.value)
                 }
