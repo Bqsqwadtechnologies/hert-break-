@@ -12,6 +12,7 @@ object AdsConfig {
     private const val TEST_NATIVE = "ca-app-pub-3940256099942544/2247696110"
     private const val TEST_INTERSTITIAL = "ca-app-pub-3940256099942544/1033173712"
     private const val TEST_REWARDED = "ca-app-pub-3940256099942544/5224354917"
+    private const val TEST_APP_OPEN = "ca-app-pub-3940256099942544/9257395921"
 
     private fun unit(test: String, production: String): String =
         if (BuildConfig.DEBUG) test else production
@@ -40,10 +41,11 @@ object AdsConfig {
     val REWARDED_SHOP_EXTRA get() = unit(TEST_REWARDED, "ca-app-pub-2748789567113929/4144645513")
 
     // App-open inventory is reserved; no app-open format is currently shown.
-    const val APP_OPEN = "ca-app-pub-2748789567113929/7628594951"
+    val APP_OPEN get() = unit(TEST_APP_OPEN, "ca-app-pub-2748789567113929/7628594951")
 
     // Conservative full-screen frequency caps.
     const val INTERSTITIAL_MIN_INTERVAL_MS = 3 * 60 * 1000L
     const val INTERSTITIAL_MAX_PER_SESSION = 3
-    const val APP_OPEN_MIN_BACKGROUND_MS = 4 * 60 * 60 * 1000L
+    const val APP_OPEN_MIN_BACKGROUND_MS = 30 * 60 * 1000L
+    const val APP_OPEN_MAX_AD_AGE_MS = 4 * 60 * 60 * 1000L
 }
