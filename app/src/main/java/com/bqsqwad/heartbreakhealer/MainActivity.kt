@@ -39,6 +39,16 @@ import com.bqsqwad.heartbreakhealer.core.common.ads.ConsentHelper
 class MainActivity : ComponentActivity() {
     @Inject lateinit var consentHelper: ConsentHelper
     @Inject lateinit var adManager: AdManager
+    override fun onStart() {
+        super.onStart()
+        adManager.onAppForeground(this)
+    }
+
+    override fun onStop() {
+        adManager.onAppBackground()
+        super.onStop()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
