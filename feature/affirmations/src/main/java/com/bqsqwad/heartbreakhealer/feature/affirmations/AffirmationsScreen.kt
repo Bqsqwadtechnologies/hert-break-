@@ -13,7 +13,7 @@ import com.bqsqwad.heartbreakhealer.core.ui.ads.BannerAdView
 import com.bqsqwad.heartbreakhealer.core.ui.ads.NativeAdCard
 
 @Composable
-fun AffirmationsScreen(onBack: () -> Unit = {}) {
+fun AffirmationsScreen(onBack: () -> Unit = {}, adsAllowed: Boolean = false) {
     val today = AffirmationBank.today()
     Column(Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 12.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -36,10 +36,10 @@ fun AffirmationsScreen(onBack: () -> Unit = {}) {
                 Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
                     Text(affirmation, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(16.dp))
                 }
-                if ((index + 1) % 8 == 0) NativeAdCard(unitId = AdsConfig.NATIVE_AFFIRMATIONS)
+                if ((index + 1) % 8 == 0) NativeAdCard(unitId = AdsConfig.NATIVE_AFFIRMATIONS, enabled = adsAllowed)
             }
         }
         Text("Support this free healing space", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        BannerAdView(unitId = AdsConfig.BANNER_LIST)
+        BannerAdView(unitId = AdsConfig.BANNER_LIST, enabled = adsAllowed)
     }
 }
