@@ -1,50 +1,59 @@
 package com.bqsqwad.heartbreakhealer.core.common.ads
 
 /**
- * Exact ad placement rules for Heartbreak Healer.
+ * Current, code-backed ad placement inventory.
  *
- * NEVER show ads on:
- * - Onboarding
- * - Journal / Unsent letters
- * - Urge SOS (breathing, distraction, grounding, dont-text)
- * - No-contact slip flow
- * - Memories box
- * - Crisis / "Need more support?"
- * - Settings / legal / privacy
- * - Permission or error screens
+ * Ads are intentionally excluded from onboarding, Journal/Unsent Letters,
+ * Urge SOS, No-Contact, Memories, crisis/support, Settings, permissions and errors.
  */
 object AdPlacementMap {
-
     val BANNER_SCREENS = listOf(
-        "Dashboard (home)",
-        "Self-care planner list",
-        "30-day rebuild program list",
-        "Affirmations list"
+        "Dashboard home — bottom of scroll content",
+        "Self-Care — bottom of task list",
+        "30-Day Rebuild — bottom of challenge list",
+        "Affirmations — bottom of list",
+        "Healing Library — bottom of article list",
+        "14-Day Healing Path — bottom of path list",
+        "Weekly Review — bottom of summary"
     )
 
     val NATIVE_SCREENS = listOf(
-        "Affirmations list (every 8th item)",
-        "Rebuild program list (every 8th item)"
+        "Affirmations — after every 8 affirmations",
+        "30-Day Rebuild — after every 8 challenges",
+        "Healing Library — after every 6 articles",
+        "14-Day Healing Path — after every 6 days"
     )
 
     val INTERSTITIAL_TRIGGERS = listOf(
-        "After completing a self-care task",
-        "After completing a daily rebuild challenge"
+        "After completing a Self-Care task",
+        "After completing a 30-Day Rebuild challenge",
+        "After completing a 14-Day Healing Path day"
     )
 
     val REWARDED_TRIGGERS = listOf(
-        "Hearts Shop – Watch a short video to earn hearts",
-        "Top-bar hearts balance – optional Watch to earn"
+        "Hearts Shop — user-initiated reward video for bonus hearts"
     )
 
-    val APP_OPEN_RULE = "Only on return from background ≥ 4 hours, once per session, never first launch"
-
-    /** Recommended names to create in AdMob console */
-    val RECOMMENDED_UNIT_NAMES = mapOf(
-        "Banner" to listOf("hh_banner_home", "hh_banner_lists"),
-        "Native" to listOf("hh_native_affirmations", "hh_native_rebuild"),
-        "Interstitial" to listOf("hh_interstitial_task_complete"),
-        "Rewarded" to listOf("hh_rewarded_hearts"),
-        "App Open" to listOf("hh_app_open")
+    val NEVER_SHOW_ADS = listOf(
+        "Onboarding",
+        "Journal and Unsent Letters",
+        "Urge SOS and coping flows",
+        "No-Contact and slip recovery",
+        "Memories",
+        "Support / crisis information",
+        "Settings, privacy and legal screens",
+        "Permission, loading and error screens"
     )
+
+    const val INTERSTITIAL_MIN_INTERVAL_MS = 3 * 60 * 1000L
+    const val INTERSTITIAL_MAX_PER_SESSION = 3
+
+    /** Optional inventory to create only after the owner approves additional placements. */
+    val PROPOSED_PLACEMENTS = listOf(
+        "A single native card near the end of the Weekly Review (not inside progress metrics)",
+        "One optional native card at the end of the Hearts Shop, visually separated from purchase and reward controls"
+    )
+
+    /** App-open ads are not currently implemented or shown. */
+    const val APP_OPEN_STATUS = "Reserved only; not active"
 }
