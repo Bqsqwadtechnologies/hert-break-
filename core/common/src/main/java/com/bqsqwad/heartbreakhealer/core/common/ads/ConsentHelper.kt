@@ -23,7 +23,7 @@ class ConsentHelper @Inject constructor() {
         onComplete: (canShowAds: Boolean) -> Unit
     ) {
         val params = ConsentRequestParameters.Builder()
-            .setTagForUnderAgeOfConsent(false)
+            .setTagForUnderAgeOfConsent(true)
             .build()
         val consentInfo = UserMessagingPlatform.getConsentInformation(activity)
         consentInformation = consentInfo
@@ -41,7 +41,7 @@ class ConsentHelper @Inject constructor() {
             },
             { error ->
                 Log.w(TAG, "Consent info update failed: ${error.message}")
-                onComplete(true) // fail-open for non-EEA / error
+                onComplete(consentInfo.canRequestAds())
             }
         )
     }
