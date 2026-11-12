@@ -83,7 +83,7 @@ class AdManager @Inject constructor() {
     }
 
     fun loadRewarded(context: Context) {
-        if (!adsEnabled) return
+        if (!consentResolved || !adsEnabled) return
         val request = AdRequest.Builder().build()
         RewardedAd.load(context, AdsConfig.REWARDED_HEARTS, request, object : RewardedAdLoadCallback() {
             override fun onAdLoaded(ad: RewardedAd) { rewarded = ad }
