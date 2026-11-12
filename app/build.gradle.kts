@@ -53,6 +53,27 @@ kotlin {
     }
 }
 
+
+val generateOfficialLogoResources by tasks.registering {
+    val logoSource = rootProject.file("core/ui/src/main/java/com/bqsqwad/heartbreakhealer/core/ui/components/HeartbreakHealerLogo.kt")
+    val generatedRes = layout.buildDirectory.dir("generated/res/officialLogo")
+    inputs.file(logoSource)
+    outputs.dir(generatedRes)
+    doLast {
+        val source = logoSource.readText()
+        val encoded = Regex("""private const val OFFICIAL_LOGO_WEBP = "([^"]+)"""")
+            .find(source)?.groupValues?.get(1)
+            ?: error("Official embedded Heartbreak Healer logo was not found.")
+        val imageBytes = java.util.Base64.getDecoder().decode(encoded)
+        val imageFile = generatedRes.get().file("drawable-nodpi/official_healed_heart.webp").asFile
+        imageFile.parentFile.mkdirs()
+        imageFile.writeBytes(imageBytes)
+    }
+}
+
+android.sourceSets.getByName("main").res.srcDir(layout.buildDirectory.dir("generated/res/officialLogo"))
+tasks.named("preBuild").configure { dependsOn(generateOfficialLogoResources) }
+
 dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:ui"))
