@@ -47,6 +47,7 @@ import com.bqsqwad.heartbreakhealer.feature.dashboard.SmallWinsScreen
 import com.bqsqwad.heartbreakhealer.feature.dashboard.StageTrackerCard
 import com.bqsqwad.heartbreakhealer.feature.dashboard.TimeCapsuleScreen
 import com.bqsqwad.heartbreakhealer.feature.dashboard.UrgePassedCard
+import com.bqsqwad.heartbreakhealer.feature.entertainment.EntertainmentScreen
 import com.bqsqwad.heartbreakhealer.feature.heartsshop.HeartsShopScreen
 import com.bqsqwad.heartbreakhealer.feature.journal.JournalScreen
 import com.bqsqwad.heartbreakhealer.feature.journal.JournalUiEntry
@@ -88,6 +89,7 @@ object Routes {
     const val LIBRARY = "library"
     const val PATH = "path"
     const val WEEKLY = "weekly"
+    const val ENTERTAINMENT = "entertainment"
 }
 
 @Composable
@@ -111,6 +113,8 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
     val completedPathDays by dashboardViewModel.completedPathDays.collectAsState()
     val rebuildCompletedDays by dashboardViewModel.rebuildCompletedDays.collectAsState()
     val lastJourneyCompletionDate by dashboardViewModel.lastJourneyCompletionDate.collectAsState()
+    val viewedStoryIds by dashboardViewModel.viewedStoryIds.collectAsState()
+    val seenJokeIds by dashboardViewModel.seenJokeIds.collectAsState()
     // Both guided journeys share a single daily completion lock in DataStore.
     val activity = LocalContext.current as? Activity
     val adsAllowed by adManager.adsAllowed.collectAsState()
@@ -163,7 +167,8 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                 Routes.HEARTS_SHOP,
                 Routes.LIBRARY,
                 Routes.PATH,
-                Routes.WEEKLY
+                Routes.WEEKLY,
+                Routes.ENTERTAINMENT
             )
         )
     }
@@ -203,6 +208,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                 onLibrary = { openFeature(Routes.LIBRARY) },
                 onPath = { openFeature(Routes.PATH) },
                 onWeekly = { openFeature(Routes.WEEKLY) },
+                onEntertainment = { openFeature(Routes.ENTERTAINMENT) },
                 onCheckIn = dashboardViewModel::onCheckIn
             )
         }
@@ -456,6 +462,33 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
             )
         }
         composable(Routes.WEEKLY) { WeeklyReviewScreen(checkIns = journalEntries.count { runCatching { java.time.LocalDate.parse(it.date).isAfter(java.time.LocalDate.now().minusDays(7)) }.getOrDefault(false) }, urgesRodeOut = urgePassedCount, noContactDays = noContactDays, onBack = { if (activity != null) adManager.showInterstitialIfAllowed(activity, InterstitialPlacement.WEEKLY_REVIEW_EXIT) { navController.popBackStack() } else navController.popBackStack() }, adsAllowed = adsAllowed) }
+        composable(Routes.ENTERTAINMENT) {
+            EntertainmentScreen(
+                viewedStoryIds = viewedStoryIds,
+                seenJokeIds = seenJokeIds,
+                onMarkStoryViewed = dashboardViewModel::markStoryViewed,
+                onMarkJokeSeen = dashboardViewModel::markJokeSeen,
+                onUnlock = { kind, onUnlocked ->
+                    val host = activity
+                    if (host == null) {
+                        Toast.makeText(LocalContext.current, "A video ad is not available right now.", Toast.LENGTH_LONG).show()
+                    } else {
+                        val placement = if (kind == "joke") RewardedPlacement.JOKE_UNLOCK else RewardedPlacement.STORY_UNLOCK
+                        adManager.showRewarded(
+                            host,
+                            placement,
+                            onRewarded = onUnlocked,
+                            onDismissed = {},
+                            onUnavailable = {
+                                Toast.makeText(host, "A rewarded video isn't ready yet. Please try again shortly.", Toast.LENGTH_LONG).show()
+                            }
+                        )
+                    }
+                },
+                adsAllowed = adsAllowed,
+                onBack = { navController.popBackStack() }
+            )
+        }
     }
 }
 
@@ -486,6 +519,7 @@ private fun DashboardScreen(
     onLibrary: () -> Unit,
     onPath: () -> Unit,
     onWeekly: () -> Unit,
+    onEntertainment: () -> Unit,
     onCheckIn: (Int, String) -> Unit
 ) {
     val ink = androidx.compose.ui.graphics.Color(0xFF17172A)
@@ -576,7 +610,8 @@ private fun DashboardScreen(
                 "Lonely or Missing Them?" to onGriefContact,
                 "Healing Library" to onLibrary,
                 "14-Day Healing Path" to onPath,
-                "Weekly Review" to onWeekly
+                "Weekly Review" to onWeekly,
+                "Stories & Jokes" to onEntertainment
             ).forEach { (label, action) ->
                 Card(onClick = action, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), shape = RoundedCornerShape(15.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F8FC))) {
                     Row(Modifier.fillMaxWidth().padding(15.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
