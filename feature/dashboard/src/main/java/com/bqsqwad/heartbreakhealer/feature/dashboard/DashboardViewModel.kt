@@ -45,6 +45,10 @@ class DashboardViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     val rebuildProgress = database.rebuildDao().getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val rebuildCompletedDays = preferences.completedRebuildDays
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+    val lastJourneyCompletionDate = preferences.lastJourneyCompletionDate
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
     val urgePassedCount = preferences.urgePassedCount
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
     val reduceMotion = preferences.reduceMotion
@@ -106,6 +110,23 @@ class DashboardViewModel @Inject constructor(
             if (!database.rebuildDao().isCompleted(day)) {
                 database.rebuildDao().upsert(RebuildProgressEntity(day, true, System.currentTimeMillis()))
             }
+        }
+    }
+
+    fun completeJourneyDay(
+        journey: String,
+        day: Int,
+        alreadyCompletedDays: Set<Int>,
+        onResult: (Boolean) -> Unit
+    ) {
+        viewModelScope.launch {
+            val completed = preferences.tryCompleteJourneyDay(
+                journey = journey,
+                day = day,
+                alreadyCompletedDays = alreadyCompletedDays,
+                today = LocalDate.now().toString()
+            )
+            onResult(completed)
         }
     }
 
