@@ -111,6 +111,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
     val completedPathDays by dashboardViewModel.completedPathDays.collectAsState()
     val rebuildCompletedDays by dashboardViewModel.rebuildCompletedDays.collectAsState()
     val lastJourneyCompletionDate by dashboardViewModel.lastJourneyCompletionDate.collectAsState()
+    // Both guided journeys share a single daily completion lock in DataStore.
     val activity = LocalContext.current as? Activity
     val adsAllowed by adManager.adsAllowed.collectAsState()
     var pendingFeatureRoute by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
