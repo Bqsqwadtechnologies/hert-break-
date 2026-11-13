@@ -7,12 +7,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.bqsqwad.heartbreakhealer.core.common.ads.AdsConfig
+import com.bqsqwad.heartbreakhealer.core.ui.ads.BannerAdView
 
 @Composable
 fun NoContactScreen(
     currentDays: Int = 0,
     bestDays: Int = 0,
     onSlip: () -> Unit = {},
+    adsAllowed: Boolean = false,
     onBack: () -> Unit = {}
 ) {
     var showSlipDialog by remember { mutableStateOf(false) }
@@ -29,6 +32,8 @@ fun NoContactScreen(
         OutlinedButton(onClick = { showSlipDialog = true }) { Text("I slipped — restart gently") }
         Spacer(Modifier.height(16.dp))
         TextButton(onClick = onBack) { Text("Back") }
+        Spacer(Modifier.height(8.dp))
+        BannerAdView(unitId = AdsConfig.BANNER_LIBRARY, enabled = adsAllowed)
     }
     if (showSlipDialog) {
         AlertDialog(
