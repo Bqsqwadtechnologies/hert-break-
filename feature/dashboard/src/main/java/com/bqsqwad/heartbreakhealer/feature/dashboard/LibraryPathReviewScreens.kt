@@ -10,6 +10,8 @@ import androidx.compose.ui.unit.dp
 import com.bqsqwad.heartbreakhealer.core.common.ads.AdsConfig
 import com.bqsqwad.heartbreakhealer.core.ui.ads.BannerAdView
 import com.bqsqwad.heartbreakhealer.core.ui.ads.NativeAdCard
+import com.bqsqwad.heartbreakhealer.core.ui.components.JourneyRewardOfferDialog
+import com.bqsqwad.heartbreakhealer.core.ui.components.JourneySuccessDialog
 
 data class LibraryArticle(val id: String, val title: String, val body: String)
 
@@ -59,41 +61,97 @@ data class PathDay(val day: Int, val title: String, val done: Boolean)
 @Composable
 fun HealingPathScreen(
     days: List<PathDay> = (1..14).map { PathDay(it, "Day $it — one small act of care", false) },
-    onCompleteDay: (Int) -> Unit = {},
+    completedToday: Boolean = false,
+    onCompleteDay: (Int, (Boolean) -> Unit) -> Unit = { _, result -> result(false) },
+    onWatchRewarded: ((() -> Unit) -> Unit) = { finished -> finished() },
     onBack: () -> Unit,
     adsAllowed: Boolean = false
 ) {
+    var completedLocally by remember { mutableStateOf(emptySet<Int>()) }
+    var blockedToday by remember(completedToday) { mutableStateOf(completedToday) }
+    var showRewardOffer by remember { mutableStateOf(false) }
+    var showSuccess by remember { mutableStateOf(false) }
+    val completed = days.filter { it.done }.map { it.day }.toSet() + completedLocally
+    val nextDay = (1..14).firstOrNull { it !in completed } ?: 15
+
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.weight(1f).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             item {
-                Text("14-day path", style = MaterialTheme.typography.headlineMedium)
-                Text("One gentle focus per day.", style = MaterialTheme.typography.bodySmall)
+                Text("14-Day Healing Path", style = MaterialTheme.typography.headlineMedium)
+                Text("One gentle focus each day. Complete one step, then give yourself time to practise it.", style = MaterialTheme.typography.bodySmall)
+                if (blockedToday && nextDay <= 14) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        "Today's step is complete. Your next Healing Path task unlocks tomorrow.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
                 Spacer(Modifier.height(8.dp))
             }
             itemsIndexed(days) { index, d ->
                 if (index > 0 && index % 6 == 0) {
                     NativeAdCard(unitId = AdsConfig.NATIVE_PATHS, enabled = adsAllowed)
                 }
+                val isDone = d.done || d.day in completedLocally
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Row(
                         modifier = Modifier.padding(12.dp).fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
                     ) {
                         Column(Modifier.weight(1f)) {
                             Text("Day ${d.day}", style = MaterialTheme.typography.titleMedium)
                             Text(d.title, style = MaterialTheme.typography.bodySmall)
                         }
-                        if (d.done) Text("Done", color = MaterialTheme.colorScheme.primary)
-                        else Button(onClick = { onCompleteDay(d.day) }) { Text("Done") }
+                        when {
+                            isDone -> Text("Completed ✓", color = MaterialTheme.colorScheme.primary)
+                            d.day != nextDay -> Text("Locked", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            blockedToday -> Text("Tomorrow", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            else -> Button(onClick = {
+                                onCompleteDay(d.day) { success ->
+                                    if (success) {
+                                        completedLocally = completedLocally + d.day
+                                        blockedToday = true
+                                        showRewardOffer = true
+                                    } else {
+                                        blockedToday = true
+                                    }
+                                }
+                            }) { Text("Complete") }
+                        }
                     }
                 }
             }
             item { TextButton(onClick = onBack) { Text("Back") } }
         }
         BannerAdView(unitId = AdsConfig.BANNER_PATHS, enabled = adsAllowed)
+    }
+
+    if (showRewardOffer) {
+        JourneyRewardOfferDialog(
+            title = "You made space for healing",
+            description = "Your Healing Path step is safely saved. Watching is optional: watch a short video to support the app and earn 15 Hearts, or continue without an ad.",
+            showRewardedOption = adsAllowed,
+            onWatchRewarded = {
+                showRewardOffer = false
+                onWatchRewarded { showSuccess = true }
+            },
+            onContinue = {
+                showRewardOffer = false
+                showSuccess = true
+            }
+        )
+    }
+    if (showSuccess) {
+        JourneySuccessDialog(
+            title = "Your healing matters",
+            message = "You made time for yourself today. Healing is not a race, and you do not have to do everything at once. Keep choosing gentle steps, trust your progress, and remember that you matter. Wishing you brighter days ahead — see you tomorrow!",
+            onDismiss = { showSuccess = false }
+        )
     }
 }
 
