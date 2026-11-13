@@ -48,7 +48,7 @@ Debug builds use Google's official test ad units; release builds use the configu
 | Rewarded (2) | Earn 15 Hearts, optional extra 15 Hearts |
 | App Open (1) | Eligible return after the configured background interval |
 
-Private feature landing/list screens may show a clearly-labelled banner when the user is not editing private content. Ads are not shown inside journal/letter/memory editors, Urge SOS, support/crisis information, onboarding, settings, privacy or legal screens. Rewarded videos are voluntary; Hearts are credited only by the Google Mobile Ads reward callback. Each optional feature visit costs 1 Heart; Urge SOS, support and Settings remain free. If a user lacks Hearts, the app opens Hearts Shop and returns to the requested feature after a completed rewarded view.
+Private feature landing/list screens may show a clearly-labelled banner when the user is not editing private content. Ads are not shown inside journal/letter/memory editors, Urge SOS, support/crisis information, onboarding, privacy or legal screens; Settings only has a separated footer placement. Rewarded videos are voluntary; Hearts are credited only by the Google Mobile Ads reward callback. Each optional feature visit costs 1 Heart; Urge SOS, support and Settings remain free. If a user lacks Hearts, the app opens Hearts Shop and returns to the requested feature after a completed rewarded view.
 
 ## Legal
 - Privacy: https://bqsqwadtechnologies.github.io/hert-break-/privacy.html
