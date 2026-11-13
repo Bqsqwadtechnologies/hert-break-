@@ -135,7 +135,9 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                     if (paid) navController.navigate(target) {
                         popUpTo(Routes.HEARTS_SHOP) { inclusive = true }
                     }
-                    else Toast.makeText(activity, "Please earn more Hearts to open this feature.", Toast.LENGTH_LONG).show()
+                    else activity?.let { host ->
+                        Toast.makeText(host, "Please earn more Hearts to open this feature.", Toast.LENGTH_LONG).show()
+                    }
                 }
             }
         }
