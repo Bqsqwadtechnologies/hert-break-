@@ -272,8 +272,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                             onRewarded = { dashboardViewModel.onRewardedHearts() },
                             onDismissed = onFinished,
                             onUnavailable = {
-                                Toast.makeText(host, "A rewarded video isn't ready yet. Your progress is saved.", Toast.LENGTH_LONG).show()
-                                onFinished()
+                                Toast.makeText(host, "A rewarded video isn't ready yet. Try again shortly, or continue without an ad. Your progress is saved.", Toast.LENGTH_LONG).show()
                             }
                         )
                     }
