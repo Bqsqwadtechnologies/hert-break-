@@ -71,11 +71,11 @@ fun MemoriesScreen(
             }
             Spacer(Modifier.height(12.dp))
             if (memories.isEmpty()) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                     Text("No memories saved yet.")
                 }
             } else {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(memories, key = { it.id }) { memory ->
                         Card(modifier = Modifier.fillMaxWidth()) {
                             Column(Modifier.padding(12.dp)) {
