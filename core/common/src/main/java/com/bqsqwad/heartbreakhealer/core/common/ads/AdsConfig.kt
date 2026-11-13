@@ -36,9 +36,11 @@ object AdsConfig {
     val INTERSTITIAL_PATH_DAY get() = unit(TEST_INTERSTITIAL, "ca-app-pub-2748789567113929/1318191688")
     val INTERSTITIAL_WEEKLY get() = unit(TEST_INTERSTITIAL, "ca-app-pub-2748789567113929/6399448775")
 
-    // Optional reward placements
+    // Rewarded placements
     val REWARDED_HEARTS get() = unit(TEST_REWARDED, "ca-app-pub-2748789567113929/1334649343")
     val REWARDED_SHOP_EXTRA get() = unit(TEST_REWARDED, "ca-app-pub-2748789567113929/4144645513")
+    val REWARDED_HEALING_PATH_14 get() = unit(TEST_REWARDED, "ca-app-pub-2748789567113929/6182423982")
+    val REWARDED_REBUILD_30 get() = unit(TEST_REWARDED, "ca-app-pub-2748789567113929/8617015632")
 
     // App-open inventory is reserved; no app-open format is currently shown.
     val APP_OPEN get() = unit(TEST_APP_OPEN, "ca-app-pub-2748789567113929/7628594951")
