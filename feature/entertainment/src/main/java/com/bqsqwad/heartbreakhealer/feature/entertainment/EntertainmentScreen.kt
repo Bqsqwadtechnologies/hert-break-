@@ -29,7 +29,6 @@ fun EntertainmentScreen(
     var activeStory by remember { mutableStateOf<StorySeries?>(null) }
     var partIndex by remember { mutableIntStateOf(0) }
     var joke by remember { mutableStateOf<Pair<Int, String>?>(null) }
-    var pendingNextPart by remember { mutableStateOf(false) }
     val unseenStories = EntertainmentCatalog.stories.filter { it.id !in viewedStoryIds }
     val unseenJokes = EntertainmentCatalog.jokes.indices.filter { "joke_${it + 1}" !in seenJokeIds }
 
@@ -61,29 +60,23 @@ fun EntertainmentScreen(
                         Text("A story chosen just for this visit", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                         Text("Romance, secrets and endings that make you want to read one more part.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-                    items(unseenStories, key = { it.id }) { story ->
-                        Card(
-                            onClick = {
-                                onUnlock("story_start") {
-                                    onMarkStoryViewed(story.id)
-                                    activeStory = story
-                                    partIndex = 0
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(20.dp)
-                        ) {
-                            Column(Modifier.padding(18.dp)) {
-                                Text(story.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                                Spacer(Modifier.height(6.dp))
-                                Text(story.tagline, style = MaterialTheme.typography.bodyMedium)
-                                Spacer(Modifier.height(10.dp))
-                                Text("Read story • ${story.parts.size} parts", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
-                            }
+                    item {
+                        if (unseenStories.isNotEmpty()) {
+                            Button(
+                                onClick = {
+                                    val story = unseenStories.random()
+                                    onUnlock("story_start") {
+                                        onMarkStoryViewed(story.id)
+                                        activeStory = story
+                                        partIndex = 0
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            ) { Text("Surprise me with a story") }
+                            Text("${unseenStories.size} unread stories in your collection", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        } else {
+                            Text("You've read every story in this collection. More stories will arrive in a future content update.", modifier = Modifier.padding(18.dp))
                         }
-                    }
-                    if (unseenStories.isEmpty()) item {
-                        Text("You've read every story in this collection. More stories will arrive in a future content update.", modifier = Modifier.padding(18.dp))
                     }
                     item { NativeAdCard(unitId = AdsConfig.NATIVE_LIBRARY, enabled = adsAllowed) }
                 }
@@ -121,18 +114,22 @@ fun EntertainmentScreen(
                     Text(story.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                     Text("Part ${part.number} of ${story.parts.size} • ${part.title}", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
                 }
-                items(part.paragraphs) { paragraph ->
-                    Text(paragraph, style = MaterialTheme.typography.bodyLarge, lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.25f)
+                items(part.paragraphs.size) { index ->
+                    Text(
+                        part.paragraphs[index],
+                        style = MaterialTheme.typography.bodyLarge,
+                        lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.25f
+                    )
+                    if ((index + 1) % 3 == 0) {
+                        NativeAdCard(unitId = AdsConfig.NATIVE_LIBRARY, enabled = adsAllowed)
+                    }
                 }
-                item { NativeAdCard(unitId = AdsConfig.NATIVE_LIBRARY, enabled = adsAllowed) }
                 item {
                     if (partIndex < story.parts.lastIndex) {
                         Button(
                             onClick = {
-                                pendingNextPart = true
                                 onUnlock("story_next_part") {
                                     partIndex++
-                                    pendingNextPart = false
                                 }
                             },
                             modifier = Modifier.fillMaxWidth()
