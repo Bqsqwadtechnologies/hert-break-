@@ -35,17 +35,20 @@ Private, supportive companion for healing after a breakup.
 - Privacy Policy + Terms (`/docs`)
 - CI (debug + release workflows)
 
-## Ad units to create in AdMob
-| Type | Name |
+## AdMob inventory and placements
+
+All 16 production ad-unit IDs are centralized in `core/common/.../ads/AdsConfig.kt`.
+Debug builds use Google's official test ad units; release builds use the configured production units.
+
+| Format | Production placements |
 |------|------|
-| Banner | `hh_banner_home`, `hh_banner_lists` |
-| Native | `hh_native_affirmations`, `hh_native_rebuild` |
-| Interstitial | `hh_interstitial_task_complete` |
-| Rewarded | `hh_rewarded_hearts` |
-| App Open | `hh_app_open` |
+| Banner (5) | Home, general lists, private/library footer, 14-day path, Hearts Shop |
+| Native (5) | Affirmations, 30-Day Rebuild, Healing Library, 14-day path, Weekly Review |
+| Interstitial (3) | Self-Care completion, path-day completion, Weekly Review exit |
+| Rewarded (2) | Earn 15 Hearts, optional extra 15 Hearts |
+| App Open (1) | Eligible return after the configured background interval |
 
-Never on: onboarding, journal, SOS, unsent letters, memories, support, settings.
-
+Private feature landing/list screens may show a clearly-labelled banner when the user is not editing private content. Ads are not shown inside journal/letter/memory editors, Urge SOS, support/crisis information, onboarding, settings, privacy or legal screens. Rewarded videos are voluntary; Hearts are credited only by the Google Mobile Ads reward callback. Each optional feature visit costs 1 Heart; Urge SOS, support and Settings remain free. If a user lacks Hearts, the app opens Hearts Shop and returns to the requested feature after a completed rewarded view.
 ## Legal
 - Privacy: https://bqsqwadtechnologies.github.io/hert-break-/privacy.html
 - Terms: https://bqsqwadtechnologies.github.io/hert-break-/terms.html  
