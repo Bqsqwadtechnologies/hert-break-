@@ -37,6 +37,8 @@ class UserPreferences @Inject constructor(
     val savedMemories: Flow<Set<String>> = ds.data.map { it[Keys.MEMORIES] ?: emptySet() }
     val savedTriggers: Flow<Set<String>> = ds.data.map { it[Keys.TRIGGERS] ?: emptySet() }
     val completedPathDays: Flow<Set<String>> = ds.data.map { it[Keys.PATH_DAYS] ?: emptySet() }
+    val completedRebuildDays: Flow<Set<String>> = ds.data.map { it[Keys.REBUILD_DAYS] ?: emptySet() }
+    val lastJourneyCompletionDate: Flow<String?> = ds.data.map { it[Keys.LAST_JOURNEY_COMPLETION_DATE] }
     val timeCapsuleText: Flow<String?> = ds.data.map { it[Keys.CAPSULE_TEXT] }
     val timeCapsuleUnlock: Flow<String?> = ds.data.map { it[Keys.CAPSULE_UNLOCK] }
     val breakupDayEpoch: Flow<Long?> = ds.data.map { it[Keys.BREAKUP_EPOCH] }
@@ -104,6 +106,44 @@ class UserPreferences @Inject constructor(
         }
     }
 
+    /**
+     * Atomically records a journey task and a shared daily lock.
+     * The 14-day and 30-day journeys share this lock so only one task across
+     * both programs can be completed on a calendar day.
+     */
+    suspend fun tryCompleteJourneyDay(
+        journey: String,
+        day: Int,
+        alreadyCompletedDays: Set<Int>,
+        today: String
+    ): Boolean {
+        var completed = false
+        ds.edit { data ->
+            val completionKey = when (journey) {
+                JOURNEY_REBUILD -> Keys.REBUILD_DAYS
+                JOURNEY_HEALING_PATH -> Keys.PATH_DAYS
+                else -> return@edit
+            }
+            val maximumDays = if (journey == JOURNEY_REBUILD) 30 else 14
+            val storedDays = data[completionKey].orEmpty().mapNotNull(String::toIntOrNull).toSet()
+            val allCompletedDays = storedDays + alreadyCompletedDays
+            var nextDay = 1
+            while (nextDay in allCompletedDays && nextDay <= maximumDays) nextDay++
+
+            if (day !in 1..maximumDays ||
+                day != nextDay ||
+                data[Keys.LAST_JOURNEY_COMPLETION_DATE] == today
+            ) {
+                return@edit
+            }
+
+            data[completionKey] = storedDays + day.toString()
+            data[Keys.LAST_JOURNEY_COMPLETION_DATE] = today
+            completed = true
+        }
+        return completed
+    }
+
     suspend fun completePathDay(day: Int) {
         ds.edit { data -> data[Keys.PATH_DAYS] = (data[Keys.PATH_DAYS] ?: emptySet()) + day.toString() }
     }
@@ -137,6 +177,11 @@ class UserPreferences @Inject constructor(
         ds.edit { it.clear() }
     }
 
+    companion object {
+        const val JOURNEY_REBUILD = "rebuild"
+        const val JOURNEY_HEALING_PATH = "healing_path"
+    }
+
     private object Keys {
         val ONBOARDING = booleanPreferencesKey("onboarding_complete")
         val NICKNAME = stringPreferencesKey("nickname")
@@ -150,6 +195,8 @@ class UserPreferences @Inject constructor(
         val MEMORIES = stringSetPreferencesKey("saved_memories")
         val TRIGGERS = stringSetPreferencesKey("saved_triggers")
         val PATH_DAYS = stringSetPreferencesKey("completed_path_days")
+        val REBUILD_DAYS = stringSetPreferencesKey("completed_rebuild_days")
+        val LAST_JOURNEY_COMPLETION_DATE = stringPreferencesKey("last_journey_completion_date")
         val FIRST_LAUNCH = booleanPreferencesKey("first_launch")
         val AGE_CONFIRMED = booleanPreferencesKey("age_confirmed")
         val URGE_PASSED = intPreferencesKey("urge_passed")
