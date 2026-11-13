@@ -10,6 +10,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
+import com.bqsqwad.heartbreakhealer.core.common.ads.AdsConfig
+import com.bqsqwad.heartbreakhealer.core.ui.ads.BannerAdView
 
 @Composable
 fun SettingsScreen(
@@ -19,6 +21,7 @@ fun SettingsScreen(
     onNotificationsChanged: (Boolean) -> Unit,
     onReduceMotionChanged: (Boolean) -> Unit,
     onClearData: () -> Unit,
+    adsAllowed: Boolean = false,
     onBack: () -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
@@ -48,6 +51,8 @@ fun SettingsScreen(
         SettingsItem("Open-source licenses") { }
         HorizontalDivider(Modifier.padding(vertical = 12.dp))
         SettingsItem("Clear all data", destructive = true) { showClearDialog = true }
+        Spacer(Modifier.height(12.dp))
+        BannerAdView(unitId = AdsConfig.BANNER_LIBRARY, enabled = adsAllowed)
         Spacer(Modifier.height(24.dp))
         TextButton(onClick = onBack) { Text("Back") }
     }
