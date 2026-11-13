@@ -60,5 +60,5 @@ internal object StoryLibraryExpansion {
                 )
             )
         )
-    ) + StoryLibraryBatch2.stories + StoryLibraryBatch3.stories + StoryLibraryBatch4.stories + StoryLibraryBatch5.stories + StoryLibraryBatch6.stories + StoryLibraryBatch7.stories + StoryLibraryBatch8.stories
+    ) + StoryLibraryBatch2.stories + StoryLibraryBatch3.stories + StoryLibraryBatch4.stories + StoryLibraryBatch5.stories + StoryLibraryBatch6.stories + StoryLibraryBatch7.stories + StoryLibraryBatch8.stories + StoryLibraryBatch9.stories
 }
