@@ -8,7 +8,7 @@ object AdPlacementMap {
     val BANNER_SCREENS = listOf(
         "BANNER_HOME — Dashboard bottom",
         "BANNER_LIST — Self-Care, 30-Day Rebuild, and Affirmations bottom",
-        "BANNER_LIBRARY — Healing Library, Journal list, Unsent Letters list, Memories, Triggers, and No-Contact screen footer",
+        "BANNER_LIBRARY — Healing Library, Journal list, Unsent Letters list, Memories, Triggers, No-Contact, and Settings footers",
         "BANNER_PATHS — 14-Day Healing Path bottom",
         "BANNER_HEARTS_SHOP — Hearts Shop bottom, separated from rewards"
     )
@@ -43,7 +43,7 @@ object AdPlacementMap {
         "No-Contact slip-recovery dialog",
         "Urge SOS and coping flows",
         "Support / crisis information",
-        "Settings, privacy and legal screens",
+        "Privacy and legal screens",
         "Permission, loading and error screens"
     )
 
