@@ -1,14 +1,14 @@
 package com.bqsqwad.heartbreakhealer.core.common.ads
 
 /**
- * Auditable inventory of the 16 production AdMob units and their app placements.
+ * Auditable inventory of production AdMob placements and their app locations.
  * Banners may appear in private feature landing/list footers, never within active editors or urgent support flows.
  */
 object AdPlacementMap {
     val BANNER_SCREENS = listOf(
         "BANNER_HOME — Dashboard bottom",
         "BANNER_LIST — Self-Care, 30-Day Rebuild, and Affirmations bottom",
-        "BANNER_LIBRARY — Healing Library, Journal list, Unsent Letters list, Memories, Triggers, No-Contact, and Settings footers",
+        "BANNER_LIBRARY — Healing Library, Stories, Jokes, Journal list, Unsent Letters list, Memories, Triggers, No-Contact, and Settings footers",
         "BANNER_PATHS — 14-Day Healing Path bottom",
         "BANNER_HEARTS_SHOP — Hearts Shop bottom, separated from rewards"
     )
@@ -16,7 +16,7 @@ object AdPlacementMap {
     val NATIVE_SCREENS = listOf(
         "NATIVE_AFFIRMATIONS — after every 8 affirmations",
         "NATIVE_REBUILD — after every 8 completed-program items",
-        "NATIVE_LIBRARY — within the article list at the designated interval",
+        "NATIVE_LIBRARY — within Healing Library articles and after roughly three story paragraphs (about 30 reading lines)",
         "NATIVE_PATHS — within the 14-day path at the designated interval",
         "NATIVE_WEEKLY_REVIEW — below the weekly progress summary"
     )
@@ -28,8 +28,8 @@ object AdPlacementMap {
     )
 
     val REWARDED_TRIGGERS = listOf(
-        "REWARDED_HEARTS — user-initiated Hearts Shop video; grant hearts only from the SDK reward callback",
-        "REWARDED_SHOP_EXTRA — separate optional user-initiated extra video; grant hearts only from the SDK reward callback"
+        "REWARDED_HEARTS — Hearts Shop video and user-initiated story/next-part unlock; story access is granted only from the SDK reward callback",
+        "REWARDED_SHOP_EXTRA — Hearts Shop extra video and user-initiated joke unlock; story/joke access is granted only from the SDK reward callback"
     )
 
     const val APP_OPEN_TRIGGER =
