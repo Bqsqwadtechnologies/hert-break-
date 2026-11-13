@@ -44,11 +44,11 @@ fun JournalScreen(
             Button(onClick = { showEditor = true }, modifier = Modifier.fillMaxWidth()) { Text("New entry") }
             Spacer(Modifier.height(12.dp))
             if (entries.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                     Text("No entries yet. Your words stay private.")
                 }
             } else {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(entries, key = { it.id }) { entry ->
                         Card(modifier = Modifier.fillMaxWidth()) {
                             Column(Modifier.padding(12.dp)) {
