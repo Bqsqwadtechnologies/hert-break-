@@ -120,7 +120,7 @@ fun EntertainmentScreen(
                         style = MaterialTheme.typography.bodyLarge,
                         lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.25f
                     )
-                    if ((index + 1) % 3 == 0) {
+                    if ((index + 1) % 2 == 0) {
                         NativeAdCard(unitId = AdsConfig.NATIVE_LIBRARY, enabled = adsAllowed)
                     }
                 }
