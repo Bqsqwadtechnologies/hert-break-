@@ -38,6 +38,8 @@ class UserPreferences @Inject constructor(
     val savedTriggers: Flow<Set<String>> = ds.data.map { it[Keys.TRIGGERS] ?: emptySet() }
     val completedPathDays: Flow<Set<String>> = ds.data.map { it[Keys.PATH_DAYS] ?: emptySet() }
     val completedRebuildDays: Flow<Set<String>> = ds.data.map { it[Keys.REBUILD_DAYS] ?: emptySet() }
+    val viewedStoryIds: Flow<Set<String>> = ds.data.map { it[Keys.VIEWED_STORIES] ?: emptySet() }
+    val seenJokeIds: Flow<Set<String>> = ds.data.map { it[Keys.SEEN_JOKES] ?: emptySet() }
     val lastJourneyCompletionDate: Flow<String?> = ds.data.map { it[Keys.LAST_JOURNEY_COMPLETION_DATE] }
     val timeCapsuleText: Flow<String?> = ds.data.map { it[Keys.CAPSULE_TEXT] }
     val timeCapsuleUnlock: Flow<String?> = ds.data.map { it[Keys.CAPSULE_UNLOCK] }
@@ -145,6 +147,16 @@ class UserPreferences @Inject constructor(
         return completed
     }
 
+    suspend fun markStoryViewed(storyId: String) {
+        if (storyId.isBlank()) return
+        ds.edit { data -> data[Keys.VIEWED_STORIES] = (data[Keys.VIEWED_STORIES] ?: emptySet()) + storyId }
+    }
+
+    suspend fun markJokeSeen(jokeId: String) {
+        if (jokeId.isBlank()) return
+        ds.edit { data -> data[Keys.SEEN_JOKES] = (data[Keys.SEEN_JOKES] ?: emptySet()) + jokeId }
+    }
+
     suspend fun completePathDay(day: Int) {
         ds.edit { data -> data[Keys.PATH_DAYS] = (data[Keys.PATH_DAYS] ?: emptySet()) + day.toString() }
     }
@@ -197,6 +209,8 @@ class UserPreferences @Inject constructor(
         val TRIGGERS = stringSetPreferencesKey("saved_triggers")
         val PATH_DAYS = stringSetPreferencesKey("completed_path_days")
         val REBUILD_DAYS = stringSetPreferencesKey("completed_rebuild_days")
+        val VIEWED_STORIES = stringSetPreferencesKey("viewed_story_ids")
+        val SEEN_JOKES = stringSetPreferencesKey("seen_joke_ids")
         val LAST_JOURNEY_COMPLETION_DATE = stringPreferencesKey("last_journey_completion_date")
         val FIRST_LAUNCH = booleanPreferencesKey("first_launch")
         val AGE_CONFIRMED = booleanPreferencesKey("age_confirmed")
