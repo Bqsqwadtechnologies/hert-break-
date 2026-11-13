@@ -125,7 +125,8 @@ class UserPreferences @Inject constructor(
                 else -> return@edit
             }
             val maximumDays = if (journey == JOURNEY_REBUILD) 30 else 14
-            val storedDays = data[completionKey].orEmpty().mapNotNull(String::toIntOrNull).toSet()
+            val storedDayStrings = data[completionKey].orEmpty()
+            val storedDays = storedDayStrings.mapNotNull(String::toIntOrNull).toSet()
             val allCompletedDays = storedDays + alreadyCompletedDays
             var nextDay = 1
             while (nextDay in allCompletedDays && nextDay <= maximumDays) nextDay++
@@ -137,7 +138,7 @@ class UserPreferences @Inject constructor(
                 return@edit
             }
 
-            data[completionKey] = storedDays + day.toString()
+            data[completionKey] = storedDayStrings + day.toString()
             data[Keys.LAST_JOURNEY_COMPLETION_DATE] = today
             completed = true
         }
