@@ -15,6 +15,7 @@ import android.app.Activity
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.compose.ui.platform.LocalContext
@@ -109,6 +110,36 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
     val completedPathDays by dashboardViewModel.completedPathDays.collectAsState()
     val activity = LocalContext.current as? Activity
     val adsAllowed by adManager.adsAllowed.collectAsState()
+    var pendingFeatureRoute by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
+    var pendingRewardGranted by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    var pendingRewardDismissed by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    var pendingRewardCredited by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    val openFeature: (String) -> Unit = { route ->
+        dashboardViewModel.spendHearts(1) { paid ->
+            if (paid) navController.navigate(route)
+            else {
+                pendingFeatureRoute = route
+                navController.navigate(Routes.HEARTS_SHOP)
+            }
+        }
+    }
+    fun finishPendingReward() {
+        if (pendingRewardGranted && pendingRewardDismissed && pendingRewardCredited) {
+            pendingRewardGranted = false
+            pendingRewardDismissed = false
+            pendingRewardCredited = false
+            val target = pendingFeatureRoute
+            pendingFeatureRoute = null
+            if (target != null) {
+                dashboardViewModel.spendHearts(1) { paid ->
+                    if (paid) navController.navigate(target) {
+                        popUpTo(Routes.HEARTS_SHOP) { inclusive = true }
+                    }
+                    else Toast.makeText(activity, "Please earn more Hearts to open this feature.", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
     val backStackEntry by navController.currentBackStackEntryAsState()
     LaunchedEffect(onboardingComplete, backStackEntry?.destination?.route) {
         if (onboardingComplete && backStackEntry?.destination?.route == Routes.ONBOARDING) {
@@ -146,26 +177,26 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                 urgePassedCount = urgePassedCount,
                 adsAllowed = adsAllowed,
                 onSos = { navController.navigate(Routes.SOS) },
-                onJournal = { navController.navigate(Routes.JOURNAL) },
-                onLetters = { navController.navigate(Routes.LETTERS) },
-                onNoContact = { navController.navigate(Routes.NO_CONTACT) },
-                onSelfCare = { navController.navigate(Routes.SELF_CARE) },
-                onRebuild = { navController.navigate(Routes.REBUILD) },
-                onAffirmations = { navController.navigate(Routes.AFFIRMATIONS) },
+                onJournal = { openFeature(Routes.JOURNAL) },
+                onLetters = { openFeature(Routes.LETTERS) },
+                onNoContact = { openFeature(Routes.NO_CONTACT) },
+                onSelfCare = { openFeature(Routes.SELF_CARE) },
+                onRebuild = { openFeature(Routes.REBUILD) },
+                onAffirmations = { openFeature(Routes.AFFIRMATIONS) },
                 onHeartsShop = { navController.navigate(Routes.HEARTS_SHOP) },
                 onSettings = { navController.navigate(Routes.SETTINGS) },
-                onMemories = { navController.navigate(Routes.MEMORIES) },
-                onTriggers = { navController.navigate(Routes.TRIGGERS) },
-                onCoping = { navController.navigate(Routes.COPING) },
+                onMemories = { openFeature(Routes.MEMORIES) },
+                onTriggers = { openFeature(Routes.TRIGGERS) },
+                onCoping = { openFeature(Routes.COPING) },
                 onLogUrge = dashboardViewModel::logUrgePassed,
-                onBoundaries = { navController.navigate(Routes.BOUNDARIES) },
-                onCapsule = { navController.navigate(Routes.CAPSULE) },
-                onWins = { navController.navigate(Routes.WINS) },
-                onEvening = { navController.navigate(Routes.EVENING) },
-                onGriefContact = { navController.navigate(Routes.GRIEF_CONTACT) },
-                onLibrary = { navController.navigate(Routes.LIBRARY) },
-                onPath = { navController.navigate(Routes.PATH) },
-                onWeekly = { navController.navigate(Routes.WEEKLY) },
+                onBoundaries = { openFeature(Routes.BOUNDARIES) },
+                onCapsule = { openFeature(Routes.CAPSULE) },
+                onWins = { openFeature(Routes.WINS) },
+                onEvening = { openFeature(Routes.EVENING) },
+                onGriefContact = { openFeature(Routes.GRIEF_CONTACT) },
+                onLibrary = { openFeature(Routes.LIBRARY) },
+                onPath = { openFeature(Routes.PATH) },
+                onWeekly = { openFeature(Routes.WEEKLY) },
                 onCheckIn = dashboardViewModel::onCheckIn
             )
         }
@@ -180,6 +211,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
             JournalScreen(
                 entries = journalEntries.map { JournalUiEntry(it.id, it.date, it.mood, it.content) },
                 onSaveEntry = dashboardViewModel::saveJournalEntry,
+                adsAllowed = adsAllowed,
                 onBack = { navController.popBackStack() }
             )
         }
@@ -188,6 +220,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                 letters = unsentLetters.map { LetterUi(it.id, it.content, it.status) },
                 onSave = dashboardViewModel::saveUnsentLetter,
                 onRelease = dashboardViewModel::releaseUnsentLetter,
+                adsAllowed = adsAllowed,
                 onBack = { navController.popBackStack() }
             )
         }
@@ -196,6 +229,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                 currentDays = noContactDays,
                 bestDays = bestNoContactDays,
                 onSlip = dashboardViewModel::recordNoContactSlip,
+                adsAllowed = adsAllowed,
                 onBack = { navController.popBackStack() }
             )
         }
@@ -220,13 +254,53 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
             HeartsShopScreen(
                 balance = hearts,
                 onWatchRewarded = {
+                    pendingRewardGranted = false
+                    pendingRewardDismissed = false
+                    pendingRewardCredited = false
                     activity?.let { host ->
-                        adManager.showRewarded(host, RewardedPlacement.HEARTS_REWARD, onRewarded = dashboardViewModel::onRewardedHearts)
+                        adManager.showRewarded(
+                            host,
+                            RewardedPlacement.HEARTS_REWARD,
+                            onRewarded = {
+                                pendingRewardGranted = true
+                                dashboardViewModel.onRewardedHearts {
+                                    pendingRewardCredited = true
+                                    finishPendingReward()
+                                }
+                            },
+                            onDismissed = {
+                                pendingRewardDismissed = true
+                                finishPendingReward()
+                            },
+                            onUnavailable = {
+                                Toast.makeText(host, "A rewarded video is not ready yet. Please try again shortly.", Toast.LENGTH_LONG).show()
+                            }
+                        )
                     }
                 },
                 onWatchExtraRewarded = {
+                    pendingRewardGranted = false
+                    pendingRewardDismissed = false
+                    pendingRewardCredited = false
                     activity?.let { host ->
-                        adManager.showRewarded(host, RewardedPlacement.SHOP_EXTRA_REWARD, onRewarded = dashboardViewModel::onRewardedHearts)
+                        adManager.showRewarded(
+                            host,
+                            RewardedPlacement.SHOP_EXTRA_REWARD,
+                            onRewarded = {
+                                pendingRewardGranted = true
+                                dashboardViewModel.onRewardedHearts {
+                                    pendingRewardCredited = true
+                                    finishPendingReward()
+                                }
+                            },
+                            onDismissed = {
+                                pendingRewardDismissed = true
+                                finishPendingReward()
+                            },
+                            onUnavailable = {
+                                Toast.makeText(host, "A rewarded video is not ready yet. Please try again shortly.", Toast.LENGTH_LONG).show()
+                            }
+                        )
                     }
                 },
                 onBack = { navController.popBackStack() },
@@ -265,6 +339,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                     MemoryUi(index.toLong(), parts.firstOrNull().orEmpty(), parts.getOrElse(1) { "" })
                 },
                 onAdd = dashboardViewModel::addMemory,
+                adsAllowed = adsAllowed,
                 onBack = { navController.popBackStack() }
             )
         }
@@ -275,6 +350,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                     TriggerUi(index.toLong(), parts.firstOrNull().orEmpty(), parts.getOrElse(1) { "" })
                 },
                 onAdd = dashboardViewModel::addTrigger,
+                adsAllowed = adsAllowed,
                 onBack = { navController.popBackStack() }
             )
         }
@@ -392,6 +468,7 @@ private fun DashboardScreen(
             }
             Spacer(Modifier.height(18.dp))
             Text("Quick access", style = MaterialTheme.typography.titleLarge, color = ink, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+            Text("Optional tools use 1 Heart per visit. Urge SOS, support and Settings are always free.", style = MaterialTheme.typography.bodySmall, color = muted)
             Spacer(Modifier.height(10.dp))
             @Composable fun androidx.compose.foundation.layout.RowScope.FeatureTile(emoji: String, title: String, action: () -> Unit) {
                 Card(onClick = action, modifier = Modifier.weight(1f), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = blush)) {
