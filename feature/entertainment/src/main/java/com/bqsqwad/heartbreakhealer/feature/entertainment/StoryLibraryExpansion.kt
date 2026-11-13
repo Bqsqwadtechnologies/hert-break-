@@ -60,5 +60,5 @@ internal object StoryLibraryExpansion {
                 )
             )
         )
-    )
+    ) + StoryLibraryBatch2.stories
 }
