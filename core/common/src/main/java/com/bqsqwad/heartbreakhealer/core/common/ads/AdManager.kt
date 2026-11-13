@@ -203,7 +203,6 @@ class AdManager @Inject constructor() {
             context.applicationContext,
             AdsConfig.APP_OPEN,
             AdRequest.Builder().build(),
-            AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT,
             object : AppOpenAd.AppOpenAdLoadCallback() {
                 override fun onAdLoaded(ad: AppOpenAd) {
                     appOpenAd = ad
