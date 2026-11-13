@@ -8,6 +8,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.bqsqwad.heartbreakhealer.core.common.ads.AdsConfig
+import com.bqsqwad.heartbreakhealer.core.ui.ads.BannerAdView
 
 data class LetterUi(val id: Long, val content: String, val status: String)
 
@@ -16,6 +18,7 @@ fun UnsentLettersScreen(
     letters: List<LetterUi> = emptyList(),
     onSave: (String) -> Unit = {},
     onRelease: (Long) -> Unit = {},
+    adsAllowed: Boolean = false,
     onBack: () -> Unit = {}
 ) {
     var writing by remember { mutableStateOf(false) }
@@ -86,6 +89,10 @@ fun UnsentLettersScreen(
                     }
                 }
             }
+        }
+        if (!writing) {
+            Spacer(Modifier.height(8.dp))
+            BannerAdView(unitId = AdsConfig.BANNER_LIBRARY, enabled = adsAllowed)
         }
     }
 }
