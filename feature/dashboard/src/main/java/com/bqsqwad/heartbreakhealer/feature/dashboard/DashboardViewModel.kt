@@ -57,6 +57,10 @@ class DashboardViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
     val completedPathDays = preferences.completedPathDays
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+    val viewedStoryIds = preferences.viewedStoryIds
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+    val seenJokeIds = preferences.seenJokeIds
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
     val triggers = preferences.savedTriggers
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
     val dailyRemindersEnabled = preferences.dailyRemindersEnabled
@@ -85,6 +89,9 @@ class DashboardViewModel @Inject constructor(
     fun releaseUnsentLetter(id: Long) { viewModelScope.launch { journalRepository.releaseLetter(id) } }
 
     fun completePathDay(day: Int) { viewModelScope.launch { preferences.completePathDay(day) } }
+
+    fun markStoryViewed(storyId: String) { viewModelScope.launch { preferences.markStoryViewed(storyId) } }
+    fun markJokeSeen(jokeId: String) { viewModelScope.launch { preferences.markJokeSeen(jokeId) } }
 
     fun logUrgePassed() { viewModelScope.launch { preferences.incrementUrgePassed() } }
 
