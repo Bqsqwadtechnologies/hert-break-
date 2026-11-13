@@ -159,16 +159,17 @@ class AdManager @Inject constructor() {
         activity: Activity,
         placement: RewardedPlacement,
         onRewarded: () -> Unit,
-        onDismissed: () -> Unit = {}
+        onDismissed: () -> Unit = {},
+        onUnavailable: () -> Unit = {}
     ) {
         if (!canRequestAds() || isShowingFullScreenContent) {
-            onDismissed()
+            onUnavailable()
             return
         }
         val ad = rewardedAds[placement]
         if (ad == null) {
             loadRewarded(activity, placement)
-            onDismissed()
+            onUnavailable()
             return
         }
 
@@ -189,6 +190,7 @@ class AdManager @Inject constructor() {
                 rewardedAds[placement] = null
                 Log.w(TAG, "Rewarded $placement failed to show: ${error.message}")
                 loadRewarded(activity, placement)
+                onUnavailable()
                 onDismissed()
             }
         }
