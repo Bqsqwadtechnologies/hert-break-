@@ -8,6 +8,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.bqsqwad.heartbreakhealer.core.common.ads.AdsConfig
+import com.bqsqwad.heartbreakhealer.core.ui.ads.BannerAdView
 
 data class JournalUiEntry(val id: Long, val date: String, val mood: Int, val content: String)
 
@@ -15,6 +17,7 @@ data class JournalUiEntry(val id: Long, val date: String, val mood: Int, val con
 fun JournalScreen(
     entries: List<JournalUiEntry> = emptyList(),
     onSaveEntry: (mood: Int, content: String) -> Unit = { _, _ -> },
+    adsAllowed: Boolean = false,
     onBack: () -> Unit = {}
 ) {
     var showEditor by remember { mutableStateOf(false) }
@@ -57,6 +60,10 @@ fun JournalScreen(
                     }
                 }
             }
+        }
+        if (!showEditor) {
+            Spacer(Modifier.height(8.dp))
+            BannerAdView(unitId = AdsConfig.BANNER_LIBRARY, enabled = adsAllowed)
         }
     }
 }
