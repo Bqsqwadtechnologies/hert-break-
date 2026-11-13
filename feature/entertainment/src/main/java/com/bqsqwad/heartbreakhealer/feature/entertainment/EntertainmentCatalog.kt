@@ -90,7 +90,7 @@ object EntertainmentCatalog {
                 ))
             )
         )
-    )
+    ) + StoryLibraryExpansion.stories
 
     val jokes = listOf(
         "I told my pillow all my problems. It said, “I’m here for you.” Then it got pressed under pressure.",
@@ -144,5 +144,5 @@ object EntertainmentCatalog {
         "My plants are great listeners. They never interrupt; they just leaf it to me.",
         "Why did the light bulb get promoted? It was very bright.",
         "I asked the elevator for a joke. It said the humour was on another level."
-    )
+    ) + JokeLibraryExpansion.jokes
 }
