@@ -48,7 +48,7 @@ fun TriggersScreen(
         } else {
             Button(onClick = { adding = true }, modifier = Modifier.fillMaxWidth()) { Text("Add trigger") }
             Spacer(Modifier.height(12.dp))
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(triggers, key = { it.id }) { t ->
                     Card(Modifier.fillMaxWidth()) {
                         Column(Modifier.padding(12.dp)) {
