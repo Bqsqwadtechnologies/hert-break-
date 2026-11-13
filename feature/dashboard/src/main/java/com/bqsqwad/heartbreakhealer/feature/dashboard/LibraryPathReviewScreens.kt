@@ -137,8 +137,10 @@ fun HealingPathScreen(
             description = "Your Healing Path step is safely saved. Watching is optional: watch a short video to support the app and earn 15 Hearts, or continue without an ad.",
             showRewardedOption = adsAllowed,
             onWatchRewarded = {
-                showRewardOffer = false
-                onWatchRewarded { showSuccess = true }
+                onWatchRewarded {
+                    showRewardOffer = false
+                    showSuccess = true
+                }
             },
             onContinue = {
                 showRewardOffer = false
