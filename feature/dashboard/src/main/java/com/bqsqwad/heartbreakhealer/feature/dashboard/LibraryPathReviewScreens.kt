@@ -85,7 +85,7 @@ fun HealingPathScreen(
                 if (blockedToday && nextDay <= 14) {
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "Today's step is complete. Your next Healing Path task unlocks tomorrow.",
+                        "You've completed your one journey task for today. Your next task unlocks tomorrow.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary
                     )
