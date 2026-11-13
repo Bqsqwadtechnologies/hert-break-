@@ -116,7 +116,8 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
     val viewedStoryIds by dashboardViewModel.viewedStoryIds.collectAsState()
     val seenJokeIds by dashboardViewModel.seenJokeIds.collectAsState()
     // Both guided journeys share a single daily completion lock in DataStore.
-    val activity = LocalContext.current as? Activity
+    val context = LocalContext.current
+    val activity = context as? Activity
     val adsAllowed by adManager.adsAllowed.collectAsState()
     var pendingFeatureRoute by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
     var pendingRewardGranted by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
@@ -471,7 +472,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                 onUnlock = { kind, onUnlocked ->
                     val host = activity
                     if (host == null) {
-                        Toast.makeText(LocalContext.current, "A video ad is not available right now.", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, "A video ad is not available right now.", Toast.LENGTH_LONG).show()
                     } else {
                         val placement = if (kind == "joke") RewardedPlacement.JOKE_UNLOCK else RewardedPlacement.STORY_UNLOCK
                         adManager.showRewarded(
