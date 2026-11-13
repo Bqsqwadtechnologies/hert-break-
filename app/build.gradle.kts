@@ -112,6 +112,7 @@ dependencies {
     implementation(project(":feature:settings"))
     implementation(project(":feature:memories"))
     implementation(project(":feature:heartsshop"))
+    implementation(project(":feature:entertainment"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
