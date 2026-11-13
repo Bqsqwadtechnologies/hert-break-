@@ -2,7 +2,7 @@ package com.bqsqwad.heartbreakhealer.core.common.ads
 
 /**
  * Auditable inventory of the 16 production AdMob units and their app placements.
- * Ads stay out of sensitive recovery, privacy, and support flows.
+ * Banners may appear in private feature landing/list footers, never within active editors or urgent support flows.
  */
 object AdPlacementMap {
     val BANNER_SCREENS = listOf(
@@ -37,10 +37,11 @@ object AdPlacementMap {
 
     val NEVER_SHOW_ADS = listOf(
         "Onboarding",
-        "Journal and Unsent Letters",
+        "Journal editor while composing private entries",
+        "Unsent Letters editor while composing private letters",
+        "Memories and Triggers editors while entering private details",
+        "No-Contact slip-recovery dialog",
         "Urge SOS and coping flows",
-        "No-Contact and slip recovery",
-        "Memories",
         "Support / crisis information",
         "Settings, privacy and legal screens",
         "Permission, loading and error screens"
