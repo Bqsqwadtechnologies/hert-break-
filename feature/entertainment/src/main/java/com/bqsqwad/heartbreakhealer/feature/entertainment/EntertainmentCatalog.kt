@@ -81,12 +81,12 @@ object EntertainmentCatalog {
                     "Outside, the rain began again. Daniel asked whether Mara wanted to walk with him to the bus stop. No promises, no grand speeches—just a question.",
                     "She smiled. “Only if you tell me what happened to the other half of the photograph.”"
                 )),
-                StoryPart(11, "The Other Half", listOf(
-                    "Daniel laughed softly and took a small photograph from his wallet. It was the missing half: two children standing in front of the blue library door, holding the same book between them.",
-                    "Mara recognised herself. The boy beside her was Daniel. They had met once, long before either could remember, and their mothers had written a note on the back: “May they grow up knowing that kindness can begin again.”",
-                    "The discovery did not make them destined for one another. It did something better: it gave them a beginning they could choose for themselves.",
-                    "Weeks later, the library project reopened. Mara and Daniel worked side by side, slowly learning each other's habits, humour, and hopes. Their friendship grew without hurry, and the possibility of something more arrived quietly.",
-                    "On opening night, Mara found one final envelope inside the old book. It contained a note in her mother's handwriting: “If you have reached this page, the story is yours now. Write it honestly.”"
+                StoryPart(11, "A Story of Their Own", listOf(
+                    "Daniel laughed softly and took a small photograph from his wallet. It was the missing half: two children standing in front of the blue library door, holding the same book between them. Mara recognised herself beside a boy she now knew was Daniel.",
+                    "On the back, their mothers had written: “May they grow up knowing that kindness can begin again.” The photograph did not mean the two were destined for anything. It simply reminded them that their families had once imagined a kinder future—and that they were free to choose what came next.",
+                    "The library reopened six weeks later. The reading room was bright again, the shelves were full, and the names of every volunteer and donor were displayed together at the entrance. Mara gave the opening speech. Daniel stood beside Elias, and for the first time in years the brothers looked at ease with one another.",
+                    "After the guests had gone, Mara and Daniel sat on the library steps. They spoke honestly about the years they had lost, the people they were becoming, and the friendship they wanted to build. Neither made promises they could not keep. They agreed to take their time and let trust grow through ordinary, thoughtful choices.",
+                    "Mara returned the old book to its shelf, but kept the photograph. The family misunderstanding had finally been put to rest, the library's promise had been fulfilled, and the future no longer belonged to an unfinished letter. As Daniel switched off the reading-room lights, Mara smiled at the quiet shelves. Their parents had left them a story about forgiveness; now they had written its ending together—with the door open, the truth spoken, and a new beginning chosen freely."
                 ))
             )
         )
