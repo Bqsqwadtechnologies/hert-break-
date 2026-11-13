@@ -185,7 +185,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                 onSelfCare = { openFeature(Routes.SELF_CARE) },
                 onRebuild = { openFeature(Routes.REBUILD) },
                 onAffirmations = { openFeature(Routes.AFFIRMATIONS) },
-                onHeartsShop = { navController.navigate(Routes.HEARTS_SHOP) },
+                onHeartsShop = { pendingFeatureRoute = null; navController.navigate(Routes.HEARTS_SHOP) },
                 onSettings = { navController.navigate(Routes.SETTINGS) },
                 onMemories = { openFeature(Routes.MEMORIES) },
                 onTriggers = { openFeature(Routes.TRIGGERS) },
@@ -305,7 +305,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                         )
                     }
                 },
-                onBack = { navController.popBackStack() },
+                onBack = { pendingFeatureRoute = null; navController.popBackStack() },
                 adsAllowed = adsAllowed
             )
         }
