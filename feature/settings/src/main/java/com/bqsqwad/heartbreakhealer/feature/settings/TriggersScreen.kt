@@ -8,6 +8,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.bqsqwad.heartbreakhealer.core.common.ads.AdsConfig
+import com.bqsqwad.heartbreakhealer.core.ui.ads.BannerAdView
 
 data class TriggerUi(val id: Long, val name: String, val coping: String)
 
@@ -15,6 +17,7 @@ data class TriggerUi(val id: Long, val name: String, val coping: String)
 fun TriggersScreen(
     triggers: List<TriggerUi> = emptyList(),
     onAdd: (String, String) -> Unit = { _, _ -> },
+    adsAllowed: Boolean = false,
     onBack: () -> Unit = {}
 ) {
     var adding by remember { mutableStateOf(false) }
@@ -55,6 +58,10 @@ fun TriggersScreen(
                     }
                 }
             }
+        }
+        if (!adding) {
+            Spacer(Modifier.height(8.dp))
+            BannerAdView(unitId = AdsConfig.BANNER_LIBRARY, enabled = adsAllowed)
         }
     }
 }
