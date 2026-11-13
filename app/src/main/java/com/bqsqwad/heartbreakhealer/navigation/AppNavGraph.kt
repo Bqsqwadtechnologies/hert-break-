@@ -329,6 +329,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                 },
                 onReduceMotionChanged = dashboardViewModel::setReduceMotion,
                 onClearData = dashboardViewModel::clearAll,
+                adsAllowed = adsAllowed,
                 onBack = { navController.popBackStack()
                 }
             )
