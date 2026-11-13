@@ -26,7 +26,9 @@ enum class InterstitialPlacement(val unitId: String) {
 
 enum class RewardedPlacement(val unitId: String) {
     HEARTS_REWARD(AdsConfig.REWARDED_HEARTS),
-    SHOP_EXTRA_REWARD(AdsConfig.REWARDED_SHOP_EXTRA)
+    SHOP_EXTRA_REWARD(AdsConfig.REWARDED_SHOP_EXTRA),
+    HEALING_PATH_14(AdsConfig.REWARDED_HEALING_PATH_14),
+    REBUILD_30(AdsConfig.REWARDED_REBUILD_30)
 }
 
 @Singleton
@@ -154,7 +156,7 @@ class AdManager @Inject constructor() {
         )
     }
 
-    /** Only call from an explicit user action; reward is granted solely by the SDK reward callback. */
+    /** Rewarded video is only opened after the user explicitly chooses the watch action. */
     fun showRewarded(
         activity: Activity,
         placement: RewardedPlacement,
