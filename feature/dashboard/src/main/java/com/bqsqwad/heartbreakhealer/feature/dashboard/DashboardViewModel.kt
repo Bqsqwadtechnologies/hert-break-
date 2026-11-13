@@ -141,9 +141,16 @@ class DashboardViewModel @Inject constructor(
         viewModelScope.launch { noContactRepository.recordSlip() }
     }
 
-    fun onRewardedHearts() {
+    fun spendHearts(amount: Int, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            onResult(heartsRepository.spend(amount))
+        }
+    }
+
+    fun onRewardedHearts(onComplete: () -> Unit = {}) {
         viewModelScope.launch {
             heartsRepository.earnFromRewardedAd()
+            onComplete()
         }
     }
 }
