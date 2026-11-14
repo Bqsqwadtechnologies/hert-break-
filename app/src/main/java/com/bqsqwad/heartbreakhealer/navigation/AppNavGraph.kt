@@ -115,6 +115,9 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
     val lastJourneyCompletionDate by dashboardViewModel.lastJourneyCompletionDate.collectAsState()
     val viewedStoryIds by dashboardViewModel.viewedStoryIds.collectAsState()
     val seenJokeIds by dashboardViewModel.seenJokeIds.collectAsState()
+    val activeStoryId by dashboardViewModel.activeStoryId.collectAsState()
+    val activeStoryPart by dashboardViewModel.activeStoryPart.collectAsState()
+    val activeJokeIndex by dashboardViewModel.activeJokeIndex.collectAsState()
     // Both guided journeys share a single daily completion lock in DataStore.
     val context = LocalContext.current
     val activity = context as? Activity
@@ -466,12 +469,25 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                 seenJokeIds = seenJokeIds,
                 onMarkStoryViewed = dashboardViewModel::markStoryViewed,
                 onMarkJokeSeen = dashboardViewModel::markJokeSeen,
+                activeStoryId = activeStoryId,
+                activeStoryPart = activeStoryPart,
+                activeJokeIndex = activeJokeIndex,
+                onSaveStoryProgress = dashboardViewModel::saveStoryProgress,
+                onClearStoryProgress = dashboardViewModel::clearStoryProgress,
+                onSaveJokeProgress = dashboardViewModel::saveJokeProgress,
+                onClearJokeProgress = dashboardViewModel::clearJokeProgress,
                 onUnlock = { kind, onUnlocked ->
                     val host = activity
                     if (host == null) {
                         onUnlocked()
                     } else {
-                        val placement = if (kind == "joke") RewardedPlacement.JOKE_UNLOCK else RewardedPlacement.STORY_UNLOCK
+                        val placement = when {
+                            kind == "joke" -> RewardedPlacement.JOKE_UNLOCK
+                            kind.startsWith("story_part_") -> RewardedPlacement.storyPart(
+                                kind.substringAfterLast("_").toIntOrNull() ?: 1
+                            )
+                            else -> RewardedPlacement.storyPart(1)
+                        }
                         adManager.showRewarded(
                             host,
                             placement,
