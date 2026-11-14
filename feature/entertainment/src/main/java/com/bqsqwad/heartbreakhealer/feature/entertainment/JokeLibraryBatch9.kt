@@ -87,6 +87,9 @@ internal object JokeLibraryBatch9 {
         "The lamp started a study group. It was full of bright ideas.",
         "The book joined a gardening club to grow its plot.",
         "The river's favourite holiday is a current getaway.",
-        "The kettle joined a choir because it could hit the high notes when it boiled."
+        "The kettle joined a choir because it could hit the high notes when it boiled.",
+        "The stapler joined a choir because it loved bringing voices together.",
+        "The map became a storyteller because every tale took a new direction.",
+        "The clock's favourite subject is grammar because it knows all about past, present, and future."
     )
 }
