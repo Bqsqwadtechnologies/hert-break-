@@ -63,5 +63,5 @@ internal object JokeLibraryExpansion {
         "The train got a perfect score because it stayed on track.",
         "The clockmaker was calm under pressure; he knew how to handle the hours.",
         "The pillow started a book club. It enjoyed a soft landing at the end of every chapter."
-    ) + JokeLibraryBatch2.jokes + JokeLibraryBatch3.jokes + JokeLibraryBatch4.jokes + JokeLibraryBatch5.jokes + JokeLibraryBatch6.jokes
+    ) + JokeLibraryBatch2.jokes + JokeLibraryBatch3.jokes + JokeLibraryBatch4.jokes + JokeLibraryBatch5.jokes + JokeLibraryBatch6.jokes + JokeLibraryBatch7.jokes
 }
