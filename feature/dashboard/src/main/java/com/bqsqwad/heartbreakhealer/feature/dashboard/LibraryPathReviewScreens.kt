@@ -69,7 +69,6 @@ fun HealingPathScreen(
 ) {
     var completedLocally by remember { mutableStateOf(emptySet<Int>()) }
     var blockedToday by remember(completedToday) { mutableStateOf(completedToday) }
-    var showRewardOffer by remember { mutableStateOf(false) }
     var showSuccess by remember { mutableStateOf(false) }
     val completed = days.filter { it.done }.map { it.day }.toSet() + completedLocally
     val nextDay = (1..14).firstOrNull { it !in completed } ?: 15
@@ -116,7 +115,7 @@ fun HealingPathScreen(
                                     if (success) {
                                         completedLocally = completedLocally + d.day
                                         blockedToday = true
-                                        showRewardOffer = true
+                                        onWatchRewarded { showSuccess = true }
                                     } else {
                                         blockedToday = true
                                     }
@@ -131,23 +130,6 @@ fun HealingPathScreen(
         BannerAdView(unitId = AdsConfig.BANNER_PATHS, enabled = adsAllowed)
     }
 
-    if (showRewardOffer) {
-        JourneyRewardOfferDialog(
-            title = "You made space for healing",
-            description = "Your Healing Path step is safely saved. Watching is optional: watch a short video to support the app and earn 15 Hearts, or continue without an ad.",
-            showRewardedOption = adsAllowed,
-            onWatchRewarded = {
-                onWatchRewarded {
-                    showRewardOffer = false
-                    showSuccess = true
-                }
-            },
-            onContinue = {
-                showRewardOffer = false
-                showSuccess = true
-            }
-        )
-    }
     if (showSuccess) {
         JourneySuccessDialog(
             title = "Your healing matters",
