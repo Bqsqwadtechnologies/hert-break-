@@ -278,9 +278,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                             RewardedPlacement.REBUILD_30,
                             onRewarded = { dashboardViewModel.onRewardedHearts() },
                             onDismissed = onFinished,
-                            onUnavailable = {
-                                Toast.makeText(host, "A rewarded video isn't ready yet. Try again shortly, or continue without an ad. Your progress is saved.", Toast.LENGTH_LONG).show()
-                            }
+                            onUnavailable = { onFinished() }
                         )
                     }
                 },
@@ -480,9 +478,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                             placement,
                             onRewarded = onUnlocked,
                             onDismissed = {},
-                            onUnavailable = {
-                                Toast.makeText(host, "A rewarded video isn't ready yet. Please try again shortly.", Toast.LENGTH_LONG).show()
-                            }
+                            onUnavailable = onUnlocked
                         )
                     }
                 },
