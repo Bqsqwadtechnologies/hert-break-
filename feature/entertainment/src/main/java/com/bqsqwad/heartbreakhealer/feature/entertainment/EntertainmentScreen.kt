@@ -117,6 +117,15 @@ fun EntertainmentScreen(
                 Column(Modifier.weight(1f).padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                     Text("A little laugh can brighten the moment.", style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.height(18.dp))
+                    if (activeJokeIndex in EntertainmentCatalog.jokes.indices) {
+                        OutlinedButton(
+                            onClick = {
+                                joke = activeJokeIndex to EntertainmentCatalog.jokes[activeJokeIndex]
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) { Text("Resume your last joke") }
+                        Spacer(Modifier.height(8.dp))
+                    }
                     Button(
                         onClick = {
                             if (unseenJokes.isNotEmpty()) {
@@ -191,7 +200,7 @@ fun EntertainmentScreen(
                 Text(selected.second, style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.height(26.dp))
                 Button(onClick = {
-                    val next = unseenJokes.firstOrNull()
+                    val next = unseenJokes.firstOrNull { it != selected.first }
                     if (next == null) {
                         joke = null
                         onClearJokeProgress()
