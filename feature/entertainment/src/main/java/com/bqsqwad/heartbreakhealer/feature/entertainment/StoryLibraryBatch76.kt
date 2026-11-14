@@ -1,0 +1,23 @@
+package com.bqsqwad.heartbreakhealer.feature.entertainment
+
+internal object StoryLibraryBatch76 {
+    val stories = listOf(
+        StorySeries(
+            id = "last_page_music_notebook",
+            title = "The Last Page of the Music Notebook",
+            tagline = "A ten-part story of memory, discovery, and community.",
+            parts = listOf(
+                StoryPart(1, "A Torn Corner", listOf("Mina found a music notebook in the school auditorium after rehearsal. Most pages contained scales and short melodies, but the final page had been torn away.", "The cover carried the name of a former student, Elias, who had graduated many years earlier.", "Mina asked the music teacher whether the notebook belonged in the school archive.")),
+                StoryPart(2, "The Old Ensemble", listOf("The teacher remembered Elias as a member of a student ensemble that had performed at community events.", "The group had written an original piece together, but the school programme listed only the ensemble name and not the individual composers.", "Mina wondered whether the missing page contained the ending of their composition.")),
+                StoryPart(3, "A Programme in Storage", listOf("The archive held a programme from the final concert. It mentioned a piece called 'Morning Windows' and thanked the student ensemble for its arrangement.", "A handwritten note said the score had been returned to its writers after the performance.", "The teacher suggested contacting former members before assuming the notebook held the only copy.")),
+                StoryPart(4, "Finding the Players", listOf("Mina and her classmates located two former ensemble members through the school's alumni office. Both agreed to speak with them.", "One remembered Elias writing the opening melody; the other remembered a classmate creating the harmony.", "Neither could recall how the piece ended, but they knew the group had recorded a rehearsal.")),
+                StoryPart(5, "The Rehearsal Tape", listOf("The school archive had a digital recording labelled with the concert date. The audio was clear enough to hear the full composition.", "The former students listened together and recognised the missing ending. It had been written by a third member, Ada, whose name was absent from the programme.", "They agreed that any new score should credit all contributors accurately.")),
+                StoryPart(6, "A Question of Permission", listOf("The music teacher explained that the school needed permission before publishing the arrangement or using the recording in a public project.", "Mina helped the teacher contact the composers and confirm what each person was comfortable sharing.", "The group chose to donate a corrected score to the archive and allow students to perform it with proper credit.")),
+                StoryPart(7, "Rewriting the Score", listOf("The former students met the current ensemble and helped transcribe the recording. They checked the rhythm and notes together rather than relying on memory alone.", "Mina noticed a measure that differed from the old notebook. The group listened again and confirmed that the recording contained a later revision.", "They marked both versions in the archive so the history of the composition remained clear.")),
+                StoryPart(8, "A New Arrangement", listOf("The current ensemble prepared the piece for a school event. The teacher asked them to respect the original structure while making the performance their own.", "The former composers attended rehearsal and offered suggestions, but left the final interpretation to the students.", "Mina felt proud that the notebook had connected generations without turning the past into a rule that could not change.")),
+                StoryPart(9, "The Concert", listOf("At the concert, the programme credited all original writers and explained that the current students had prepared a new performance.", "The audience listened closely. Afterward, Ada spoke about how meaningful it was to see her contribution recognised after so many years.", "The teacher placed the corrected score beside the old notebook in the archive.")),
+                StoryPart(10, "A Page Added", listOf("Mina made a new final page for the notebook, carefully labelled as a modern addition. It listed the recovered ending, the contributors, and the date the score was verified.", "The school kept the recording under its archive rules and invited former students to add corrections if they found further evidence.", "The notebook was no longer unfinished. Its final page told a story about collaboration, careful credit, and music that could be shared honestly."))
+            )
+        )
+    )
+}
