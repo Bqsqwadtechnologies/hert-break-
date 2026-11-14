@@ -21,6 +21,13 @@ fun EntertainmentScreen(
     seenJokeIds: Set<String>,
     onMarkStoryViewed: (String) -> Unit,
     onMarkJokeSeen: (String) -> Unit,
+    activeStoryId: String?,
+    activeStoryPart: Int,
+    activeJokeIndex: Int,
+    onSaveStoryProgress: (String, Int) -> Unit,
+    onClearStoryProgress: () -> Unit,
+    onSaveJokeProgress: (Int) -> Unit,
+    onClearJokeProgress: () -> Unit,
     onUnlock: (String, () -> Unit) -> Unit,
     adsAllowed: Boolean,
     onBack: () -> Unit
@@ -31,6 +38,19 @@ fun EntertainmentScreen(
     var joke by remember { mutableStateOf<Pair<Int, String>?>(null) }
     val unseenStories = EntertainmentCatalog.stories.filter { it.id !in viewedStoryIds }
     val unseenJokes = EntertainmentCatalog.jokes.indices.filter { "joke_${it + 1}" !in seenJokeIds }
+    LaunchedEffect(activeStoryId, activeStoryPart, activeJokeIndex) {
+        if (activeStoryId != null && activeStory == null && joke == null) {
+            val saved = EntertainmentCatalog.stories.firstOrNull { it.id == activeStoryId }
+            if (saved != null) {
+                activeStory = saved
+                partIndex = activeStoryPart.coerceIn(0, saved.parts.lastIndex)
+                tab = "stories"
+            }
+        } else if (activeJokeIndex in EntertainmentCatalog.jokes.indices && activeStory == null && joke == null) {
+            joke = activeJokeIndex to EntertainmentCatalog.jokes[activeJokeIndex]
+            tab = "jokes"
+        }
+    }
 
     Column(Modifier.fillMaxSize()) {
         Row(
@@ -65,8 +85,9 @@ fun EntertainmentScreen(
                             Button(
                                 onClick = {
                                     val story = unseenStories.random()
-                                    onUnlock("story_start") {
+                                    onUnlock("story_part_1") {
                                         onMarkStoryViewed(story.id)
+                                        onSaveStoryProgress(story.id, 0)
                                         activeStory = story
                                         partIndex = 0
                                     }
@@ -76,6 +97,18 @@ fun EntertainmentScreen(
                             // Story library count intentionally hidden.
                         } else {
                             Text("You've read every story in this collection. More stories will arrive in a future content update.", modifier = Modifier.padding(18.dp))
+                        }
+                        if (activeStoryId != null) {
+                            val savedStory = EntertainmentCatalog.stories.firstOrNull { it.id == activeStoryId }
+                            if (savedStory != null) {
+                                OutlinedButton(
+                                    onClick = {
+                                        activeStory = savedStory
+                                        partIndex = activeStoryPart.coerceIn(0, savedStory.parts.lastIndex)
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) { Text("Resume ${savedStory.title}") }
+                            }
                         }
                     }
                     item { NativeAdCard(unitId = AdsConfig.NATIVE_LIBRARY, enabled = adsAllowed) }
@@ -90,6 +123,7 @@ fun EntertainmentScreen(
                                 val selected = unseenJokes.random()
                                 onUnlock("joke") {
                                     onMarkJokeSeen("joke_${selected + 1}")
+                                    onSaveJokeProgress(selected)
                                     joke = selected to EntertainmentCatalog.jokes[selected]
                                 }
                             }
@@ -128,8 +162,9 @@ fun EntertainmentScreen(
                     if (partIndex < story.parts.lastIndex) {
                         Button(
                             onClick = {
-                                onUnlock("story_next_part") {
+                                onUnlock("story_part_${partIndex + 2}") {
                                     partIndex++
+                                    onSaveStoryProgress(story.id, partIndex)
                                 }
                             },
                             modifier = Modifier.fillMaxWidth()
@@ -137,6 +172,7 @@ fun EntertainmentScreen(
                     } else {
                         Text("The End", style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
                         Text("Please update Heartbreak Healer to enjoy the latest stories and improvements.", style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
+                        LaunchedEffect(story.id) { onClearStoryProgress() }
                     }
                     OutlinedButton(onClick = { activeStory = null }, modifier = Modifier.fillMaxWidth()) { Text("Back to Stories") }
                 }
@@ -155,8 +191,18 @@ fun EntertainmentScreen(
                 Text(selected.second, style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.height(26.dp))
                 Button(onClick = {
-                    joke = null
-                }, modifier = Modifier.fillMaxWidth()) { Text("That's funny — next one") }
+                    val next = unseenJokes.firstOrNull()
+                    if (next == null) {
+                        joke = null
+                        onClearJokeProgress()
+                    } else {
+                        onUnlock("joke") {
+                            onMarkJokeSeen("joke_${next + 1}")
+                            onSaveJokeProgress(next)
+                            joke = next to EntertainmentCatalog.jokes[next]
+                        }
+                    }
+                }, modifier = Modifier.fillMaxWidth(), enabled = unseenJokes.isNotEmpty()) { Text("That's funny — next one") }
                 OutlinedButton(onClick = { joke = null }, modifier = Modifier.fillMaxWidth()) { Text("Back to jokes") }
             }
             BannerAdView(unitId = AdsConfig.BANNER_LIBRARY, enabled = adsAllowed)
