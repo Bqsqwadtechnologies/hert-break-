@@ -85,7 +85,7 @@ fun EntertainmentScreen(
                             Button(
                                 onClick = {
                                     val story = unseenStories.random()
-                                    onUnlock("story_part_1") {
+                                    onUnlock("story_part_${Math.floorMod(story.id.hashCode(), 20) + 1}") {
                                         onMarkStoryViewed(story.id)
                                         onSaveStoryProgress(story.id, 0)
                                         activeStory = story
@@ -171,7 +171,7 @@ fun EntertainmentScreen(
                     if (partIndex < story.parts.lastIndex) {
                         Button(
                             onClick = {
-                                onUnlock("story_part_${partIndex + 2}") {
+                                onUnlock("story_part_${Math.floorMod(story.id.hashCode() + partIndex + 1, 20) + 1}") {
                                     partIndex++
                                     onSaveStoryProgress(story.id, partIndex)
                                 }
