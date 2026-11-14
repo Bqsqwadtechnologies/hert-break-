@@ -38,20 +38,6 @@ fun EntertainmentScreen(
     var joke by remember { mutableStateOf<Pair<Int, String>?>(null) }
     val unseenStories = EntertainmentCatalog.stories.filter { it.id !in viewedStoryIds }
     val unseenJokes = EntertainmentCatalog.jokes.indices.filter { "joke_${it + 1}" !in seenJokeIds }
-    LaunchedEffect(activeStoryId, activeStoryPart, activeJokeIndex) {
-        if (activeStoryId != null && activeStory == null && joke == null) {
-            val saved = EntertainmentCatalog.stories.firstOrNull { it.id == activeStoryId }
-            if (saved != null) {
-                activeStory = saved
-                partIndex = activeStoryPart.coerceIn(0, saved.parts.lastIndex)
-                tab = "stories"
-            }
-        } else if (activeJokeIndex in EntertainmentCatalog.jokes.indices && activeStory == null && joke == null) {
-            joke = activeJokeIndex to EntertainmentCatalog.jokes[activeJokeIndex]
-            tab = "jokes"
-        }
-    }
-
     Column(Modifier.fillMaxSize()) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
@@ -116,6 +102,13 @@ fun EntertainmentScreen(
             } else {
                 Column(Modifier.weight(1f).padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                     Text("A little laugh can brighten the moment.", style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
+                    if (activeJokeIndex in EntertainmentCatalog.jokes.indices) {
+                        Spacer(Modifier.height(10.dp))
+                        OutlinedButton(
+                            onClick = { joke = activeJokeIndex to EntertainmentCatalog.jokes[activeJokeIndex] },
+                            modifier = Modifier.fillMaxWidth()
+                        ) { Text("Resume your last joke") }
+                    }
                     Spacer(Modifier.height(18.dp))
                     if (activeJokeIndex in EntertainmentCatalog.jokes.indices) {
                         OutlinedButton(
@@ -181,9 +174,15 @@ fun EntertainmentScreen(
                     } else {
                         Text("The End", style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
                         Text("Please update Heartbreak Healer to enjoy the latest stories and improvements.", style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
-                        LaunchedEffect(story.id) { onClearStoryProgress() }
+
                     }
-                    OutlinedButton(onClick = { activeStory = null }, modifier = Modifier.fillMaxWidth()) { Text("Back to Stories") }
+                    OutlinedButton(
+                        onClick = {
+                            if (partIndex == story.parts.lastIndex) onClearStoryProgress()
+                            activeStory = null
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) { Text("Back to Stories") }
                 }
             }
             BannerAdView(unitId = AdsConfig.BANNER_LIBRARY, enabled = adsAllowed)
