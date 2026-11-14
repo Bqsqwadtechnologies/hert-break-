@@ -40,6 +40,9 @@ class UserPreferences @Inject constructor(
     val completedRebuildDays: Flow<Set<String>> = ds.data.map { it[Keys.REBUILD_DAYS] ?: emptySet() }
     val viewedStoryIds: Flow<Set<String>> = ds.data.map { it[Keys.VIEWED_STORIES] ?: emptySet() }
     val seenJokeIds: Flow<Set<String>> = ds.data.map { it[Keys.SEEN_JOKES] ?: emptySet() }
+    val activeStoryId: Flow<String?> = ds.data.map { it[Keys.ACTIVE_STORY_ID] }
+    val activeStoryPart: Flow<Int> = ds.data.map { it[Keys.ACTIVE_STORY_PART] ?: 0 }
+    val activeJokeIndex: Flow<Int> = ds.data.map { it[Keys.ACTIVE_JOKE_INDEX] ?: -1 }
     val lastJourneyCompletionDate: Flow<String?> = ds.data.map { it[Keys.LAST_JOURNEY_COMPLETION_DATE] }
     val timeCapsuleText: Flow<String?> = ds.data.map { it[Keys.CAPSULE_TEXT] }
     val timeCapsuleUnlock: Flow<String?> = ds.data.map { it[Keys.CAPSULE_UNLOCK] }
@@ -152,6 +155,29 @@ class UserPreferences @Inject constructor(
         ds.edit { data -> data[Keys.VIEWED_STORIES] = (data[Keys.VIEWED_STORIES] ?: emptySet()) + storyId }
     }
 
+    suspend fun saveStoryProgress(storyId: String, partIndex: Int) {
+        if (storyId.isBlank()) return
+        ds.edit { data ->
+            data[Keys.ACTIVE_STORY_ID] = storyId
+            data[Keys.ACTIVE_STORY_PART] = partIndex.coerceAtLeast(0)
+        }
+    }
+
+    suspend fun clearStoryProgress() {
+        ds.edit { data ->
+            data.remove(Keys.ACTIVE_STORY_ID)
+            data.remove(Keys.ACTIVE_STORY_PART)
+        }
+    }
+
+    suspend fun saveJokeProgress(index: Int) {
+        ds.edit { data -> data[Keys.ACTIVE_JOKE_INDEX] = index.coerceAtLeast(-1) }
+    }
+
+    suspend fun clearJokeProgress() {
+        ds.edit { data -> data[Keys.ACTIVE_JOKE_INDEX] = -1 }
+    }
+
     suspend fun markJokeSeen(jokeId: String) {
         if (jokeId.isBlank()) return
         ds.edit { data -> data[Keys.SEEN_JOKES] = (data[Keys.SEEN_JOKES] ?: emptySet()) + jokeId }
@@ -211,6 +237,9 @@ class UserPreferences @Inject constructor(
         val REBUILD_DAYS = stringSetPreferencesKey("completed_rebuild_days")
         val VIEWED_STORIES = stringSetPreferencesKey("viewed_story_ids")
         val SEEN_JOKES = stringSetPreferencesKey("seen_joke_ids")
+        val ACTIVE_STORY_ID = stringPreferencesKey("active_story_id")
+        val ACTIVE_STORY_PART = intPreferencesKey("active_story_part")
+        val ACTIVE_JOKE_INDEX = intPreferencesKey("active_joke_index")
         val LAST_JOURNEY_COMPLETION_DATE = stringPreferencesKey("last_journey_completion_date")
         val FIRST_LAUNCH = booleanPreferencesKey("first_launch")
         val AGE_CONFIRMED = booleanPreferencesKey("age_confirmed")
