@@ -36,9 +36,12 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import com.bqsqwad.heartbreakhealer.core.common.ads.AdManager
 import com.bqsqwad.heartbreakhealer.core.common.ads.ConsentHelper
+import com.bqsqwad.heartbreakhealer.notifications.DailyReminderWorker
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private var openStoriesFromReminder by mutableStateOf(false)
+
     @Inject lateinit var consentHelper: ConsentHelper
     @Inject lateinit var adManager: AdManager
     override fun onStart() {
@@ -51,9 +54,16 @@ class MainActivity : ComponentActivity() {
         super.onStop()
     }
 
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        openStoriesFromReminder = intent.getBooleanExtra(DailyReminderWorker.EXTRA_OPEN_STORIES, false)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        openStoriesFromReminder = intent?.getBooleanExtra(DailyReminderWorker.EXTRA_OPEN_STORIES, false) ?: false
         val pendingCrashReport = CrashReportStore.read(this)
         enableEdgeToEdge()
         consentHelper.requestConsent(this) { canShowAds ->
@@ -82,7 +92,11 @@ class MainActivity : ComponentActivity() {
                         Column(Modifier.fillMaxSize()) {
                             NetworkConnectionNotice()
                             Box(Modifier.weight(1f)) {
-                                HeartbreakHealerAppContent(adManager)
+                                HeartbreakHealerAppContent(
+                                    adManager = adManager,
+                                    openStoriesFromReminder = openStoriesFromReminder,
+                                    onReminderNavigationHandled = { openStoriesFromReminder = false }
+                                )
                             }
                         }
                     }
@@ -116,7 +130,18 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun HeartbreakHealerAppContent(adManager: AdManager) {
+fun HeartbreakHealerAppContent(
+    adManager: AdManager,
+    openStoriesFromReminder: Boolean = false,
+    onReminderNavigationHandled: () -> Unit = {}
+) {
     val navController = rememberNavController()
-    AppNavGraph(navController = navController, adManager = adManager)
+    AppNavGraph(
+        navController = navController,
+        adManager = adManager,
+        openStoriesOnStart = openStoriesFromReminder,
+        onReminderNavigationHandled = onReminderNavigationHandled
+    )
 }
+
+
