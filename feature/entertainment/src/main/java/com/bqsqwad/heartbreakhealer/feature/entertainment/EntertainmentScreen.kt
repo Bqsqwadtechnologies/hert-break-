@@ -58,7 +58,7 @@ fun EntertainmentScreen(
                     item {
                         Spacer(Modifier.height(8.dp))
                         Text("A story chosen just for this visit", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                        Text("Romance, secrets and endings that make you want to read one more part.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("Mysteries, discoveries and uplifting endings that make you want to read one more part.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     item {
                         if (unseenStories.isNotEmpty()) {
@@ -73,7 +73,7 @@ fun EntertainmentScreen(
                                 },
                                 modifier = Modifier.fillMaxWidth()
                             ) { Text("Surprise me with a story") }
-                            Text("${unseenStories.size} unread stories in your collection", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            // Story library count intentionally hidden.
                         } else {
                             Text("You've read every story in this collection. More stories will arrive in a future content update.", modifier = Modifier.padding(18.dp))
                         }
@@ -112,7 +112,7 @@ fun EntertainmentScreen(
             ) {
                 item {
                     Text(story.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                    Text("Part ${part.number} of ${story.parts.size} • ${part.title}", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    Text(part.title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
                 }
                 items(part.paragraphs.size) { index ->
                     Text(
@@ -133,9 +133,10 @@ fun EntertainmentScreen(
                                 }
                             },
                             modifier = Modifier.fillMaxWidth()
-                        ) { Text("Unlock Part ${part.number + 1}") }
+                        ) { Text("Continue reading") }
                     } else {
                         Text("The End", style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                        Text("Please update Heartbreak Healer to enjoy the latest stories and improvements.", style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
                     }
                     OutlinedButton(onClick = { activeStory = null }, modifier = Modifier.fillMaxWidth()) { Text("Back to Stories") }
                 }
