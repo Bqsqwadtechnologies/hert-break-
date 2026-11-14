@@ -165,8 +165,11 @@ fun AppNavGraph(
             navController.navigate(Routes.DASHBOARD) { popUpTo(Routes.ONBOARDING) { inclusive = true } }
         }
     }
-    LaunchedEffect(onboardingComplete, openStoriesOnStart) {
-        if (onboardingComplete && openStoriesOnStart) {
+    LaunchedEffect(onboardingComplete, openStoriesOnStart, backStackEntry?.destination?.route) {
+        if (onboardingComplete &&
+            openStoriesOnStart &&
+            backStackEntry?.destination?.route == Routes.DASHBOARD
+        ) {
             navController.navigate(Routes.ENTERTAINMENT) {
                 launchSingleTop = true
             }
