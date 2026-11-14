@@ -30,7 +30,6 @@ fun RebuildScreen(
 ) {
     var completedLocally by remember { mutableStateOf(emptySet<Int>()) }
     var blockedToday by remember(completedToday) { mutableStateOf(completedToday) }
-    var showRewardOffer by remember { mutableStateOf(false) }
     var showSuccess by remember { mutableStateOf(false) }
     val completed = completedDays + completedLocally
     val nextDay = (1..30).firstOrNull { it !in completed } ?: 31
@@ -86,7 +85,7 @@ fun RebuildScreen(
                                     if (success) {
                                         completedLocally = completedLocally + day.day
                                         blockedToday = true
-                                        showRewardOffer = true
+                                        onWatchRewarded { showSuccess = true }
                                     } else {
                                         blockedToday = true
                                     }
@@ -102,23 +101,6 @@ fun RebuildScreen(
         BannerAdView(unitId = AdsConfig.BANNER_LIST, enabled = adsAllowed)
     }
 
-    if (showRewardOffer) {
-        JourneyRewardOfferDialog(
-            title = "A strong step forward",
-            description = "Your Rebuild task is safely saved. Watching is optional: you can watch a short video to support the app and earn 15 Hearts, or continue without an ad.",
-            showRewardedOption = adsAllowed,
-            onWatchRewarded = {
-                onWatchRewarded {
-                    showRewardOffer = false
-                    showSuccess = true
-                }
-            },
-            onContinue = {
-                showRewardOffer = false
-                showSuccess = true
-            }
-        )
-    }
     if (showSuccess) {
         JourneySuccessDialog(
             title = "Keep rebuilding. You're doing well!",
