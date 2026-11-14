@@ -93,7 +93,12 @@ object Routes {
 }
 
 @Composable
-fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
+fun AppNavGraph(
+    navController: NavHostController,
+    adManager: AdManager,
+    openStoriesOnStart: Boolean = false,
+    onReminderNavigationHandled: () -> Unit = {}
+) {
     val dashboardViewModel: DashboardViewModel = hiltViewModel()
     val onboardingComplete by dashboardViewModel.onboardingComplete.collectAsState()
     val capsuleText by dashboardViewModel.capsuleText.collectAsState()
@@ -158,6 +163,14 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
     LaunchedEffect(onboardingComplete, backStackEntry?.destination?.route) {
         if (onboardingComplete && backStackEntry?.destination?.route == Routes.ONBOARDING) {
             navController.navigate(Routes.DASHBOARD) { popUpTo(Routes.ONBOARDING) { inclusive = true } }
+        }
+    }
+    LaunchedEffect(onboardingComplete, openStoriesOnStart) {
+        if (onboardingComplete && openStoriesOnStart) {
+            navController.navigate(Routes.ENTERTAINMENT) {
+                launchSingleTop = true
+            }
+            onReminderNavigationHandled()
         }
     }
     LaunchedEffect(backStackEntry?.destination?.route) {
