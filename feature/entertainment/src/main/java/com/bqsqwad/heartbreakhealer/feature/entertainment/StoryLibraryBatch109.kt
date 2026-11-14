@@ -1,0 +1,23 @@
+package com.bqsqwad.heartbreakhealer.feature.entertainment
+
+internal object StoryLibraryBatch109 {
+    val stories = listOf(
+        StorySeries(
+            id = "the_rooftop_paper_airport",
+            title = "The Rooftop Paper Airport",
+            tagline = "A school club turns a forgotten rooftop into a careful experiment in design, teamwork, and flight.",
+            parts = listOf(
+                StoryPart(1, "The Unused Roof", listOf("The science club at Unity School needed room for a project. Their teacher suggested a paper-aircraft exhibition rather than building anything powered.", "The school rooftop was available only with staff supervision, so the club proposed a small test area in the centre, away from edges and walkways.", "The head teacher approved the plan with clear safety rules.")),
+                StoryPart(2, "A Name for the Project", listOf("The students called it the Rooftop Paper Airport. Each team would design a paper aircraft, record its materials, and explain its flight.", "Distance would not be the only measure. Stability, repeatability, clear instructions, and creative design would count too.", "Amina coordinated the teams while Femi kept the results sheet.")),
+                StoryPart(3, "The First Designs", listOf("The first aircraft were folded from ordinary paper. Some spun quickly, while others glided briefly before landing.", "Their teacher asked them to change one feature at a time. Changing wing shape and paper weight together would make the results difficult to understand.", "The club recorded every design with a sketch and a short description.")),
+                StoryPart(4, "A Surprising Result", listOf("Amina's simplest aircraft travelled less distance than the others, but it landed smoothly almost every time.", "Femi suggested that a consistent design might be more useful than one that flew far only once.", "The group added repeatability to its judging criteria and tested each model several times under the same conditions.")),
+                StoryPart(5, "The Windy Afternoon", listOf("A breeze moved across the rooftop during one session. The teacher paused the tests and moved everyone indoors rather than letting the wind make the results unpredictable.", "Inside the classroom, students compared sketches and discussed how air movement could affect a paper aircraft.", "They learned that deciding not to test was also part of responsible experimentation.")),
+                StoryPart(6, "Instructions for Visitors", listOf("The club prepared folding diagrams with numbered steps so younger pupils could follow along.", "The event rules prohibited launching objects toward people, buildings, or the rooftop edge. Tests would take place only in the supervised centre area.", "The head teacher reviewed the instructions and arranged for visitors to make their own models.")),
+                StoryPart(7, "The Exhibition Opens", listOf("Families and students visited on Friday afternoon. Club members explained the differences between broad wings, narrow bodies, and balanced folds.", "A younger pupil asked why one model turned left. Amina showed how an uneven fold could affect its direction and helped the pupil correct it.", "The event felt more like a workshop than a contest.")),
+                StoryPart(8, "A Design Without a Winner", listOf("The results showed that no single model led every category. One was stable, another easy to fold, and a third used the least paper.", "The judges recognised several strengths instead of choosing one overall champion.", "Femi displayed the trial counts and conditions so visitors could see how the club reached its conclusions.")),
+                StoryPart(9, "The Paper Airport Kit", listOf("The school asked the club to create a reusable classroom kit containing safe event rules, paper templates, a results sheet, and a guide to changing one variable at a time.", "The teacher added a reminder that rooftop activities must always be supervised and held away from edges.", "The kit was placed in the science room for future classes.")),
+                StoryPart(10, "A Flight of Ideas", listOf("At the end of term, the rooftop returned to its quiet garden routine. The club packed away its signs and left the area clean.", "Amina kept the first aircraft, not because it had travelled farthest, but because it had taught the team to value careful observation.", "The exhibition became an annual classroom event. Its greatest achievement was showing students that curiosity works best when imagination and responsibility travel together."))
+            )
+        )
+    )
+}
