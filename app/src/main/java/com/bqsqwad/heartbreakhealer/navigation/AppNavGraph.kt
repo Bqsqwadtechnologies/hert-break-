@@ -488,12 +488,19 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                             )
                             else -> RewardedPlacement.storyPart(1)
                         }
+                        // Continue after the rewarded ad closes or cannot be shown.
+                        // The same continuation can be reported by both failure callbacks,
+                        // so guard it to prevent advancing two story parts at once.
+                        val continued = java.util.concurrent.atomic.AtomicBoolean(false)
+                        val continueOnce = {
+                            if (continued.compareAndSet(false, true)) onUnlocked()
+                        }
                         adManager.showRewarded(
                             host,
                             placement,
-                            onRewarded = onUnlocked,
-                            onDismissed = {},
-                            onUnavailable = onUnlocked
+                            onRewarded = continueOnce,
+                            onDismissed = continueOnce,
+                            onUnavailable = continueOnce
                         )
                     }
                 },
