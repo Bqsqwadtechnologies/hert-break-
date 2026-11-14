@@ -450,7 +450,6 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                             onRewarded = { dashboardViewModel.onRewardedHearts() },
                             onDismissed = onFinished,
                             onUnavailable = {
-                                Toast.makeText(host, "A rewarded video isn't ready yet. Your progress is saved.", Toast.LENGTH_LONG).show()
                                 onFinished()
                             }
                         )
@@ -470,7 +469,7 @@ fun AppNavGraph(navController: NavHostController, adManager: AdManager) {
                 onUnlock = { kind, onUnlocked ->
                     val host = activity
                     if (host == null) {
-                        Toast.makeText(context, "A video ad is not available right now.", Toast.LENGTH_LONG).show()
+                        onUnlocked()
                     } else {
                         val placement = if (kind == "joke") RewardedPlacement.JOKE_UNLOCK else RewardedPlacement.STORY_UNLOCK
                         adManager.showRewarded(
