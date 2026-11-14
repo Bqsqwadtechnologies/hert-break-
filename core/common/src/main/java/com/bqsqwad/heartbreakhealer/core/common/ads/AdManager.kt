@@ -30,7 +30,34 @@ enum class RewardedPlacement(val unitId: String) {
     HEALING_PATH_14(AdsConfig.REWARDED_HEALING_PATH_14),
     REBUILD_30(AdsConfig.REWARDED_REBUILD_30),
     STORY_UNLOCK(AdsConfig.REWARDED_HEARTS),
-    JOKE_UNLOCK(AdsConfig.REWARDED_SHOP_EXTRA)
+    JOKE_UNLOCK(AdsConfig.REWARDED_SHOP_EXTRA),
+    STORY_PART_1(AdsConfig.REWARDED_STORY_PART_1),
+    STORY_PART_2(AdsConfig.REWARDED_STORY_PART_2),
+    STORY_PART_3(AdsConfig.REWARDED_STORY_PART_3),
+    STORY_PART_4(AdsConfig.REWARDED_STORY_PART_4),
+    STORY_PART_5(AdsConfig.REWARDED_STORY_PART_5),
+    STORY_PART_6(AdsConfig.REWARDED_STORY_PART_6),
+    STORY_PART_7(AdsConfig.REWARDED_STORY_PART_7),
+    STORY_PART_8(AdsConfig.REWARDED_STORY_PART_8),
+    STORY_PART_9(AdsConfig.REWARDED_STORY_PART_9),
+    STORY_PART_10(AdsConfig.REWARDED_STORY_PART_10),
+    STORY_PART_11(AdsConfig.REWARDED_STORY_PART_11),
+    STORY_PART_12(AdsConfig.REWARDED_STORY_PART_12),
+    STORY_PART_13(AdsConfig.REWARDED_STORY_PART_13),
+    STORY_PART_14(AdsConfig.REWARDED_STORY_PART_14),
+    STORY_PART_15(AdsConfig.REWARDED_STORY_PART_15),
+    STORY_PART_16(AdsConfig.REWARDED_STORY_PART_16),
+    STORY_PART_17(AdsConfig.REWARDED_STORY_PART_17),
+    STORY_PART_18(AdsConfig.REWARDED_STORY_PART_18),
+    STORY_PART_19(AdsConfig.REWARDED_STORY_PART_19),
+    STORY_PART_20(AdsConfig.REWARDED_STORY_PART_20);
+
+    companion object {
+        fun storyPart(partNumber: Int): RewardedPlacement {
+            val index = ((partNumber - 1).coerceAtLeast(0) % 20) + 1
+            return values().first { it.name == "STORY_PART_$index" }
+        }
+    }
 }
 
 @Singleton
