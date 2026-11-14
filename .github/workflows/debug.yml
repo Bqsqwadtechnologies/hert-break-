@@ -3,6 +3,9 @@ name: Debug Build
 # Automatic builds are paused during the content-writing phase.
 # Re-enable push/pull_request triggers when the library is ready for final verification.
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
