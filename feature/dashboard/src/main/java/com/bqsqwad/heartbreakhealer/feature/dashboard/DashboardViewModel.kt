@@ -61,6 +61,12 @@ class DashboardViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
     val seenJokeIds = preferences.seenJokeIds
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+    val activeStoryId = preferences.activeStoryId
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+    val activeStoryPart = preferences.activeStoryPart
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+    val activeJokeIndex = preferences.activeJokeIndex
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), -1)
     val triggers = preferences.savedTriggers
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
     val dailyRemindersEnabled = preferences.dailyRemindersEnabled
@@ -92,6 +98,12 @@ class DashboardViewModel @Inject constructor(
 
     fun markStoryViewed(storyId: String) { viewModelScope.launch { preferences.markStoryViewed(storyId) } }
     fun markJokeSeen(jokeId: String) { viewModelScope.launch { preferences.markJokeSeen(jokeId) } }
+    fun saveStoryProgress(storyId: String, partIndex: Int) {
+        viewModelScope.launch { preferences.saveStoryProgress(storyId, partIndex) }
+    }
+    fun clearStoryProgress() { viewModelScope.launch { preferences.clearStoryProgress() } }
+    fun saveJokeProgress(index: Int) { viewModelScope.launch { preferences.saveJokeProgress(index) } }
+    fun clearJokeProgress() { viewModelScope.launch { preferences.clearJokeProgress() } }
 
     fun logUrgePassed() { viewModelScope.launch { preferences.incrementUrgePassed() } }
 
