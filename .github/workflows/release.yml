@@ -1,12 +1,9 @@
 name: Release Build
 
+# Automatic release builds are paused during the content-writing phase.
+# Restore push triggers when the library is ready for final verification.
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    tags:
-      - 'v*'
 
 permissions:
   contents: read
@@ -23,13 +20,11 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v7
-
       - name: Set up JDK 17
         uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '17'
-
       - name: Restore and validate release keystore
         env:
           BQ_RELEASE_KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
@@ -45,44 +40,33 @@ jobs:
               exit 1
             fi
           done
-
-          # GitHub secrets are text. Remove whitespace only; never strip Base64 letters.
           if ! printf '%s' "$BQ_RELEASE_KEYSTORE_BASE64" | python3 -c 'import base64,sys; s="".join(sys.stdin.read().split()); sys.stdout.buffer.write(base64.b64decode(s, validate=True))' > app/release-key.jks; then
             rm -f app/release-key.jks
-            echo "::error::KEYSTORE_BASE64 is malformed or incomplete. Paste the complete contents of the matching Base64 keystore file into that secret."
+            echo "::error::KEYSTORE_BASE64 is malformed or incomplete."
             exit 1
           fi
           if [[ ! -s app/release-key.jks ]]; then
             echo "::error::Decoded keystore is empty."
             exit 1
           fi
-          if ! keytool -list -keystore app/release-key.jks -storepass "$BQ_RELEASE_STORE_PASSWORD" > /tmp/keystore-list.txt 2>&1; then
-            cat /tmp/keystore-list.txt
-            echo "::error::The keystore could not be opened. Check that KEYSTORE_BASE64 and KEYSTORE_PASSWORD belong to the same JKS file."
+          if ! keytool -list -keystore app/release-key.jks -storepass "$BQ_RELEASE_STORE_PASSWORD" >/dev/null 2>&1; then
+            echo "::error::The keystore could not be opened. Check the matching password."
             exit 1
           fi
           if ! keytool -list -keystore app/release-key.jks -storepass "$BQ_RELEASE_STORE_PASSWORD" -alias "$BQ_RELEASE_KEY_ALIAS" >/dev/null 2>&1; then
-            echo "::error::The keystore opens, but KEY_ALIAS was not found. Check the alias in the matching keystore."
-            keytool -list -keystore app/release-key.jks -storepass "$BQ_RELEASE_STORE_PASSWORD" | sed -n '1,20p'
+            echo "::error::KEY_ALIAS was not found in the keystore."
             exit 1
           fi
-          echo "Release keystore and configured alias validated."
-
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6.4.1
         with:
           gradle-version: '9.0.0'
-
-      - name: Verify Gradle
-        run: gradle --version
-
       - name: Build signed release APK and bundle
         env:
           BQ_RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           BQ_RELEASE_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           BQ_RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: gradle :app:assembleRelease :app:bundleRelease --stacktrace --no-daemon --warning-mode all
-
       - name: Verify APK and AAB signatures
         shell: bash
         run: |
@@ -90,22 +74,14 @@ jobs:
           APK="$(find app/build/outputs/apk/release -maxdepth 1 -name '*.apk' -print -quit)"
           AAB="$(find app/build/outputs/bundle/release -maxdepth 1 -name '*.aab' -print -quit)"
           test -n "$APK" && test -n "$AAB"
-
-          # Android Gradle Plugin installs build-tools in the SDK; apksigner
-          # is not guaranteed to be on PATH on GitHub-hosted runners.
           SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-$HOME/Android/Sdk}}"
           APKSIGNER="$(find "$SDK_ROOT/build-tools" -type f -name apksigner -print 2>/dev/null | sort -V | tail -n 1)"
           if [[ -z "$APKSIGNER" ]]; then
             echo "::error::Could not locate apksigner under $SDK_ROOT/build-tools."
-            echo "Installed Android build-tools:"
-            find "$SDK_ROOT/build-tools" -mindepth 1 -maxdepth 1 -type d -printf '%f\\n' 2>/dev/null || true
             exit 1
           fi
-
           "$APKSIGNER" verify --verbose "$APK"
           jarsigner -verify "$AAB" >/dev/null
-          echo "Both release outputs have valid signatures."
-
       - name: Upload release artifacts
         uses: actions/upload-artifact@v7.0.2
         with:
@@ -115,7 +91,6 @@ jobs:
             app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
           retention-days: 30
-
       - name: Remove temporary keystore
         if: always()
         run: rm -f app/release-key.jks
