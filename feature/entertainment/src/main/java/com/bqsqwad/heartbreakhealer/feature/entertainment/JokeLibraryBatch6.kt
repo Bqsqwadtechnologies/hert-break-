@@ -100,6 +100,7 @@ internal object JokeLibraryBatch6 {
         "Why did the compass get top marks? It always found the right direction.",
         "The baker's favourite sport is dough-jitsu.",
         "Why did the leaf become a journalist? It wanted to turn over a new page.",
+        "Why did the telescope get promoted? It always helped the team see the bigger picture.",
         "The lamp's favourite compliment is 'you brighten the room.'",
         "Why did the library plant a tree? It wanted to grow its collection."
     )
