@@ -1,11 +1,9 @@
 name: Debug Build
 
+# Automatic builds are paused during the content-writing phase.
+# Re-enable push/pull_request triggers when the library is ready for final verification.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
 
 permissions:
   contents: read
@@ -22,24 +20,19 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v7
-
       - name: Set up JDK 17
         uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '17'
-
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6.4.1
         with:
           gradle-version: '9.0.0'
-
       - name: Verify Gradle
         run: gradle --version
-
       - name: Build debug APK
         run: gradle :app:assembleDebug --stacktrace --no-daemon --warning-mode all
-
       - name: Upload debug APK
         uses: actions/upload-artifact@v7.0.2
         with:
