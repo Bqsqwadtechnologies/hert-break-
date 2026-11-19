@@ -1,5 +1,11 @@
 package com.bqsqwad.heartbreakhealer
 
+import com.bqsqwad.heartbreakhealer.core.data.journey.HeartJourneyRepository
+import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -8,10 +14,14 @@ import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
 class HeartbreakHealerApp : Application() {
+    @Inject lateinit var journey: HeartJourneyRepository
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
     override fun onCreate() {
         super.onCreate()
         CrashReportStore.install(this)
         createNotificationChannels()
+        journey.start(appScope) // counts a journey day the moment all three tasks are done
     }
 
     private fun createNotificationChannels() {

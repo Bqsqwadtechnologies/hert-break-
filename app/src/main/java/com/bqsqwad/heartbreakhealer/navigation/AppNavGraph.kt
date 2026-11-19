@@ -90,6 +90,7 @@ object Routes {
     const val PATH = "path"
     const val WEEKLY = "weekly"
     const val ENTERTAINMENT = "entertainment"
+    const val JOURNEY = "heart_journey"
 }
 
 @Composable
@@ -97,7 +98,9 @@ fun AppNavGraph(
     navController: NavHostController,
     adManager: AdManager,
     openStoriesOnStart: Boolean = false,
-    onReminderNavigationHandled: () -> Unit = {}
+    onReminderNavigationHandled: () -> Unit = {},
+    openJourneyOnStart: Boolean = false,
+    onJourneyNavigationHandled: () -> Unit = {}
 ) {
     val dashboardViewModel: DashboardViewModel = hiltViewModel()
     val onboardingComplete by dashboardViewModel.onboardingComplete.collectAsState()
@@ -176,6 +179,15 @@ fun AppNavGraph(
             onReminderNavigationHandled()
         }
     }
+    LaunchedEffect(onboardingComplete, openJourneyOnStart, backStackEntry?.destination?.route) {
+        if (onboardingComplete && openJourneyOnStart && backStackEntry?.destination?.route == Routes.DASHBOARD) {
+            navController.navigate(Routes.JOURNEY) { launchSingleTop = true }
+            onJourneyNavigationHandled()
+        }
+    }
+    LaunchedEffect(backStackEntry?.destination?.route) {
+        dashboardViewModel.recordVisit(backStackEntry?.destination?.route)
+    }
     LaunchedEffect(backStackEntry?.destination?.route) {
         val route = backStackEntry?.destination?.route
         adManager.setAppOpenEligible(
@@ -203,6 +215,12 @@ fun AppNavGraph(
         }
         composable(Routes.DASHBOARD) {
             DashboardScreen(
+                heartSlot = {
+                    com.bqsqwad.heartbreakhealer.feature.heartjourney.HeartJourneyHomeSection(
+                        reduceMotion = reduceMotion,
+                        onOpenJourney = { navController.navigate(Routes.JOURNEY) }
+                    )
+                },
                 hearts = hearts,
                 noContactDays = noContactDays,
                 urgePassedCount = urgePassedCount,
@@ -479,6 +497,22 @@ fun AppNavGraph(
             )
         }
         composable(Routes.WEEKLY) { WeeklyReviewScreen(checkIns = journalEntries.count { runCatching { java.time.LocalDate.parse(it.date).isAfter(java.time.LocalDate.now().minusDays(7)) }.getOrDefault(false) }, urgesRodeOut = urgePassedCount, noContactDays = noContactDays, onBack = { if (activity != null) adManager.showInterstitialIfAllowed(activity, InterstitialPlacement.WEEKLY_REVIEW_EXIT) { navController.popBackStack() } else navController.popBackStack() }, adsAllowed = adsAllowed) }
+        composable(Routes.JOURNEY) {
+            val rebuildDoneCount = (rebuildProgress.filter { it.completed }.map { it.day }.toSet() +
+                rebuildCompletedDays.mapNotNull { it.toIntOrNull() }).size
+            val nextStepRoute = when {
+                rebuildDoneCount < 30 -> Routes.REBUILD
+                completedPathDays.size < 14 -> Routes.PATH
+                else -> Routes.SELF_CARE
+            }
+            com.bqsqwad.heartbreakhealer.feature.heartjourney.HeartJourneyScreen(
+                reduceMotion = reduceMotion,
+                nextStepRoute = nextStepRoute,
+                // Same path as the Home tiles, so the Hearts economy is unchanged. SOS stays free.
+                onOpenFeature = { route, free -> if (free) navController.navigate(route) else openFeature(route) },
+                onBack = { navController.popBackStack() }
+            )
+        }
         composable(Routes.ENTERTAINMENT) {
             EntertainmentScreen(
                 viewedStoryIds = viewedStoryIds,
@@ -529,6 +563,7 @@ fun AppNavGraph(
 
 @Composable
 private fun DashboardScreen(
+    heartSlot: @Composable () -> Unit,
     hearts: Int,
     noContactDays: Int,
     urgePassedCount: Int,
@@ -577,6 +612,8 @@ private fun DashboardScreen(
                 TextButton(onClick = onSettings) { Text("⚙ Settings", color = ink) }
             }
             Spacer(Modifier.height(18.dp))
+            heartSlot()
+            Spacer(Modifier.height(16.dp))
             Card(colors = CardDefaults.cardColors(containerColor = blush), shape = RoundedCornerShape(22.dp), modifier = Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(18.dp)) {
                     Text("You are not alone ❤️", style = MaterialTheme.typography.titleLarge, color = ink, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)

@@ -1,5 +1,8 @@
 package com.bqsqwad.heartbreakhealer.feature.dashboard
 
+import com.bqsqwad.heartbreakhealer.core.data.journey.HeartJourneyRepository
+import com.bqsqwad.heartbreakhealer.core.data.journey.JourneyEvents
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bqsqwad.heartbreakhealer.core.data.repo.HeartsRepository
@@ -23,7 +26,8 @@ class DashboardViewModel @Inject constructor(
     private val journalRepository: JournalRepository,
     private val noContactRepository: NoContactRepository,
     private val preferences: UserPreferences,
-    private val database: AppDatabase
+    private val database: AppDatabase,
+    private val journey: HeartJourneyRepository
 ) : ViewModel() {
 
     val onboardingComplete = preferences.onboardingComplete
@@ -88,27 +92,28 @@ class DashboardViewModel @Inject constructor(
     fun saveCapsule(text: String, days: Int) {
         viewModelScope.launch {
             preferences.setTimeCapsule(text, LocalDate.now().plusDays(days.toLong()).toString())
+            journey.recordEvent(JourneyEvents.CAPSULE)
         }
     }
 
-    fun saveUnsentLetter(content: String) { viewModelScope.launch { journalRepository.saveLetter(content) } }
+    fun saveUnsentLetter(content: String) { viewModelScope.launch { journalRepository.saveLetter(content); journey.recordEvent(JourneyEvents.LETTER) } }
     fun releaseUnsentLetter(id: Long) { viewModelScope.launch { journalRepository.releaseLetter(id) } }
 
     fun completePathDay(day: Int) { viewModelScope.launch { preferences.completePathDay(day) } }
 
-    fun markStoryViewed(storyId: String) { viewModelScope.launch { preferences.markStoryViewed(storyId) } }
-    fun markJokeSeen(jokeId: String) { viewModelScope.launch { preferences.markJokeSeen(jokeId) } }
+    fun markStoryViewed(storyId: String) { viewModelScope.launch { preferences.markStoryViewed(storyId); journey.recordStory() } }
+    fun markJokeSeen(jokeId: String) { viewModelScope.launch { preferences.markJokeSeen(jokeId); journey.recordJoke(jokeId) } }
     fun saveStoryProgress(storyId: String, partIndex: Int) {
-        viewModelScope.launch { preferences.saveStoryProgress(storyId, partIndex) }
+        viewModelScope.launch { preferences.saveStoryProgress(storyId, partIndex); if (partIndex > 0) journey.recordStory() }
     }
     fun clearStoryProgress() { viewModelScope.launch { preferences.clearStoryProgress() } }
     fun saveJokeProgress(index: Int) { viewModelScope.launch { preferences.saveJokeProgress(index) } }
     fun clearJokeProgress() { viewModelScope.launch { preferences.clearJokeProgress() } }
 
-    fun logUrgePassed() { viewModelScope.launch { preferences.incrementUrgePassed() } }
+    fun logUrgePassed() { viewModelScope.launch { preferences.incrementUrgePassed(); journey.recordEvent(JourneyEvents.URGE) } }
 
-    fun addMemory(title: String, note: String) { viewModelScope.launch { preferences.addMemory(title, note) } }
-    fun addTrigger(name: String, coping: String) { viewModelScope.launch { preferences.addTrigger(name, coping) } }
+    fun addMemory(title: String, note: String) { viewModelScope.launch { preferences.addMemory(title, note); journey.recordEvent(JourneyEvents.MEMORY) } }
+    fun addTrigger(name: String, coping: String) { viewModelScope.launch { preferences.addTrigger(name, coping); journey.recordEvent(JourneyEvents.TRIGGER) } }
 
     fun setReduceMotion(enabled: Boolean) { viewModelScope.launch { preferences.setReduceMotion(enabled) } }
     fun setDailyRemindersEnabled(enabled: Boolean) { viewModelScope.launch { preferences.setDailyRemindersEnabled(enabled) } }
@@ -120,6 +125,7 @@ class DashboardViewModel @Inject constructor(
             if (!database.selfCareDao().isCompleted(key)) {
                 database.selfCareDao().insertCompletion(SelfCareCompletionEntity(key, taskId, date, System.currentTimeMillis()))
                 heartsRepository.earnFromSelfCare()
+                journey.recordEvent(JourneyEvents.SELFCARE)
             }
         }
     }
@@ -153,6 +159,7 @@ class DashboardViewModel @Inject constructor(
         viewModelScope.launch {
             database.clearAllTables()
             preferences.clearAll()
+            journey.clearAll()
         }
     }
 
@@ -160,6 +167,7 @@ class DashboardViewModel @Inject constructor(
         viewModelScope.launch {
             journalRepository.saveEntry(mood, note.ifBlank { "Check-in" })
             heartsRepository.earnFromCheckIn()
+            journey.recordEvent(JourneyEvents.CHECKIN)
         }
     }
 
@@ -167,6 +175,7 @@ class DashboardViewModel @Inject constructor(
         viewModelScope.launch {
             val content = listOf("Grateful: $gratitude", "Release: $release", "Hope: $hope").joinToString("\n")
             journalRepository.saveEntry(3, content)
+            journey.recordEvent(JourneyEvents.EVENING)
         }
     }
 
@@ -174,6 +183,7 @@ class DashboardViewModel @Inject constructor(
         viewModelScope.launch {
             journalRepository.saveEntry(mood, content)
             heartsRepository.earnFromJournal()
+            journey.recordEvent(JourneyEvents.JOURNAL)
         }
     }
 
@@ -193,4 +203,12 @@ class DashboardViewModel @Inject constructor(
             onComplete()
         }
     }
+
+    private val trackedVisits = setOf(
+        "affirmations", "coping", "boundaries", "wins", "grief_contact", "library", "weekly", "no_contact", "sos",
+    )
+    fun recordVisit(route: String?) {
+        if (route != null && route in trackedVisits) viewModelScope.launch { journey.recordEvent(JourneyEvents.visit(route)) }
+    }
+
 }

@@ -40,6 +40,7 @@ import com.bqsqwad.heartbreakhealer.notifications.DailyReminderWorker
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private var openStoriesFromReminder by mutableStateOf(false)
+    private var openJourneyFromReminder by mutableStateOf(false)
 
     @Inject lateinit var consentHelper: ConsentHelper
     @Inject lateinit var adManager: AdManager
@@ -57,12 +58,14 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         openStoriesFromReminder = intent.getBooleanExtra(DailyReminderWorker.EXTRA_OPEN_STORIES, false)
+        openJourneyFromReminder = intent.getBooleanExtra(com.bqsqwad.heartbreakhealer.feature.heartjourney.JourneyNotifications.EXTRA_OPEN_JOURNEY, false)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         openStoriesFromReminder = intent?.getBooleanExtra(DailyReminderWorker.EXTRA_OPEN_STORIES, false) ?: false
+        openJourneyFromReminder = intent?.getBooleanExtra(com.bqsqwad.heartbreakhealer.feature.heartjourney.JourneyNotifications.EXTRA_OPEN_JOURNEY, false) ?: false
         val pendingCrashReport = CrashReportStore.read(this)
         enableEdgeToEdge()
         consentHelper.requestConsent(this) { canShowAds ->
@@ -94,7 +97,9 @@ class MainActivity : ComponentActivity() {
                                 HeartbreakHealerAppContent(
                                     adManager = adManager,
                                     openStoriesFromReminder = openStoriesFromReminder,
-                                    onReminderNavigationHandled = { openStoriesFromReminder = false }
+                                    onReminderNavigationHandled = { openStoriesFromReminder = false },
+                                    openJourneyFromReminder = openJourneyFromReminder,
+                                    onJourneyNavigationHandled = { openJourneyFromReminder = false }
                                 )
                             }
                         }
@@ -132,15 +137,21 @@ class MainActivity : ComponentActivity() {
 fun HeartbreakHealerAppContent(
     adManager: AdManager,
     openStoriesFromReminder: Boolean = false,
-    onReminderNavigationHandled: () -> Unit = {}
+    onReminderNavigationHandled: () -> Unit = {},
+    openJourneyFromReminder: Boolean = false,
+    onJourneyNavigationHandled: () -> Unit = {}
 ) {
     val navController = rememberNavController()
-    AppNavGraph(
-        navController = navController,
-        adManager = adManager,
-        openStoriesOnStart = openStoriesFromReminder,
-        onReminderNavigationHandled = onReminderNavigationHandled
-    )
+    Box(Modifier.fillMaxSize()) {
+        AppNavGraph(
+            navController = navController,
+            adManager = adManager,
+            openStoriesOnStart = openStoriesFromReminder,
+            onReminderNavigationHandled = onReminderNavigationHandled,
+            openJourneyOnStart = openJourneyFromReminder,
+            onJourneyNavigationHandled = onJourneyNavigationHandled
+        )
+        // Flowers spray across the whole app when day 30 is counted. It never blocks touches.
+        com.bqsqwad.heartbreakhealer.feature.heartjourney.HeartJourneyGlobalOverlay()
+    }
 }
-
-

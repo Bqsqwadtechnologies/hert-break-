@@ -1,0 +1,1 @@
+Put the BQ Sqwad AI promo video here, named exactly bqsqwad_ai_promo.mp4 (lowercase, no spaces). MP4, H.264 video, AAC audio. Best: portrait 1080x1920 or landscape 1280x720, 15 to 30 seconds, under 15 MB (it is bundled in the app).

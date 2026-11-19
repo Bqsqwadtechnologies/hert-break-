@@ -9,6 +9,10 @@ plugins {
     alias(libs.plugins.hilt)
 }
 
+val companionPackage: String = rootProject.file("config/companion.properties").takeIf { it.exists() }
+    ?.readLines()?.firstOrNull { it.startsWith("PACKAGE=") }?.substringAfter("=")?.trim().orEmpty()
+    .ifEmpty { "com.bqsqwad.companion.notinstalled" }
+
 android {
     namespace = "com.bqsqwad.heartbreakhealer"
     compileSdk = 36
@@ -16,9 +20,10 @@ android {
         applicationId = "com.bqsqwad.heartbreakhealer"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["companionPackage"] = companionPackage
         manifestPlaceholders["admobAppId"] = "ca-app-pub-2748789567113929~6610046816"
     }
     signingConfigs {
@@ -113,6 +118,7 @@ dependencies {
     implementation(project(":feature:memories"))
     implementation(project(":feature:heartsshop"))
     implementation(project(":feature:entertainment"))
+    implementation(project(":feature:heartjourney"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
