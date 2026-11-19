@@ -70,14 +70,18 @@ fun EntertainmentScreen(
                         if (unseenStories.isNotEmpty()) {
                             Button(
                                 onClick = {
+                                    if (isUnlocking) return@Button
+                                    isUnlocking = true
                                     val story = unseenStories.random()
                                     onUnlock("story_part_${Math.floorMod(story.id.hashCode(), 20) + 1}") {
+                                        isUnlocking = false
                                         onMarkStoryViewed(story.id)
                                         onSaveStoryProgress(story.id, 0)
                                         activeStory = story
                                         partIndex = 0
                                     }
                                 },
+                                enabled = !isUnlocking,
                                 modifier = Modifier.fillMaxWidth()
                             ) { Text("Surprise me with a story") }
                             // Story library count intentionally hidden.
@@ -89,12 +93,16 @@ fun EntertainmentScreen(
                             if (savedStory != null) {
                                 OutlinedButton(
                                     onClick = {
+                                        if (isUnlocking) return@OutlinedButton
+                                        isUnlocking = true
                                         val targetPart = activeStoryPart.coerceIn(0, savedStory.parts.lastIndex)
                                         onUnlock("story_part_${Math.floorMod(savedStory.id.hashCode() + targetPart, 20) + 1}") {
+                                            isUnlocking = false
                                             activeStory = savedStory
                                             partIndex = targetPart
                                         }
                                     },
+                                    enabled = !isUnlocking,
                                     modifier = Modifier.fillMaxWidth()
                                 ) { Text("Resume ${savedStory.title}") }
                             }
@@ -109,26 +117,33 @@ fun EntertainmentScreen(
                         Spacer(Modifier.height(10.dp))
                         OutlinedButton(
                             onClick = {
+                                if (isUnlocking) return@OutlinedButton
+                                isUnlocking = true
                                 onUnlock("joke") {
+                                    isUnlocking = false
                                     joke = activeJokeIndex to EntertainmentCatalog.jokes[activeJokeIndex]
                                 }
                             },
+                            enabled = !isUnlocking,
                             modifier = Modifier.fillMaxWidth()
                         ) { Text("Resume your last joke") }
                         Spacer(Modifier.height(18.dp))
                     }
                     Button(
                         onClick = {
+                            if (isUnlocking) return@Button
                             if (unseenJokes.isNotEmpty()) {
+                                isUnlocking = true
                                 val selected = unseenJokes.random()
                                 onUnlock("joke") {
+                                    isUnlocking = false
                                     onMarkJokeSeen("joke_${selected + 1}")
                                     onSaveJokeProgress(selected)
                                     joke = selected to EntertainmentCatalog.jokes[selected]
                                 }
                             }
                         },
-                        enabled = unseenJokes.isNotEmpty()
+                        enabled = unseenJokes.isNotEmpty() && !isUnlocking
                     ) { Text("Get a random joke") }
                     if (unseenJokes.isEmpty()) Text("You've seen every joke in this collection. New jokes will be added in a future update.", textAlign = TextAlign.Center)
                     Spacer(Modifier.height(12.dp))
@@ -162,11 +177,15 @@ fun EntertainmentScreen(
                     if (partIndex < story.parts.lastIndex) {
                         Button(
                             onClick = {
+                                if (isUnlocking) return@Button
+                                isUnlocking = true
                                 onUnlock("story_part_${Math.floorMod(story.id.hashCode() + partIndex + 1, 20) + 1}") {
+                                    isUnlocking = false
                                     partIndex++
                                     onSaveStoryProgress(story.id, partIndex)
                                 }
                             },
+                            enabled = !isUnlocking,
                             modifier = Modifier.fillMaxWidth()
                         ) { Text("Continue reading") }
                     } else {
@@ -197,18 +216,21 @@ fun EntertainmentScreen(
                 Text(selected.second, style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.height(26.dp))
                 Button(onClick = {
+                    if (isUnlocking) return@Button
                     val next = unseenJokes.firstOrNull { it != selected.first }
                     if (next == null) {
                         joke = null
                         onClearJokeProgress()
                     } else {
+                        isUnlocking = true
                         onUnlock("joke") {
+                            isUnlocking = false
                             onMarkJokeSeen("joke_${next + 1}")
                             onSaveJokeProgress(next)
                             joke = next to EntertainmentCatalog.jokes[next]
                         }
                     }
-                }, modifier = Modifier.fillMaxWidth(), enabled = unseenJokes.isNotEmpty()) { Text("That's funny — next one") }
+                }, modifier = Modifier.fillMaxWidth(), enabled = unseenJokes.isNotEmpty() && !isUnlocking) { Text("That's funny — next one") }
                 OutlinedButton(onClick = { joke = null }, modifier = Modifier.fillMaxWidth()) { Text("Back to jokes") }
             }
             BannerAdView(unitId = AdsConfig.BANNER_LIBRARY, enabled = adsAllowed)

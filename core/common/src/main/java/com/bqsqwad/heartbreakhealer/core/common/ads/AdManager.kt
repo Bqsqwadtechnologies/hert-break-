@@ -15,6 +15,7 @@ import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import java.util.Collections
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -65,6 +66,8 @@ class AdManager @Inject constructor() {
 
     private val interstitials = mutableMapOf<InterstitialPlacement, InterstitialAd?>()
     private val rewardedAds = mutableMapOf<RewardedPlacement, RewardedAd?>()
+    private val loadingRewardedPlacements = Collections.synchronizedSet(mutableSetOf<RewardedPlacement>())
+    private val loadingInterstitials = Collections.synchronizedSet(mutableSetOf<InterstitialPlacement>())
     private var appOpenAd: AppOpenAd? = null
     private var appOpenLoadedAt = 0L
     private var lastInterstitialShownAt = 0L
@@ -106,17 +109,21 @@ class AdManager @Inject constructor() {
 
     fun loadInterstitial(context: Context, placement: InterstitialPlacement) {
         if (!canRequestAds()) return
+        if (interstitials[placement] != null) return
+        if (!loadingInterstitials.add(placement)) return
         InterstitialAd.load(
             context.applicationContext,
             placement.unitId,
             AdRequest.Builder().build(),
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(ad: InterstitialAd) {
+                    loadingInterstitials.remove(placement)
                     interstitials[placement] = ad
                     Log.d(TAG, "Loaded interstitial placement: $placement")
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
+                    loadingInterstitials.remove(placement)
                     interstitials[placement] = null
                     Log.w(TAG, "Interstitial $placement failed to load: ${error.message}")
                 }
@@ -167,17 +174,21 @@ class AdManager @Inject constructor() {
 
     fun loadRewarded(context: Context, placement: RewardedPlacement) {
         if (!canRequestAds()) return
+        if (rewardedAds[placement] != null) return
+        if (!loadingRewardedPlacements.add(placement)) return
         RewardedAd.load(
             context.applicationContext,
             placement.unitId,
             AdRequest.Builder().build(),
             object : RewardedAdLoadCallback() {
                 override fun onAdLoaded(ad: RewardedAd) {
+                    loadingRewardedPlacements.remove(placement)
                     rewardedAds[placement] = ad
                     Log.d(TAG, "Loaded rewarded placement: $placement")
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
+                    loadingRewardedPlacements.remove(placement)
                     rewardedAds[placement] = null
                     Log.w(TAG, "Rewarded $placement failed to load: ${error.message}")
                 }
@@ -199,41 +210,27 @@ class AdManager @Inject constructor() {
         }
         var ad = rewardedAds.remove(placement)
         var consumedPlacement = placement
-        if (ad == null && placement.name.startsWith("STORY_PART_")) {
-            // If the exact story part unit hasn't finished loading yet, check if any
-            // other preloaded story part ad is already available in cache so the reader
-            // gets their rewarded ad immediately between parts without waiting.
-            val alternate = rewardedAds.entries.firstOrNull { it.key.name.startsWith("STORY_PART_") && it.value != null }
+
+        // Check if ANY preloaded rewarded ad is already in cache
+        if (ad == null) {
+            val alternate = rewardedAds.entries.firstOrNull { it.value != null }
             if (alternate != null) {
                 ad = alternate.value
                 consumedPlacement = alternate.key
                 rewardedAds.remove(alternate.key)
             }
         }
+
         if (ad != null) {
             loadRewarded(activity.applicationContext, consumedPlacement)
             showLoadedRewarded(activity, consumedPlacement, ad, onRewarded, onDismissed, onUnavailable)
             return
         }
-        // A rewarded request must not be silently skipped just because preloading
-        // hasn't completed. Load the user's requested placement and show it as soon
-        // as it is ready; only continue without the ad if Google reports a load error.
-        RewardedAd.load(
-            activity.applicationContext,
-            placement.unitId,
-            AdRequest.Builder().build(),
-            object : RewardedAdLoadCallback() {
-                override fun onAdLoaded(loadedAd: RewardedAd) {
-                    showLoadedRewarded(activity, placement, loadedAd, onRewarded, onDismissed, onUnavailable)
-                }
 
-                override fun onAdFailedToLoad(error: LoadAdError) {
-                    Log.w(TAG, "Rewarded $placement failed to load on demand: ${error.message}")
-                    loadRewarded(activity.applicationContext, placement)
-                    onUnavailable()
-                }
-            }
-        )
+        // If no ad is cached right now, do not block or delay:
+        // Preload in the background so the next action is primed, and immediately continue.
+        loadRewarded(activity.applicationContext, placement)
+        onUnavailable()
     }
 
     private fun showLoadedRewarded(
@@ -244,6 +241,11 @@ class AdManager @Inject constructor() {
         onDismissed: () -> Unit,
         onUnavailable: () -> Unit
     ) {
+        if (activity.isFinishing || activity.isDestroyed) {
+            onUnavailable()
+            return
+        }
+
         ad.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdShowedFullScreenContent() {
                 isShowingFullScreenContent = true
@@ -251,14 +253,14 @@ class AdManager @Inject constructor() {
 
             override fun onAdDismissedFullScreenContent() {
                 isShowingFullScreenContent = false
-                loadRewarded(activity, placement)
+                loadRewarded(activity.applicationContext, placement)
                 onDismissed()
             }
 
             override fun onAdFailedToShowFullScreenContent(error: AdError) {
                 isShowingFullScreenContent = false
                 Log.w(TAG, "Rewarded $placement failed to show: ${error.message}")
-                loadRewarded(activity, placement)
+                loadRewarded(activity.applicationContext, placement)
                 onUnavailable()
                 onDismissed()
             }
