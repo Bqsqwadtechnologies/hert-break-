@@ -35,9 +35,17 @@ fun EntertainmentScreen(
     var tab by remember { mutableStateOf("stories") }
     var activeStory by remember { mutableStateOf<StorySeries?>(null) }
     var partIndex by remember { mutableIntStateOf(0) }
+    var isUnlocking by remember { mutableStateOf(false) }
     var joke by remember { mutableStateOf<Pair<Int, String>?>(null) }
     val unseenStories = EntertainmentCatalog.stories.filter { it.id !in viewedStoryIds }
     val unseenJokes = EntertainmentCatalog.jokes.indices.filter { "joke_${it + 1}" !in seenJokeIds }
+
+    LaunchedEffect(isUnlocking) {
+        if (isUnlocking) {
+            kotlinx.coroutines.delay(2500L)
+            isUnlocking = false
+        }
+    }
     Column(Modifier.fillMaxSize()) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
