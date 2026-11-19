@@ -104,11 +104,11 @@ fun CompanionCard(onProceed: () -> Unit, onNoThanks: () -> Unit, onUsingAlready:
 
 /** Dialog wrapper so the same card can pop up after a day is counted. Both "No thanks" and "I'm using it already" show the house video. */
 @Composable
-fun CompanionPromptDialog(onClose: () -> Unit) {
+fun CompanionPromptDialog(onClose: () -> Unit, onPromoVideoFinished: (() -> Unit)? = null) {
     val context = LocalContext.current
     var showVideo by remember { mutableStateOf(false) }
     if (showVideo) {
-        HouseVideoAd(onClose = { showVideo = false; onClose() })
+        HouseVideoAd(onClose = { showVideo = false; onPromoVideoFinished?.invoke(); onClose() })
     } else {
         Dialog(onDismissRequest = onClose) {
             CompanionCard(

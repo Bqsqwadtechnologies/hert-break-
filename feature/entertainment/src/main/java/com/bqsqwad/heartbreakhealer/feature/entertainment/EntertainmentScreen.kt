@@ -89,8 +89,11 @@ fun EntertainmentScreen(
                             if (savedStory != null) {
                                 OutlinedButton(
                                     onClick = {
-                                        activeStory = savedStory
-                                        partIndex = activeStoryPart.coerceIn(0, savedStory.parts.lastIndex)
+                                        val targetPart = activeStoryPart.coerceIn(0, savedStory.parts.lastIndex)
+                                        onUnlock("story_part_${Math.floorMod(savedStory.id.hashCode() + targetPart, 20) + 1}") {
+                                            activeStory = savedStory
+                                            partIndex = targetPart
+                                        }
                                     },
                                     modifier = Modifier.fillMaxWidth()
                                 ) { Text("Resume ${savedStory.title}") }
@@ -105,19 +108,14 @@ fun EntertainmentScreen(
                     if (activeJokeIndex in EntertainmentCatalog.jokes.indices) {
                         Spacer(Modifier.height(10.dp))
                         OutlinedButton(
-                            onClick = { joke = activeJokeIndex to EntertainmentCatalog.jokes[activeJokeIndex] },
-                            modifier = Modifier.fillMaxWidth()
-                        ) { Text("Resume your last joke") }
-                    }
-                    Spacer(Modifier.height(18.dp))
-                    if (activeJokeIndex in EntertainmentCatalog.jokes.indices) {
-                        OutlinedButton(
                             onClick = {
-                                joke = activeJokeIndex to EntertainmentCatalog.jokes[activeJokeIndex]
+                                onUnlock("joke") {
+                                    joke = activeJokeIndex to EntertainmentCatalog.jokes[activeJokeIndex]
+                                }
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) { Text("Resume your last joke") }
-                        Spacer(Modifier.height(8.dp))
+                        Spacer(Modifier.height(18.dp))
                     }
                     Button(
                         onClick = {

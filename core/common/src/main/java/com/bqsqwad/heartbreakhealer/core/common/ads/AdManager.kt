@@ -197,31 +197,43 @@ class AdManager @Inject constructor() {
             onUnavailable()
             return
         }
-        val ad = rewardedAds.remove(placement)
-        if (ad != null) loadRewarded(activity.applicationContext, placement)
-        if (ad == null) {
-            // A rewarded request must not be silently skipped just because preloading
-            // hasn't completed. Load the user's requested placement and show it as soon
-            // as it is ready; only continue without the ad if Google reports a load error.
-            RewardedAd.load(
-                activity.applicationContext,
-                placement.unitId,
-                AdRequest.Builder().build(),
-                object : RewardedAdLoadCallback() {
-                    override fun onAdLoaded(loadedAd: RewardedAd) {
-                        showLoadedRewarded(activity, placement, loadedAd, onRewarded, onDismissed, onUnavailable)
-                    }
-
-                    override fun onAdFailedToLoad(error: LoadAdError) {
-                        Log.w(TAG, "Rewarded $placement failed to load on demand: ${error.message}")
-                        loadRewarded(activity.applicationContext, placement)
-                        onUnavailable()
-                    }
-                }
-            )
+        var ad = rewardedAds.remove(placement)
+        var consumedPlacement = placement
+        if (ad == null && placement.name.startsWith("STORY_PART_")) {
+            // If the exact story part unit hasn't finished loading yet, check if any
+            // other preloaded story part ad is already available in cache so the reader
+            // gets their rewarded ad immediately between parts without waiting.
+            val alternate = rewardedAds.entries.firstOrNull { it.key.name.startsWith("STORY_PART_") && it.value != null }
+            if (alternate != null) {
+                ad = alternate.value
+                consumedPlacement = alternate.key
+                rewardedAds.remove(alternate.key)
+            }
+        }
+        if (ad != null) {
+            loadRewarded(activity.applicationContext, consumedPlacement)
+            showLoadedRewarded(activity, consumedPlacement, ad, onRewarded, onDismissed, onUnavailable)
             return
         }
-        showLoadedRewarded(activity, placement, ad, onRewarded, onDismissed, onUnavailable)
+        // A rewarded request must not be silently skipped just because preloading
+        // hasn't completed. Load the user's requested placement and show it as soon
+        // as it is ready; only continue without the ad if Google reports a load error.
+        RewardedAd.load(
+            activity.applicationContext,
+            placement.unitId,
+            AdRequest.Builder().build(),
+            object : RewardedAdLoadCallback() {
+                override fun onAdLoaded(loadedAd: RewardedAd) {
+                    showLoadedRewarded(activity, placement, loadedAd, onRewarded, onDismissed, onUnavailable)
+                }
+
+                override fun onAdFailedToLoad(error: LoadAdError) {
+                    Log.w(TAG, "Rewarded $placement failed to load on demand: ${error.message}")
+                    loadRewarded(activity.applicationContext, placement)
+                    onUnavailable()
+                }
+            }
+        )
     }
 
     private fun showLoadedRewarded(
@@ -239,14 +251,12 @@ class AdManager @Inject constructor() {
 
             override fun onAdDismissedFullScreenContent() {
                 isShowingFullScreenContent = false
-                rewardedAds[placement] = null
                 loadRewarded(activity, placement)
                 onDismissed()
             }
 
             override fun onAdFailedToShowFullScreenContent(error: AdError) {
                 isShowingFullScreenContent = false
-                rewardedAds[placement] = null
                 Log.w(TAG, "Rewarded $placement failed to show: ${error.message}")
                 loadRewarded(activity, placement)
                 onUnavailable()

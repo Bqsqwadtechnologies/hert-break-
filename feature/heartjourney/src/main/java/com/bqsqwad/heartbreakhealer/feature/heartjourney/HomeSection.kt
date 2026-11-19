@@ -56,6 +56,7 @@ import java.time.LocalDate
 fun HeartJourneyHomeSection(
     reduceMotion: Boolean,
     onOpenJourney: () -> Unit,
+    onPromoVideoFinished: (() -> Unit)? = null,
     vm: HeartJourneyViewModel = hiltViewModel(),
 ) {
     val s: JourneyState = vm.state.collectAsState().value ?: return
@@ -86,7 +87,7 @@ fun HeartJourneyHomeSection(
             onDone = { vm.ackDayCounted(); if (dueForCompanion) { vm.companionShown(); showCompanion = true } },
         )
     }
-    if (showCompanion) CompanionPromptDialog(onClose = { showCompanion = false })
+    if (showCompanion) CompanionPromptDialog(onClose = { showCompanion = false }, onPromoVideoFinished = onPromoVideoFinished)
 
     if (s.celebrationPending) CelebrationDialog(reduceMotion = reduceMotion, onDone = { vm.ackCelebration() })
 

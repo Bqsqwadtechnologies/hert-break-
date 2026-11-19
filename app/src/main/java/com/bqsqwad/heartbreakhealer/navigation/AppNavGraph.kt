@@ -219,7 +219,19 @@ fun AppNavGraph(
                 heartSlot = {
                     com.bqsqwad.heartbreakhealer.feature.heartjourney.HeartJourneyHomeSection(
                         reduceMotion = reduceMotion,
-                        onOpenJourney = { navController.navigate(Routes.JOURNEY) }
+                        onOpenJourney = { navController.navigate(Routes.JOURNEY) },
+                        onPromoVideoFinished = {
+                            val host = activity
+                            if (host != null) {
+                                adManager.showRewarded(
+                                    host,
+                                    RewardedPlacement.REBUILD_30,
+                                    onRewarded = {},
+                                    onDismissed = {},
+                                    onUnavailable = {}
+                                )
+                            }
+                        }
                     )
                 },
                 hearts = hearts,
@@ -512,7 +524,19 @@ fun AppNavGraph(
                 // Same path as the Home tiles, so the Hearts economy is unchanged. SOS stays free.
                 onOpenFeature = { route, free -> if (free) navController.navigate(route) else openFeature(route) },
                 onBack = { navController.popBackStack() },
-                adsAllowed = adsAllowed
+                adsAllowed = adsAllowed,
+                onPromoVideoFinished = {
+                    val host = activity
+                    if (host != null) {
+                        adManager.showRewarded(
+                            host,
+                            RewardedPlacement.REBUILD_30,
+                            onRewarded = {},
+                            onDismissed = {},
+                            onUnavailable = {}
+                        )
+                    }
+                }
             )
         }
         composable(Routes.ENTERTAINMENT) {

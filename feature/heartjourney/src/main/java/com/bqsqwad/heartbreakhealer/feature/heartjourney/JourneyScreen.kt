@@ -54,6 +54,7 @@ fun HeartJourneyScreen(
     onOpenFeature: (route: String, free: Boolean) -> Unit,
     onBack: () -> Unit,
     adsAllowed: Boolean = false,
+    onPromoVideoFinished: (() -> Unit)? = null,
     vm: HeartJourneyViewModel = hiltViewModel(),
 ) {
     val s: JourneyState = vm.state.collectAsState().value ?: return
@@ -123,7 +124,7 @@ fun HeartJourneyScreen(
             item { BannerAdView(unitId = AdsConfig.BANNER_LIST, enabled = adsAllowed) }
         }
     }
-    if (showCompanionVideo) HouseVideoAd(onClose = { showCompanionVideo = false })
+    if (showCompanionVideo) HouseVideoAd(onClose = { showCompanionVideo = false; onPromoVideoFinished?.invoke() })
 }
 
 @Composable
