@@ -66,3 +66,16 @@
 | N19 | Daily notification | YES |
 | N20 | Existing programs and database untouched | YES |
 | N21 | Same design system, typography, and palette | YES |
+
+
+---
+
+## Part 4: Remote CI Build & Video Status
+- **Remote CI Run:** GitHub Actions Run #308 () — **SUCCESS** (Run ID: )
+- **Artifact:**  (26,240,930 bytes / ~25 MB)
+- **Promo Video Asset:** 
+  - Dimensions: 1080x1920 (9:16 portrait)
+  - Codec: H.264 High profile / AAC audio
+  - Size: 7,411,505 bytes (~7.1 MB, under the 15 MB limit)
+  - Duration: 49.72s (full uploaded duration preserved)
+- **Tap & Redirect Behavior:** Tapping any non-control region redirects to BQ Sqwad AI website (). Controls allow pause, mute, and skip (after 5s).
