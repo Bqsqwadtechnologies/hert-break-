@@ -20,7 +20,7 @@ android {
         applicationId = "com.bqsqwad.heartbreakhealer"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2
+        versionCode = 3
         versionName = "1.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders["companionPackage"] = companionPackage

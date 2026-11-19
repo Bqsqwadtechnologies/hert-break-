@@ -197,13 +197,41 @@ class AdManager @Inject constructor() {
             onUnavailable()
             return
         }
-        val ad = rewardedAds[placement]
+        val ad = rewardedAds.remove(placement)
+        if (ad != null) loadRewarded(activity.applicationContext, placement)
         if (ad == null) {
-            loadRewarded(activity, placement)
-            onUnavailable()
+            // A rewarded request must not be silently skipped just because preloading
+            // hasn't completed. Load the user's requested placement and show it as soon
+            // as it is ready; only continue without the ad if Google reports a load error.
+            RewardedAd.load(
+                activity.applicationContext,
+                placement.unitId,
+                AdRequest.Builder().build(),
+                object : RewardedAdLoadCallback() {
+                    override fun onAdLoaded(loadedAd: RewardedAd) {
+                        showLoadedRewarded(activity, placement, loadedAd, onRewarded, onDismissed, onUnavailable)
+                    }
+
+                    override fun onAdFailedToLoad(error: LoadAdError) {
+                        Log.w(TAG, "Rewarded $placement failed to load on demand: ${error.message}")
+                        loadRewarded(activity.applicationContext, placement)
+                        onUnavailable()
+                    }
+                }
+            )
             return
         }
+        showLoadedRewarded(activity, placement, ad, onRewarded, onDismissed, onUnavailable)
+    }
 
+    private fun showLoadedRewarded(
+        activity: Activity,
+        placement: RewardedPlacement,
+        ad: RewardedAd,
+        onRewarded: () -> Unit,
+        onDismissed: () -> Unit,
+        onUnavailable: () -> Unit
+    ) {
         ad.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdShowedFullScreenContent() {
                 isShowingFullScreenContent = true

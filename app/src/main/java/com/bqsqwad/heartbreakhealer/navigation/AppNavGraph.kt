@@ -200,7 +200,8 @@ fun AppNavGraph(
                 Routes.LIBRARY,
                 Routes.PATH,
                 Routes.WEEKLY,
-                Routes.ENTERTAINMENT
+                Routes.ENTERTAINMENT,
+                Routes.JOURNEY
             )
         )
     }
@@ -510,7 +511,8 @@ fun AppNavGraph(
                 nextStepRoute = nextStepRoute,
                 // Same path as the Home tiles, so the Hearts economy is unchanged. SOS stays free.
                 onOpenFeature = { route, free -> if (free) navController.navigate(route) else openFeature(route) },
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                adsAllowed = adsAllowed
             )
         }
         composable(Routes.ENTERTAINMENT) {
@@ -538,9 +540,9 @@ fun AppNavGraph(
                             )
                             else -> RewardedPlacement.storyPart(1)
                         }
-                        // Continue after the rewarded ad closes or cannot be shown.
-                        // The same continuation can be reported by both failure callbacks,
-                        // so guard it to prevent advancing two story parts at once.
+                        // Advance when the user earns the rewarded unlock. If ad inventory
+                        // is unavailable, keep the story/joke accessible rather than trapping
+                        // the reader; dismissing before earning does not unlock the next item.
                         val continued = java.util.concurrent.atomic.AtomicBoolean(false)
                         val continueOnce = {
                             if (continued.compareAndSet(false, true)) onUnlocked()
@@ -549,7 +551,7 @@ fun AppNavGraph(
                             host,
                             placement,
                             onRewarded = continueOnce,
-                            onDismissed = continueOnce,
+                            onDismissed = {},
                             onUnavailable = continueOnce
                         )
                     }

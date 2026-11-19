@@ -38,6 +38,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bqsqwad.heartbreakhealer.core.domain.journey.JourneyState
+import com.bqsqwad.heartbreakhealer.core.common.ads.AdsConfig
+import com.bqsqwad.heartbreakhealer.core.ui.ads.BannerAdView
 import java.time.LocalDate
 
 /**
@@ -51,6 +53,7 @@ fun HeartJourneyScreen(
     nextStepRoute: String,
     onOpenFeature: (route: String, free: Boolean) -> Unit,
     onBack: () -> Unit,
+    adsAllowed: Boolean = false,
     vm: HeartJourneyViewModel = hiltViewModel(),
 ) {
     val s: JourneyState = vm.state.collectAsState().value ?: return
@@ -117,6 +120,7 @@ fun HeartJourneyScreen(
             if (s.finished) item {
                 Button(onClick = { vm.startRound() }, modifier = Modifier.fillMaxWidth().height(50.dp), shape = RoundedCornerShape(16.dp)) { Text("Broken again") }
             }
+            item { BannerAdView(unitId = AdsConfig.BANNER_LIST, enabled = adsAllowed) }
         }
     }
     if (showCompanionVideo) HouseVideoAd(onClose = { showCompanionVideo = false })
