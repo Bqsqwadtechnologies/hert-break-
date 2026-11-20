@@ -142,9 +142,15 @@ fun AppNavGraph(
     var showHouseAdDialog by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     var pendingHouseAdReward by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<(() -> Unit)?>(null) }
 
-    val requestRewardedWithHouseFallback: (RewardedPlacement, () -> Unit, () -> Unit) -> Unit = { placement, onRewarded, onDismissed ->
+    fun triggerRewarded(
+        placement: RewardedPlacement,
+        onRewarded: () -> Unit,
+        onDismissed: () -> Unit = {},
+        forceHouseSometimes: Boolean = false
+    ) {
         val host = activity
-        if (host == null) {
+        val showHouseDirectly = forceHouseSometimes && (java.util.concurrent.ThreadLocalRandom.current().nextInt(100) < 35)
+        if (host == null || showHouseDirectly) {
             pendingHouseAdReward = {
                 onRewarded()
                 onDismissed()
@@ -165,6 +171,10 @@ fun AppNavGraph(
                 }
             )
         }
+    }
+
+    val requestRewardedWithHouseFallback: (RewardedPlacement, () -> Unit, () -> Unit) -> Unit = { placement, onRewarded, onDismissed ->
+        triggerRewarded(placement, onRewarded, onDismissed, forceHouseSometimes = false)
     }
     // Both guided journeys share a single daily completion lock in DataStore.
     val adsAllowed by adManager.adsAllowed.collectAsState()
@@ -302,7 +312,14 @@ fun AppNavGraph(
                 onMemories = { openFeature(Routes.MEMORIES) },
                 onTriggers = { openFeature(Routes.TRIGGERS) },
                 onCoping = { openFeature(Routes.COPING) },
-                onLogUrge = dashboardViewModel::logUrgePassed,
+                onLogUrge = {
+                    dashboardViewModel.logUrgePassed()
+                    triggerRewarded(
+                        placement = RewardedPlacement.TASK_COMPLETION,
+                        onRewarded = { dashboardViewModel.onRewardedHearts() },
+                        forceHouseSometimes = false
+                    )
+                },
                 onBoundaries = { openFeature(Routes.BOUNDARIES) },
                 onCapsule = { openFeature(Routes.CAPSULE) },
                 onWins = { openFeature(Routes.WINS) },
@@ -314,7 +331,14 @@ fun AppNavGraph(
                 onEntertainment = { openFeature(Routes.ENTERTAINMENT) },
                 onSoundscapes = { openFeature(Routes.SOUNDSCAPES) },
                 onBreathwork = { openFeature(Routes.BREATHWORK) },
-                onCheckIn = dashboardViewModel::onCheckIn
+                onCheckIn = { mood, note ->
+                    dashboardViewModel.onCheckIn(mood, note)
+                    triggerRewarded(
+                        placement = RewardedPlacement.TASK_COMPLETION,
+                        onRewarded = { dashboardViewModel.onRewardedHearts() },
+                        forceHouseSometimes = true
+                    )
+                }
             )
         }
         composable(Routes.SOS) {
@@ -327,7 +351,14 @@ fun AppNavGraph(
         composable(Routes.JOURNAL) {
             JournalScreen(
                 entries = journalEntries.map { JournalUiEntry(it.id, it.date, it.mood, it.content) },
-                onSaveEntry = dashboardViewModel::saveJournalEntry,
+                onSaveEntry = { mood, content ->
+                    dashboardViewModel.saveJournalEntry(mood, content)
+                    triggerRewarded(
+                        placement = RewardedPlacement.WRITING_COMPLETION,
+                        onRewarded = { dashboardViewModel.onRewardedHearts() },
+                        forceHouseSometimes = false
+                    )
+                },
                 adsAllowed = adsAllowed,
                 onBack = { navController.popBackStack() }
             )
@@ -335,8 +366,22 @@ fun AppNavGraph(
         composable(Routes.LETTERS) {
             UnsentLettersScreen(
                 letters = unsentLetters.map { LetterUi(it.id, it.content, it.status) },
-                onSave = dashboardViewModel::saveUnsentLetter,
-                onRelease = dashboardViewModel::releaseUnsentLetter,
+                onSave = { content ->
+                    dashboardViewModel.saveUnsentLetter(content)
+                    triggerRewarded(
+                        placement = RewardedPlacement.WRITING_COMPLETION,
+                        onRewarded = { dashboardViewModel.onRewardedHearts() },
+                        forceHouseSometimes = false
+                    )
+                },
+                onRelease = { id ->
+                    dashboardViewModel.releaseUnsentLetter(id)
+                    triggerRewarded(
+                        placement = RewardedPlacement.WRITING_COMPLETION,
+                        onRewarded = { dashboardViewModel.onRewardedHearts() },
+                        forceHouseSometimes = false
+                    )
+                },
                 adsAllowed = adsAllowed,
                 onBack = { navController.popBackStack() }
             )
@@ -613,10 +658,12 @@ fun AppNavGraph(
                         val continueOnce = {
                             if (continued.compareAndSet(false, true)) onUnlocked()
                         }
-                        requestRewardedWithHouseFallback(
-                            placement,
-                            continueOnce,
-                            {}
+                        val isStory = kind.startsWith("story_part_") || kind == "story"
+                        triggerRewarded(
+                            placement = placement,
+                            onRewarded = continueOnce,
+                            onDismissed = {},
+                            forceHouseSometimes = isStory
                         )
                     }
                 },
@@ -636,7 +683,10 @@ fun AppNavGraph(
                 },
                 onWatchHouseAd = {
                     pendingHouseAdReward = {
-                        dashboardViewModel.unlockSoundscape("all_temp_preview")
+                        dashboardViewModel.unlockSoundscape("delta_sleep")
+                        dashboardViewModel.unlockSoundscape("campfire")
+                        dashboardViewModel.unlockSoundscape("singing_bowls")
+                        dashboardViewModel.unlockSoundscape("ocean_waves")
                     }
                     showHouseAdDialog = true
                 },

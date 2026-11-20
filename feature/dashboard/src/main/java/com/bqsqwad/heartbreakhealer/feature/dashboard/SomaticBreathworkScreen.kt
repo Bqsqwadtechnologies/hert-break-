@@ -63,7 +63,7 @@ enum class BreathPattern(
 ) {
     VAGUS_478(
         title = "4-7-8 Vagus Reset",
-        subtitle = "Inhale 4s · Hold 7s · Exhale 8s. Clinically proven to halt panic and anxiety.",
+        subtitle = "Inhale 4s · Hold 7s · Exhale 8s. A gentle rhythm to soothe acute tension and calm anxiety.",
         inhaleSeconds = 4,
         holdSeconds = 7,
         exhaleSeconds = 8,
@@ -243,7 +243,7 @@ fun SomaticBreathworkScreen(
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "An extended restorative breathing program to deeply calm high-stress panic spikes, regulate cortisol, and rebuild nervous system safety.",
+                        "An extended restorative breathing program to deeply calm high-stress moments, soothe physical tension, and rebuild a sense of safety.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = muted,
                         textAlign = TextAlign.Center
@@ -345,7 +345,7 @@ fun SomaticBreathworkScreen(
                                 color = primaryRed
                             )
                             Text(
-                                "Racing heart or panic spike? Tap for instant Physiological Sigh reset.",
+                                "Racing heart or acute overwhelm? Tap for instant Physiological Sigh reset.",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = ink
                             )

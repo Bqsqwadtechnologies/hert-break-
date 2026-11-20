@@ -34,6 +34,8 @@ enum class RewardedPlacement(val unitId: String) {
     JOKE_UNLOCK(AdsConfig.REWARDED_SHOP_EXTRA),
     SOUNDSCAPES_PREMIUM(AdsConfig.REWARDED_HEARTS),
     BREATHWORK_DEEP(AdsConfig.REWARDED_SHOP_EXTRA),
+    TASK_COMPLETION(AdsConfig.REWARDED_HEARTS),
+    WRITING_COMPLETION(AdsConfig.REWARDED_HEARTS),
     STORY_PART_1(AdsConfig.REWARDED_STORY_PART_1),
     STORY_PART_2(AdsConfig.REWARDED_STORY_PART_2),
     STORY_PART_3(AdsConfig.REWARDED_STORY_PART_3),
@@ -229,10 +231,25 @@ class AdManager @Inject constructor() {
             return
         }
 
-        // If no ad is cached right now, do not block or delay:
-        // Preload in the background so the next action is primed, and immediately continue.
-        loadRewarded(activity.applicationContext, placement)
-        onUnavailable()
+        // A rewarded request must not be silently skipped if not preloaded.
+        // Load the requested placement on demand and show it as soon as it is ready;
+        // only call onUnavailable() (triggering house video fallback) if Google reports a load error.
+        RewardedAd.load(
+            activity.applicationContext,
+            placement.unitId,
+            AdRequest.Builder().build(),
+            object : RewardedAdLoadCallback() {
+                override fun onAdLoaded(loadedAd: RewardedAd) {
+                    showLoadedRewarded(activity, placement, loadedAd, onRewarded, onDismissed, onUnavailable)
+                }
+
+                override fun onAdFailedToLoad(error: LoadAdError) {
+                    Log.w(TAG, "Rewarded $placement failed to load on demand: ${error.message}")
+                    loadRewarded(activity.applicationContext, placement)
+                    onUnavailable()
+                }
+            }
+        )
     }
 
     private fun showLoadedRewarded(

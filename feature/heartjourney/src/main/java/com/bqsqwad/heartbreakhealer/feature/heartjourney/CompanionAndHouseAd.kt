@@ -120,7 +120,7 @@ fun CompanionPromptDialog(onClose: () -> Unit, onPromoVideoFinished: (() -> Unit
     }
 }
 
-private const val SKIP_AFTER_SECONDS = 5
+private const val SKIP_AFTER_SECONDS = 10
 
 /**
  * The BQ Sqwad AI house video.
@@ -178,25 +178,64 @@ fun HouseVideoAd(onClose: () -> Unit) {
                 shape = RoundedCornerShape(8.dp), color = Color(0x99000000),
             ) { Text("Ad · BQ Sqwad AI", color = Color.White, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)) }
 
-            if (seconds >= SKIP_AFTER_SECONDS || ended) {
-                TextButton(
-                    onClick = onClose,
-                    modifier = Modifier.align(Alignment.TopEnd).padding(12.dp).height(48.dp),
-                ) { Text(if (ended) "Close" else "Skip ›", color = Color.White, fontWeight = FontWeight.Bold) }
+            // Top-right Skip button (available after 10s or when video ends) with live countdown badge
+            Box(
+                modifier = Modifier.align(Alignment.TopEnd).padding(14.dp)
+            ) {
+                if (seconds >= SKIP_AFTER_SECONDS || ended) {
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color(0xDD000000)
+                    ) {
+                        TextButton(
+                            onClick = onClose,
+                            modifier = Modifier.height(44.dp).padding(horizontal = 6.dp)
+                        ) {
+                            Text(if (ended) "Close ✕" else "Skip ›", color = Color.White, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                } else {
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color(0x99000000)
+                    ) {
+                        Text(
+                            "Skip in ${SKIP_AFTER_SECONDS - seconds}s",
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
+                        )
+                    }
+                }
             }
+
+            // Bottom controls: Pause / Play, Mute / Unmute
             Row(
                 Modifier.align(Alignment.BottomCenter).padding(bottom = 36.dp),
                 horizontalArrangement = Arrangement.spacedBy(48.dp),
             ) {
                 RoundControl(if (playing) "❚❚" else "▶", if (playing) "Pause video" else "Play video") {
                     val v = videoView ?: return@RoundControl
-                    if (playing) v.pause() else v.start()
-                    playing = !playing
-                    if (ended) { ended = false; v.seekTo(0); v.start(); playing = true }
+                    if (playing) {
+                        v.pause()
+                        playing = false
+                    } else {
+                        if (ended) {
+                            ended = false
+                            seconds = 0
+                            v.seekTo(0)
+                        }
+                        v.start()
+                        playing = true
+                    }
                 }
                 RoundControl(if (muted) "🔇" else "🔊", if (muted) "Unmute video" else "Mute video") {
                     muted = !muted
-                    player?.setVolume(if (muted) 0f else 1f, if (muted) 0f else 1f)
+                    player?.let { mp ->
+                        val vol = if (muted) 0f else 1f
+                        mp.setVolume(vol, vol)
+                    }
                 }
             }
             if (ended) {
