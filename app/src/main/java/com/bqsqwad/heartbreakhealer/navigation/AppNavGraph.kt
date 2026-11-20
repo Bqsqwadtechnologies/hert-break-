@@ -63,6 +63,9 @@ import com.bqsqwad.heartbreakhealer.feature.selfcare.SelfCareScreen
 import com.bqsqwad.heartbreakhealer.feature.settings.SettingsScreen
 import com.bqsqwad.heartbreakhealer.feature.settings.TriggersScreen
 import com.bqsqwad.heartbreakhealer.feature.sos.SosScreen
+import com.bqsqwad.heartbreakhealer.feature.dashboard.SoundscapesScreen
+import com.bqsqwad.heartbreakhealer.feature.dashboard.SomaticBreathworkScreen
+import com.bqsqwad.heartbreakhealer.feature.heartjourney.HouseVideoAd
 import java.time.LocalDate
 
 object Routes {
@@ -91,6 +94,8 @@ object Routes {
     const val WEEKLY = "weekly"
     const val ENTERTAINMENT = "entertainment"
     const val JOURNEY = "heart_journey"
+    const val SOUNDSCAPES = "soundscapes"
+    const val BREATHWORK = "breathwork"
 }
 
 @Composable
@@ -100,7 +105,11 @@ fun AppNavGraph(
     openStoriesOnStart: Boolean = false,
     onReminderNavigationHandled: () -> Unit = {},
     openJourneyOnStart: Boolean = false,
-    onJourneyNavigationHandled: () -> Unit = {}
+    onJourneyNavigationHandled: () -> Unit = {},
+    openSoundscapesOnStart: Boolean = false,
+    onSoundscapesNavigationHandled: () -> Unit = {},
+    openBreathworkOnStart: Boolean = false,
+    onBreathworkNavigationHandled: () -> Unit = {}
 ) {
     val dashboardViewModel: DashboardViewModel = hiltViewModel()
     val onboardingComplete by dashboardViewModel.onboardingComplete.collectAsState()
@@ -126,6 +135,35 @@ fun AppNavGraph(
     val activeStoryId by dashboardViewModel.activeStoryId.collectAsState()
     val activeStoryPart by dashboardViewModel.activeStoryPart.collectAsState()
     val activeJokeIndex by dashboardViewModel.activeJokeIndex.collectAsState()
+    val unlockedSoundscapes by dashboardViewModel.unlockedSoundscapes.collectAsState()
+    val unlockedBreathworkDeep by dashboardViewModel.unlockedBreathworkDeep.collectAsState()
+    var showHouseAdDialog by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    var pendingHouseAdReward by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<(() -> Unit)?>(null) }
+
+    val requestRewardedWithHouseFallback: (RewardedPlacement, () -> Unit, () -> Unit) -> Unit = { placement, onRewarded, onDismissed ->
+        val host = activity
+        if (host == null) {
+            pendingHouseAdReward = {
+                onRewarded()
+                onDismissed()
+            }
+            showHouseAdDialog = true
+        } else {
+            adManager.showRewarded(
+                host,
+                placement,
+                onRewarded = onRewarded,
+                onDismissed = onDismissed,
+                onUnavailable = {
+                    pendingHouseAdReward = {
+                        onRewarded()
+                        onDismissed()
+                    }
+                    showHouseAdDialog = true
+                }
+            )
+        }
+    }
     // Both guided journeys share a single daily completion lock in DataStore.
     val context = LocalContext.current
     val activity = context as? Activity
@@ -185,6 +223,18 @@ fun AppNavGraph(
             onJourneyNavigationHandled()
         }
     }
+    LaunchedEffect(onboardingComplete, openSoundscapesOnStart, backStackEntry?.destination?.route) {
+        if (onboardingComplete && openSoundscapesOnStart && backStackEntry?.destination?.route == Routes.DASHBOARD) {
+            navController.navigate(Routes.SOUNDSCAPES) { launchSingleTop = true }
+            onSoundscapesNavigationHandled()
+        }
+    }
+    LaunchedEffect(onboardingComplete, openBreathworkOnStart, backStackEntry?.destination?.route) {
+        if (onboardingComplete && openBreathworkOnStart && backStackEntry?.destination?.route == Routes.DASHBOARD) {
+            navController.navigate(Routes.BREATHWORK) { launchSingleTop = true }
+            onBreathworkNavigationHandled()
+        }
+    }
     LaunchedEffect(backStackEntry?.destination?.route) {
         dashboardViewModel.recordVisit(backStackEntry?.destination?.route)
     }
@@ -201,7 +251,9 @@ fun AppNavGraph(
                 Routes.PATH,
                 Routes.WEEKLY,
                 Routes.ENTERTAINMENT,
-                Routes.JOURNEY
+                Routes.JOURNEY,
+                Routes.SOUNDSCAPES,
+                Routes.BREATHWORK
             )
         )
     }
@@ -260,6 +312,8 @@ fun AppNavGraph(
                 onPath = { openFeature(Routes.PATH) },
                 onWeekly = { openFeature(Routes.WEEKLY) },
                 onEntertainment = { openFeature(Routes.ENTERTAINMENT) },
+                onSoundscapes = { openFeature(Routes.SOUNDSCAPES) },
+                onBreathwork = { openFeature(Routes.BREATHWORK) },
                 onCheckIn = dashboardViewModel::onCheckIn
             )
         }
@@ -344,51 +398,45 @@ fun AppNavGraph(
                     pendingRewardGranted = false
                     pendingRewardDismissed = false
                     pendingRewardCredited = false
-                    activity?.let { host ->
-                        adManager.showRewarded(
-                            host,
-                            RewardedPlacement.HEARTS_REWARD,
-                            onRewarded = {
-                                pendingRewardGranted = true
-                                dashboardViewModel.onRewardedHearts {
-                                    pendingRewardCredited = true
-                                    finishPendingReward()
-                                }
-                            },
-                            onDismissed = {
-                                pendingRewardDismissed = true
+                    requestRewardedWithHouseFallback(
+                        RewardedPlacement.HEARTS_REWARD,
+                        {
+                            pendingRewardGranted = true
+                            dashboardViewModel.onRewardedHearts {
+                                pendingRewardCredited = true
                                 finishPendingReward()
-                            },
-                            onUnavailable = {
-                                Toast.makeText(host, "A rewarded video is not ready yet. Please try again shortly.", Toast.LENGTH_LONG).show()
                             }
-                        )
-                    }
+                        },
+                        {
+                            pendingRewardDismissed = true
+                            finishPendingReward()
+                        }
+                    )
                 },
                 onWatchExtraRewarded = {
                     pendingRewardGranted = false
                     pendingRewardDismissed = false
                     pendingRewardCredited = false
-                    activity?.let { host ->
-                        adManager.showRewarded(
-                            host,
-                            RewardedPlacement.SHOP_EXTRA_REWARD,
-                            onRewarded = {
-                                pendingRewardGranted = true
-                                dashboardViewModel.onRewardedHearts {
-                                    pendingRewardCredited = true
-                                    finishPendingReward()
-                                }
-                            },
-                            onDismissed = {
-                                pendingRewardDismissed = true
+                    requestRewardedWithHouseFallback(
+                        RewardedPlacement.SHOP_EXTRA_REWARD,
+                        {
+                            pendingRewardGranted = true
+                            dashboardViewModel.onRewardedHearts {
+                                pendingRewardCredited = true
                                 finishPendingReward()
-                            },
-                            onUnavailable = {
-                                Toast.makeText(host, "A rewarded video is not ready yet. Please try again shortly.", Toast.LENGTH_LONG).show()
                             }
-                        )
+                        },
+                        {
+                            pendingRewardDismissed = true
+                            finishPendingReward()
+                        }
+                    )
+                },
+                onWatchPromoVideo = {
+                    pendingHouseAdReward = {
+                        dashboardViewModel.onRewardedHearts()
                     }
+                    showHouseAdDialog = true
                 },
                 onBack = { pendingFeatureRoute = null; navController.popBackStack() },
                 adsAllowed = adsAllowed
@@ -442,14 +490,15 @@ fun AppNavGraph(
                 onBack = { navController.popBackStack() }
             )
         }
-        composable(Routes.COPING) { CopingCardsScreen(onBack = { navController.popBackStack() }) }
-        composable(Routes.BOUNDARIES) { BoundaryScriptsScreen(onBack = { navController.popBackStack() }) }
+        composable(Routes.COPING) { CopingCardsScreen(onBack = { navController.popBackStack() }, adsAllowed = adsAllowed) }
+        composable(Routes.BOUNDARIES) { BoundaryScriptsScreen(onBack = { navController.popBackStack() }, adsAllowed = adsAllowed) }
         composable(Routes.CAPSULE) {
             TimeCapsuleScreen(
                 existing = capsuleText,
                 unlockDate = capsuleUnlock,
                 onSave = dashboardViewModel::saveCapsule,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                adsAllowed = adsAllowed
             )
         }
         composable(Routes.WINS) {
@@ -459,16 +508,18 @@ fun AppNavGraph(
                     if (noContactDays > 0) add("Built a no-contact streak of $noContactDays days")
                     if (hearts > 50) add("Earned hearts through healing activities")
                 },
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                adsAllowed = adsAllowed
             )
         }
         composable(Routes.EVENING) {
             EveningWindDownScreen(
                 onSave = dashboardViewModel::saveEveningReflection,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                adsAllowed = adsAllowed
             )
         }
-        composable(Routes.GRIEF_CONTACT) { GriefVsContactScreen(onBack = { navController.popBackStack() }) }
+        composable(Routes.GRIEF_CONTACT) { GriefVsContactScreen(onBack = { navController.popBackStack() }, adsAllowed = adsAllowed) }
         composable(Routes.LIBRARY) { HealingLibraryScreen(onBack = { navController.popBackStack() }, adsAllowed = adsAllowed) }
         composable(Routes.PATH) {
             val completedDays = completedPathDays.mapNotNull { it.toIntOrNull() }.toSet()
@@ -490,20 +541,11 @@ fun AppNavGraph(
                     )
                 },
                 onWatchRewarded = { onFinished ->
-                    val host = activity
-                    if (host == null) {
-                        onFinished()
-                    } else {
-                        adManager.showRewarded(
-                            host,
-                            RewardedPlacement.HEALING_PATH_14,
-                            onRewarded = { dashboardViewModel.onRewardedHearts() },
-                            onDismissed = onFinished,
-                            onUnavailable = {
-                                onFinished()
-                            }
-                        )
-                    }
+                    requestRewardedWithHouseFallback(
+                        RewardedPlacement.HEALING_PATH_14,
+                        { dashboardViewModel.onRewardedHearts() },
+                        onFinished
+                    )
                 },
                 onBack = { navController.popBackStack() },
                 adsAllowed = adsAllowed
@@ -571,12 +613,10 @@ fun AppNavGraph(
                         val continueOnce = {
                             if (continued.compareAndSet(false, true)) onUnlocked()
                         }
-                        adManager.showRewarded(
-                            host,
+                        requestRewardedWithHouseFallback(
                             placement,
-                            onRewarded = continueOnce,
-                            onDismissed = {},
-                            onUnavailable = continueOnce
+                            continueOnce,
+                            {}
                         )
                     }
                 },
@@ -584,6 +624,57 @@ fun AppNavGraph(
                 onBack = { navController.popBackStack() }
             )
         }
+        composable(Routes.SOUNDSCAPES) {
+            SoundscapesScreen(
+                unlockedTrackIds = unlockedSoundscapes,
+                onUnlockTrack = { trackId ->
+                    requestRewardedWithHouseFallback(
+                        RewardedPlacement.SOUNDSCAPES_PREMIUM,
+                        { dashboardViewModel.unlockSoundscape(trackId) },
+                        {}
+                    )
+                },
+                onWatchHouseAd = {
+                    pendingHouseAdReward = {
+                        dashboardViewModel.unlockSoundscape("all_temp_preview")
+                    }
+                    showHouseAdDialog = true
+                },
+                adsAllowed = adsAllowed,
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Routes.BREATHWORK) {
+            SomaticBreathworkScreen(
+                unlockedDeepSession = unlockedBreathworkDeep,
+                onUnlockDeepSession = {
+                    requestRewardedWithHouseFallback(
+                        RewardedPlacement.BREATHWORK_DEEP,
+                        { dashboardViewModel.unlockBreathworkDeep() },
+                        {}
+                    )
+                },
+                onWatchHouseAd = {
+                    pendingHouseAdReward = {
+                        dashboardViewModel.unlockBreathworkDeep()
+                    }
+                    showHouseAdDialog = true
+                },
+                adsAllowed = adsAllowed,
+                onBack = { navController.popBackStack() }
+            )
+        }
+    }
+
+    if (showHouseAdDialog) {
+        HouseVideoAd(
+            onClose = {
+                val cb = pendingHouseAdReward
+                pendingHouseAdReward = null
+                showHouseAdDialog = false
+                cb?.invoke()
+            }
+        )
     }
 }
 
@@ -616,6 +707,8 @@ private fun DashboardScreen(
     onPath: () -> Unit,
     onWeekly: () -> Unit,
     onEntertainment: () -> Unit,
+    onSoundscapes: () -> Unit = {},
+    onBreathwork: () -> Unit = {},
     onCheckIn: (Int, String) -> Unit
 ) {
     val ink = androidx.compose.ui.graphics.Color(0xFF17172A)
@@ -698,6 +791,8 @@ private fun DashboardScreen(
             Text("Your healing toolkit", style = MaterialTheme.typography.titleLarge, color = ink, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
             Spacer(Modifier.height(8.dp))
             listOf(
+                "Soothing Soundscapes" to onSoundscapes,
+                "Somatic Breathwork & Panic Reset" to onBreathwork,
                 "No-Contact" to onNoContact,
                 "30-Day Rebuild" to onRebuild,
                 "Coping Cards" to onCoping,

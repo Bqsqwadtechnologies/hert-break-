@@ -13,6 +13,7 @@ fun HeartsShopScreen(
     balance: Int = 50,
     onWatchRewarded: () -> Unit = {},
     onWatchExtraRewarded: () -> Unit = {},
+    onWatchPromoVideo: () -> Unit = {},
     onBack: () -> Unit = {},
     adsAllowed: Boolean = false
 ) {
@@ -34,6 +35,10 @@ fun HeartsShopScreen(
                 Spacer(Modifier.height(10.dp))
                 OutlinedButton(onClick = onWatchExtraRewarded, modifier = Modifier.fillMaxWidth()) {
                     Text("Watch an optional extra video for 15 hearts")
+                }
+                Spacer(Modifier.height(10.dp))
+                OutlinedButton(onClick = onWatchPromoVideo, modifier = Modifier.fillMaxWidth()) {
+                    Text("Watch BQ Sqwad AI Partner Spotlight (+20 hearts)")
                 }
             }
         }

@@ -16,6 +16,8 @@ import androidx.compose.ui.unit.dp
 import com.bqsqwad.heartbreakhealer.core.domain.model.BoundaryScripts
 import com.bqsqwad.heartbreakhealer.core.domain.model.CopingDeck
 import com.bqsqwad.heartbreakhealer.core.domain.model.HealingStage
+import com.bqsqwad.heartbreakhealer.core.common.ads.AdsConfig
+import com.bqsqwad.heartbreakhealer.core.ui.ads.BannerAdView
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -46,7 +48,7 @@ fun UrgePassedCard(count: Int, onLogged: () -> Unit) {
 }
 
 @Composable
-fun CopingCardsScreen(onBack: () -> Unit) {
+fun CopingCardsScreen(onBack: () -> Unit, adsAllowed: Boolean = true) {
     var index by remember { mutableIntStateOf((0 until CopingDeck.cards.size).random()) }
     val card = CopingDeck.cards[index]
     Column(Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -62,11 +64,13 @@ fun CopingCardsScreen(onBack: () -> Unit) {
         Spacer(Modifier.height(24.dp))
         Button(onClick = { index = (index + 1) % CopingDeck.cards.size }) { Text("Another card") }
         TextButton(onClick = onBack) { Text("Back") }
+        Spacer(Modifier.weight(1f))
+        BannerAdView(unitId = AdsConfig.BANNER_LIBRARY, enabled = adsAllowed)
     }
 }
 
 @Composable
-fun BoundaryScriptsScreen(onBack: () -> Unit) {
+fun BoundaryScriptsScreen(onBack: () -> Unit, adsAllowed: Boolean = true) {
     val clipboard = LocalClipboardManager.current
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
         Text("Boundary scripts", style = MaterialTheme.typography.headlineMedium)
@@ -85,6 +89,8 @@ fun BoundaryScriptsScreen(onBack: () -> Unit) {
             }
         }
         TextButton(onClick = onBack) { Text("Back") }
+        Spacer(Modifier.height(12.dp))
+        BannerAdView(unitId = AdsConfig.BANNER_LIBRARY, enabled = adsAllowed)
     }
 }
 
@@ -93,7 +99,8 @@ fun TimeCapsuleScreen(
     existing: String? = null,
     unlockDate: String? = null,
     onSave: (String, Int) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    adsAllowed: Boolean = true
 ) {
     var text by remember { mutableStateOf("") }
     var days by remember { mutableIntStateOf(30) }
@@ -128,11 +135,13 @@ fun TimeCapsuleScreen(
             ) { Text("Seal letter") }
         }
         TextButton(onClick = onBack) { Text("Back") }
+        Spacer(Modifier.weight(1f))
+        BannerAdView(unitId = AdsConfig.BANNER_LIBRARY, enabled = adsAllowed)
     }
 }
 
 @Composable
-fun GriefVsContactScreen(onBack: () -> Unit) {
+fun GriefVsContactScreen(onBack: () -> Unit, adsAllowed: Boolean = true) {
     var step by remember { mutableIntStateOf(0) }
     Column(Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text("Lonely, or missing them?", style = MaterialTheme.typography.headlineMedium)
@@ -155,11 +164,13 @@ fun GriefVsContactScreen(onBack: () -> Unit) {
                 Button(onClick = onBack) { Text("I'll ride it out") }
             }
         }
+        Spacer(Modifier.weight(1f))
+        BannerAdView(unitId = AdsConfig.BANNER_LIBRARY, enabled = adsAllowed)
     }
 }
 
 @Composable
-fun SmallWinsScreen(wins: List<String>, onBack: () -> Unit) {
+fun SmallWinsScreen(wins: List<String>, onBack: () -> Unit, adsAllowed: Boolean = true) {
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Text("Small wins", style = MaterialTheme.typography.headlineMedium)
         Text("Proof you're showing up for yourself.", style = MaterialTheme.typography.bodySmall)
@@ -174,11 +185,13 @@ fun SmallWinsScreen(wins: List<String>, onBack: () -> Unit) {
             }
         }
         TextButton(onClick = onBack) { Text("Back") }
+        Spacer(Modifier.weight(1f))
+        BannerAdView(unitId = AdsConfig.BANNER_LIBRARY, enabled = adsAllowed)
     }
 }
 
 @Composable
-fun EveningWindDownScreen(onSave: (gratitude: String, release: String, hope: String) -> Unit, onBack: () -> Unit) {
+fun EveningWindDownScreen(onSave: (gratitude: String, release: String, hope: String) -> Unit, onBack: () -> Unit, adsAllowed: Boolean = true) {
     var g by remember { mutableStateOf("") }
     var r by remember { mutableStateOf("") }
     var h by remember { mutableStateOf("") }
@@ -195,6 +208,8 @@ fun EveningWindDownScreen(onSave: (gratitude: String, release: String, hope: Str
         Spacer(Modifier.height(16.dp))
         Button(onClick = { onSave(g, r, h); onBack() }, modifier = Modifier.fillMaxWidth()) { Text("Save & rest") }
         TextButton(onClick = onBack) { Text("Back") }
+        Spacer(Modifier.height(16.dp))
+        BannerAdView(unitId = AdsConfig.BANNER_LIBRARY, enabled = adsAllowed)
     }
 }
 

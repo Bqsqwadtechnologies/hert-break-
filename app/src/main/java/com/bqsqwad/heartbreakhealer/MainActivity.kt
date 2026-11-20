@@ -41,6 +41,8 @@ import com.bqsqwad.heartbreakhealer.notifications.DailyReminderWorker
 class MainActivity : ComponentActivity() {
     private var openStoriesFromReminder by mutableStateOf(false)
     private var openJourneyFromReminder by mutableStateOf(false)
+    private var openSoundscapesFromReminder by mutableStateOf(false)
+    private var openBreathworkFromReminder by mutableStateOf(false)
 
     @Inject lateinit var consentHelper: ConsentHelper
     @Inject lateinit var adManager: AdManager
@@ -59,6 +61,8 @@ class MainActivity : ComponentActivity() {
         setIntent(intent)
         openStoriesFromReminder = intent.getBooleanExtra(DailyReminderWorker.EXTRA_OPEN_STORIES, false)
         openJourneyFromReminder = intent.getBooleanExtra(com.bqsqwad.heartbreakhealer.feature.heartjourney.JourneyNotifications.EXTRA_OPEN_JOURNEY, false)
+        openSoundscapesFromReminder = intent.getBooleanExtra(DailyReminderWorker.EXTRA_OPEN_SOUNDSCAPES, false)
+        openBreathworkFromReminder = intent.getBooleanExtra(DailyReminderWorker.EXTRA_OPEN_BREATHWORK, false)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,12 +70,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         openStoriesFromReminder = intent?.getBooleanExtra(DailyReminderWorker.EXTRA_OPEN_STORIES, false) ?: false
         openJourneyFromReminder = intent?.getBooleanExtra(com.bqsqwad.heartbreakhealer.feature.heartjourney.JourneyNotifications.EXTRA_OPEN_JOURNEY, false) ?: false
+        openSoundscapesFromReminder = intent?.getBooleanExtra(DailyReminderWorker.EXTRA_OPEN_SOUNDSCAPES, false) ?: false
+        openBreathworkFromReminder = intent?.getBooleanExtra(DailyReminderWorker.EXTRA_OPEN_BREATHWORK, false) ?: false
         val pendingCrashReport = CrashReportStore.read(this)
         enableEdgeToEdge()
         consentHelper.requestConsent(this) { canShowAds ->
             adManager.onConsentResolved(this, canShowAds)
         }
-
 
         setContent {
             HeartbreakHealerTheme {
@@ -99,7 +104,11 @@ class MainActivity : ComponentActivity() {
                                     openStoriesFromReminder = openStoriesFromReminder,
                                     onReminderNavigationHandled = { openStoriesFromReminder = false },
                                     openJourneyFromReminder = openJourneyFromReminder,
-                                    onJourneyNavigationHandled = { openJourneyFromReminder = false }
+                                    onJourneyNavigationHandled = { openJourneyFromReminder = false },
+                                    openSoundscapesFromReminder = openSoundscapesFromReminder,
+                                    onSoundscapesNavigationHandled = { openSoundscapesFromReminder = false },
+                                    openBreathworkFromReminder = openBreathworkFromReminder,
+                                    onBreathworkNavigationHandled = { openBreathworkFromReminder = false }
                                 )
                             }
                         }
@@ -139,7 +148,11 @@ fun HeartbreakHealerAppContent(
     openStoriesFromReminder: Boolean = false,
     onReminderNavigationHandled: () -> Unit = {},
     openJourneyFromReminder: Boolean = false,
-    onJourneyNavigationHandled: () -> Unit = {}
+    onJourneyNavigationHandled: () -> Unit = {},
+    openSoundscapesFromReminder: Boolean = false,
+    onSoundscapesNavigationHandled: () -> Unit = {},
+    openBreathworkFromReminder: Boolean = false,
+    onBreathworkNavigationHandled: () -> Unit = {}
 ) {
     val navController = rememberNavController()
     Box(Modifier.fillMaxSize()) {
@@ -149,7 +162,11 @@ fun HeartbreakHealerAppContent(
             openStoriesOnStart = openStoriesFromReminder,
             onReminderNavigationHandled = onReminderNavigationHandled,
             openJourneyOnStart = openJourneyFromReminder,
-            onJourneyNavigationHandled = onJourneyNavigationHandled
+            onJourneyNavigationHandled = onJourneyNavigationHandled,
+            openSoundscapesOnStart = openSoundscapesFromReminder,
+            onSoundscapesNavigationHandled = onSoundscapesNavigationHandled,
+            openBreathworkOnStart = openBreathworkFromReminder,
+            onBreathworkNavigationHandled = onBreathworkNavigationHandled
         )
         // Flowers spray across the whole app when day 30 is counted. It never blocks touches.
         com.bqsqwad.heartbreakhealer.feature.heartjourney.HeartJourneyGlobalOverlay()

@@ -8,7 +8,7 @@ object AdPlacementMap {
     val BANNER_SCREENS = listOf(
         "BANNER_HOME — Dashboard bottom",
         "BANNER_LIST — Self-Care, 30-Day Rebuild, and Affirmations bottom",
-        "BANNER_LIBRARY — Healing Library, Stories, Jokes, Journal list, Unsent Letters list, Memories, Triggers, No-Contact, and Settings footers",
+        "BANNER_LIBRARY — Healing Library, Stories, Jokes, Journal list, Unsent Letters list, Memories, Triggers, No-Contact, Settings, Coping Cards, Boundary Scripts, Time Capsule, Grief vs Contact, Small Wins, Evening Wind-Down, Soothing Soundscapes, and Somatic Breathwork footers",
         "BANNER_PATHS — 14-Day Healing Path bottom",
         "BANNER_HEARTS_SHOP — Hearts Shop bottom, separated from rewards"
     )
@@ -29,7 +29,9 @@ object AdPlacementMap {
 
     val REWARDED_TRIGGERS = listOf(
         "REWARDED_HEARTS — Hearts Shop video and user-initiated story/next-part unlock; story access is granted only from the SDK reward callback",
-        "REWARDED_SHOP_EXTRA — Hearts Shop extra video and user-initiated joke unlock; story/joke access is granted only from the SDK reward callback"
+        "REWARDED_SHOP_EXTRA — Hearts Shop extra video and user-initiated joke unlock; story/joke access is granted only from the SDK reward callback",
+        "SOUNDSCAPES_PREMIUM — Soothing Soundscapes premium track unlock; falls back to BQ Sqwad AI promo video if offline or ad unavailable",
+        "BREATHWORK_DEEP — Somatic Breathwork 10-minute deep reset unlock; falls back to BQ Sqwad AI promo video if offline or ad unavailable"
     )
 
     const val APP_OPEN_TRIGGER =

@@ -75,6 +75,10 @@ class DashboardViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
     val dailyRemindersEnabled = preferences.dailyRemindersEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+    val unlockedSoundscapes = preferences.unlockedSoundscapes
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+    val unlockedBreathworkDeep = preferences.unlockedBreathworkDeep
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     val capsuleText: StateFlow<String?> = preferences.timeCapsuleText
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
@@ -117,6 +121,8 @@ class DashboardViewModel @Inject constructor(
 
     fun setReduceMotion(enabled: Boolean) { viewModelScope.launch { preferences.setReduceMotion(enabled) } }
     fun setDailyRemindersEnabled(enabled: Boolean) { viewModelScope.launch { preferences.setDailyRemindersEnabled(enabled) } }
+    fun unlockSoundscape(id: String) { viewModelScope.launch { preferences.unlockSoundscape(id) } }
+    fun unlockBreathworkDeep() { viewModelScope.launch { preferences.unlockBreathworkDeep() } }
 
     fun completeSelfCare(taskId: String) {
         viewModelScope.launch {
@@ -205,7 +211,7 @@ class DashboardViewModel @Inject constructor(
     }
 
     private val trackedVisits = setOf(
-        "affirmations", "coping", "boundaries", "wins", "grief_contact", "library", "weekly", "no_contact", "sos",
+        "affirmations", "coping", "boundaries", "wins", "grief_contact", "library", "weekly", "no_contact", "sos", "soundscapes", "breathwork",
     )
     fun recordVisit(route: String?) {
         if (route != null && route in trackedVisits) viewModelScope.launch { journey.recordEvent(JourneyEvents.visit(route)) }

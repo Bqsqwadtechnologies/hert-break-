@@ -47,6 +47,8 @@ class UserPreferences @Inject constructor(
     val timeCapsuleText: Flow<String?> = ds.data.map { it[Keys.CAPSULE_TEXT] }
     val timeCapsuleUnlock: Flow<String?> = ds.data.map { it[Keys.CAPSULE_UNLOCK] }
     val breakupDayEpoch: Flow<Long?> = ds.data.map { it[Keys.BREAKUP_EPOCH] }
+    val unlockedSoundscapes: Flow<Set<String>> = ds.data.map { it[Keys.UNLOCKED_SOUNDSCAPES] ?: emptySet() }
+    val unlockedBreathworkDeep: Flow<Boolean> = ds.data.map { it[Keys.UNLOCKED_BREATHWORK_DEEP] ?: false }
 
     suspend fun setOnboardingComplete(nickname: String, goals: Set<String>) {
         ds.edit {
@@ -212,6 +214,19 @@ class UserPreferences @Inject constructor(
         ds.edit { it[Keys.BREAKUP_EPOCH] = epochDay }
     }
 
+    suspend fun unlockSoundscape(soundscapeId: String) {
+        if (soundscapeId.isBlank()) return
+        ds.edit { data ->
+            data[Keys.UNLOCKED_SOUNDSCAPES] = (data[Keys.UNLOCKED_SOUNDSCAPES] ?: emptySet()) + soundscapeId
+        }
+    }
+
+    suspend fun unlockBreathworkDeep() {
+        ds.edit { data ->
+            data[Keys.UNLOCKED_BREATHWORK_DEEP] = true
+        }
+    }
+
     suspend fun clearAll() {
         ds.edit { it.clear() }
     }
@@ -247,5 +262,7 @@ class UserPreferences @Inject constructor(
         val CAPSULE_TEXT = stringPreferencesKey("capsule_text")
         val CAPSULE_UNLOCK = stringPreferencesKey("capsule_unlock")
         val BREAKUP_EPOCH = androidx.datastore.preferences.core.longPreferencesKey("breakup_epoch")
+        val UNLOCKED_SOUNDSCAPES = stringSetPreferencesKey("unlocked_soundscapes")
+        val UNLOCKED_BREATHWORK_DEEP = booleanPreferencesKey("unlocked_breathwork_deep")
     }
 }

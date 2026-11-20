@@ -17,26 +17,47 @@ class DailyReminderWorker(
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
-        val message = ReminderMessageBank.today()
+        val period = inputData.getString(KEY_PERIOD) ?: PERIOD_MORNING
+        val (title, message, targetExtra) = when (period) {
+            PERIOD_AFTERNOON -> Triple(
+                "Afternoon Breath & Reset",
+                ReminderMessageBank.afternoon(),
+                EXTRA_OPEN_BREATHWORK
+            )
+            PERIOD_EVENING -> Triple(
+                "Evening Wind-Down & Soundscapes",
+                ReminderMessageBank.evening(),
+                EXTRA_OPEN_SOUNDSCAPES
+            )
+            else -> Triple(
+                "A gentle note for today",
+                ReminderMessageBank.today(),
+                EXTRA_OPEN_STORIES
+            )
+        }
+
         val intent = Intent(applicationContext, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            putExtra(EXTRA_OPEN_STORIES, true)
+            putExtra(targetExtra, true)
+        }
+        val notifId = when (period) {
+            PERIOD_AFTERNOON -> 1002
+            PERIOD_EVENING -> 1003
+            else -> 1001
         }
         val pending = PendingIntent.getActivity(
             applicationContext,
-            REQUEST_CODE,
+            notifId,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val notification = NotificationCompat.Builder(applicationContext, HeartbreakHealerApp.CHANNEL_DAILY)
-            // Android status-bar small icons must be monochrome; this resource is
-            // generated from the official BQ/Heartbreak Healer brand mark.
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle("A gentle note for today")
-            .setContentText("Tap to read today's full message.")
+            .setContentTitle(title)
+            .setContentText(message)
             .setStyle(
                 NotificationCompat.BigTextStyle()
-                    .setBigContentTitle("A gentle note for today")
+                    .setBigContentTitle(title)
                     .bigText(message)
             )
             .setContentIntent(pending)
@@ -49,17 +70,21 @@ class DailyReminderWorker(
 
         val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         return try {
-            manager.notify(NOTIFICATION_ID, notification)
+            manager.notify(notifId, notification)
             Result.success()
         } catch (_: SecurityException) {
-            // Notification permission may have been denied or revoked.
             Result.success()
         }
     }
 
     companion object {
+        const val KEY_PERIOD = "notification_period"
+        const val PERIOD_MORNING = "morning"
+        const val PERIOD_AFTERNOON = "afternoon"
+        const val PERIOD_EVENING = "evening"
+
         const val EXTRA_OPEN_STORIES = "open_stories_from_reminder"
-        private const val NOTIFICATION_ID = 1001
-        private const val REQUEST_CODE = 1001
+        const val EXTRA_OPEN_SOUNDSCAPES = "open_soundscapes_from_reminder"
+        const val EXTRA_OPEN_BREATHWORK = "open_breathwork_from_reminder"
     }
 }
