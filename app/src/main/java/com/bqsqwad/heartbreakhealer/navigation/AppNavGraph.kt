@@ -137,6 +137,8 @@ fun AppNavGraph(
     val activeJokeIndex by dashboardViewModel.activeJokeIndex.collectAsState()
     val unlockedSoundscapes by dashboardViewModel.unlockedSoundscapes.collectAsState()
     val unlockedBreathworkDeep by dashboardViewModel.unlockedBreathworkDeep.collectAsState()
+    val context = LocalContext.current
+    val activity = context as? Activity
     var showHouseAdDialog by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     var pendingHouseAdReward by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<(() -> Unit)?>(null) }
 
@@ -165,8 +167,6 @@ fun AppNavGraph(
         }
     }
     // Both guided journeys share a single daily completion lock in DataStore.
-    val context = LocalContext.current
-    val activity = context as? Activity
     val adsAllowed by adManager.adsAllowed.collectAsState()
     var pendingFeatureRoute by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
     var pendingRewardGranted by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
@@ -626,7 +626,7 @@ fun AppNavGraph(
         }
         composable(Routes.SOUNDSCAPES) {
             SoundscapesScreen(
-                unlockedTrackIds = unlockedSoundscapes,
+                unlockedSoundscapes = unlockedSoundscapes,
                 onUnlockTrack = { trackId ->
                     requestRewardedWithHouseFallback(
                         RewardedPlacement.SOUNDSCAPES_PREMIUM,
