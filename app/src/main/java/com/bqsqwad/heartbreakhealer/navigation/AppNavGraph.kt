@@ -141,6 +141,7 @@ fun AppNavGraph(
     val activity = context as? Activity
     var showHouseAdDialog by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     var pendingHouseAdReward by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<(() -> Unit)?>(null) }
+    var isRewardedLoading by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
 
     fun triggerRewarded(
         placement: RewardedPlacement,
@@ -149,8 +150,7 @@ fun AppNavGraph(
         forceHouseSometimes: Boolean = false
     ) {
         val host = activity
-        val showHouseDirectly = forceHouseSometimes && (java.util.concurrent.ThreadLocalRandom.current().nextInt(100) < 35)
-        if (host == null || showHouseDirectly) {
+        if (host == null) {
             pendingHouseAdReward = {
                 onRewarded()
                 onDismissed()
@@ -163,12 +163,15 @@ fun AppNavGraph(
                 onRewarded = onRewarded,
                 onDismissed = onDismissed,
                 onUnavailable = {
+                    isRewardedLoading = false
                     pendingHouseAdReward = {
                         onRewarded()
                         onDismissed()
                     }
                     showHouseAdDialog = true
-                }
+                },
+                onLoading = { isRewardedLoading = true },
+                onLoadingComplete = { isRewardedLoading = false }
             )
         }
     }
@@ -282,18 +285,7 @@ fun AppNavGraph(
                     com.bqsqwad.heartbreakhealer.feature.heartjourney.HeartJourneyHomeSection(
                         reduceMotion = reduceMotion,
                         onOpenJourney = { navController.navigate(Routes.JOURNEY) },
-                        onPromoVideoFinished = {
-                            val host = activity
-                            if (host != null) {
-                                adManager.showRewarded(
-                                    host,
-                                    RewardedPlacement.REBUILD_30,
-                                    onRewarded = {},
-                                    onDismissed = {},
-                                    onUnavailable = {}
-                                )
-                            }
-                        }
+                        onPromoVideoFinished = {}
                     )
                 },
                 hearts = hearts,
@@ -612,18 +604,7 @@ fun AppNavGraph(
                 onOpenFeature = { route, free -> if (free) navController.navigate(route) else openFeature(route) },
                 onBack = { navController.popBackStack() },
                 adsAllowed = adsAllowed,
-                onPromoVideoFinished = {
-                    val host = activity
-                    if (host != null) {
-                        adManager.showRewarded(
-                            host,
-                            RewardedPlacement.REBUILD_30,
-                            onRewarded = {},
-                            onDismissed = {},
-                            onUnavailable = {}
-                        )
-                    }
-                }
+                onPromoVideoFinished = {}
             )
         }
         composable(Routes.ENTERTAINMENT) {
@@ -716,13 +697,37 @@ fun AppNavGraph(
         }
     }
 
+    if (isRewardedLoading) {
+        androidx.compose.ui.window.Dialog(
+            onDismissRequest = {},
+            properties = androidx.compose.ui.window.DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false
+            )
+        ) {
+            Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surface) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 28.dp, vertical = 22.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    CircularProgressIndicator()
+                    Text("Loading ad…", style = MaterialTheme.typography.titleMedium)
+                }
+            }
+        }
+    }
+
     if (showHouseAdDialog) {
         HouseVideoAd(
-            onClose = {
+            onCompleted = {
                 val cb = pendingHouseAdReward
                 pendingHouseAdReward = null
-                showHouseAdDialog = false
                 cb?.invoke()
+            },
+            onClose = {
+                pendingHouseAdReward = null
+                showHouseAdDialog = false
             }
         )
     }
