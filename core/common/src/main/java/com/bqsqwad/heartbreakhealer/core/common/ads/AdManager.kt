@@ -3,6 +3,8 @@ package com.bqsqwad.heartbreakhealer.core.common.ads
 import android.app.Activity
 import android.content.Context
 import android.util.Log
+import android.os.Handler
+import android.os.Looper
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
@@ -16,6 +18,7 @@ import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.Collections
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -83,6 +86,7 @@ class AdManager @Inject constructor() {
     private var backgroundedAt = 0L
     private var appOpenEligible = false
     private var eligibleForegroundCount = 0
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     private val _adsAllowed = MutableStateFlow(false)
     val adsAllowed: StateFlow<Boolean> = _adsAllowed
@@ -206,45 +210,47 @@ class AdManager @Inject constructor() {
         placement: RewardedPlacement,
         onRewarded: () -> Unit,
         onDismissed: () -> Unit = {},
-        onUnavailable: () -> Unit = {}
+        onUnavailable: () -> Unit = {},
+        onLoading: () -> Unit = {}
     ) {
         if (!canRequestAds() || isShowingFullScreenContent) {
             onUnavailable()
             return
         }
-        var ad = rewardedAds.remove(placement)
-        var consumedPlacement = placement
-
-        // Check if ANY preloaded rewarded ad is already in cache
-        if (ad == null) {
-            val alternate = rewardedAds.entries.firstOrNull { it.value != null }
-            if (alternate != null) {
-                ad = alternate.value
-                consumedPlacement = alternate.key
-                rewardedAds.remove(alternate.key)
-            }
-        }
-
+        // Never substitute another placement's inventory: each screen/story part has its own unit.
+        val ad = rewardedAds.remove(placement)
         if (ad != null) {
-            loadRewarded(activity.applicationContext, consumedPlacement)
-            showLoadedRewarded(activity, consumedPlacement, ad, onRewarded, onDismissed, onUnavailable)
+            loadRewarded(activity.applicationContext, placement)
+            showLoadedRewarded(activity, placement, ad, onRewarded, onDismissed, onUnavailable)
             return
         }
 
-        // A rewarded request must not be silently skipped if not preloaded.
-        // Load the requested placement on demand and show it as soon as it is ready;
-        // only call onUnavailable() (triggering house video fallback) if Google reports a load error.
+        // Give AdMob a short opportunity to load before the caller switches to the BQ house ad.
+        onLoading()
+        val resolved = AtomicBoolean(false)
+        val timeout = Runnable {
+            if (resolved.compareAndSet(false, true)) {
+                Log.w(TAG, "Rewarded $placement timed out after ${REWARDED_LOAD_TIMEOUT_MS}ms")
+                onUnavailable()
+            }
+        }
+        mainHandler.postDelayed(timeout, REWARDED_LOAD_TIMEOUT_MS)
+
         RewardedAd.load(
             activity.applicationContext,
             placement.unitId,
             AdRequest.Builder().build(),
             object : RewardedAdLoadCallback() {
                 override fun onAdLoaded(loadedAd: RewardedAd) {
+                    if (!resolved.compareAndSet(false, true)) return
+                    mainHandler.removeCallbacks(timeout)
                     showLoadedRewarded(activity, placement, loadedAd, onRewarded, onDismissed, onUnavailable)
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
-                    Log.w(TAG, "Rewarded $placement failed to load on demand: ${error.message}")
+                    if (!resolved.compareAndSet(false, true)) return
+                    mainHandler.removeCallbacks(timeout)
+                    Log.w(TAG, "Rewarded $placement failed to load: code=${error.code}, domain=${error.domain}, message=${error.message}, response=${error.responseInfo}")
                     loadRewarded(activity.applicationContext, placement)
                     onUnavailable()
                 }
@@ -372,5 +378,6 @@ class AdManager @Inject constructor() {
 
     companion object {
         private const val TAG = "AdManager"
+        private const val REWARDED_LOAD_TIMEOUT_MS = 5_000L
     }
 }
