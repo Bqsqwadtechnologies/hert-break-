@@ -146,8 +146,7 @@ fun AppNavGraph(
     fun triggerRewarded(
         placement: RewardedPlacement,
         onRewarded: () -> Unit,
-        onDismissed: () -> Unit = {},
-        forceHouseSometimes: Boolean = false
+        onDismissed: () -> Unit = {}
     ) {
         val host = activity
         if (host == null) {
@@ -177,7 +176,7 @@ fun AppNavGraph(
     }
 
     val requestRewardedWithHouseFallback: (RewardedPlacement, () -> Unit, () -> Unit) -> Unit = { placement, onRewarded, onDismissed ->
-        triggerRewarded(placement, onRewarded, onDismissed, forceHouseSometimes = false)
+        triggerRewarded(placement, onRewarded, onDismissed)
     }
     // Both guided journeys share a single daily completion lock in DataStore.
     val adsAllowed by adManager.adsAllowed.collectAsState()
@@ -308,8 +307,7 @@ fun AppNavGraph(
                     dashboardViewModel.logUrgePassed()
                     triggerRewarded(
                         placement = RewardedPlacement.TASK_COMPLETION,
-                        onRewarded = { dashboardViewModel.onRewardedHearts() },
-                        forceHouseSometimes = false
+                        onRewarded = { dashboardViewModel.onRewardedHearts() }
                     )
                 },
                 onBoundaries = { openFeature(Routes.BOUNDARIES) },
@@ -327,8 +325,7 @@ fun AppNavGraph(
                     dashboardViewModel.onCheckIn(mood, note)
                     triggerRewarded(
                         placement = RewardedPlacement.TASK_COMPLETION,
-                        onRewarded = { dashboardViewModel.onRewardedHearts() },
-                        forceHouseSometimes = true
+                        onRewarded = { dashboardViewModel.onRewardedHearts() }
                     )
                 }
             )
@@ -347,8 +344,7 @@ fun AppNavGraph(
                     dashboardViewModel.saveJournalEntry(mood, content)
                     triggerRewarded(
                         placement = RewardedPlacement.WRITING_COMPLETION,
-                        onRewarded = { dashboardViewModel.onRewardedHearts() },
-                        forceHouseSometimes = false
+                        onRewarded = { dashboardViewModel.onRewardedHearts() }
                     )
                 },
                 adsAllowed = adsAllowed,
@@ -362,16 +358,14 @@ fun AppNavGraph(
                     dashboardViewModel.saveUnsentLetter(content)
                     triggerRewarded(
                         placement = RewardedPlacement.WRITING_COMPLETION,
-                        onRewarded = { dashboardViewModel.onRewardedHearts() },
-                        forceHouseSometimes = false
+                        onRewarded = { dashboardViewModel.onRewardedHearts() }
                     )
                 },
                 onRelease = { id ->
                     dashboardViewModel.releaseUnsentLetter(id)
                     triggerRewarded(
                         placement = RewardedPlacement.WRITING_COMPLETION,
-                        onRewarded = { dashboardViewModel.onRewardedHearts() },
-                        forceHouseSometimes = false
+                        onRewarded = { dashboardViewModel.onRewardedHearts() }
                     )
                 },
                 adsAllowed = adsAllowed,
@@ -410,18 +404,11 @@ fun AppNavGraph(
                     )
                 },
                 onWatchRewarded = { onFinished ->
-                    val host = activity
-                    if (host == null) {
-                        onFinished()
-                    } else {
-                        adManager.showRewarded(
-                            host,
-                            RewardedPlacement.REBUILD_30,
-                            onRewarded = { dashboardViewModel.onRewardedHearts() },
-                            onDismissed = onFinished,
-                            onUnavailable = { onFinished() }
-                        )
-                    }
+                    requestRewardedWithHouseFallback(
+                        RewardedPlacement.REBUILD_30,
+                        { dashboardViewModel.onRewardedHearts() },
+                        onFinished
+                    )
                 },
                 adsAllowed = adsAllowed,
                 onBack = { navController.popBackStack() }
@@ -643,8 +630,7 @@ fun AppNavGraph(
                         triggerRewarded(
                             placement = placement,
                             onRewarded = continueOnce,
-                            onDismissed = {},
-                            forceHouseSometimes = isStory
+                            onDismissed = {}
                         )
                     }
                 },
