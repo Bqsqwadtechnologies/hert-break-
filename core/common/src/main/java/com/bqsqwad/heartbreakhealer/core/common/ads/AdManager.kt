@@ -211,7 +211,8 @@ class AdManager @Inject constructor() {
         onRewarded: () -> Unit,
         onDismissed: () -> Unit = {},
         onUnavailable: () -> Unit = {},
-        onLoading: () -> Unit = {}
+        onLoading: () -> Unit = {},
+        onLoadingComplete: () -> Unit = {}
     ) {
         if (!canRequestAds() || isShowingFullScreenContent) {
             onUnavailable()
@@ -231,6 +232,7 @@ class AdManager @Inject constructor() {
         val timeout = Runnable {
             if (resolved.compareAndSet(false, true)) {
                 Log.w(TAG, "Rewarded $placement timed out after ${REWARDED_LOAD_TIMEOUT_MS}ms")
+                onLoadingComplete()
                 onUnavailable()
             }
         }
@@ -244,12 +246,14 @@ class AdManager @Inject constructor() {
                 override fun onAdLoaded(loadedAd: RewardedAd) {
                     if (!resolved.compareAndSet(false, true)) return
                     mainHandler.removeCallbacks(timeout)
+                    onLoadingComplete()
                     showLoadedRewarded(activity, placement, loadedAd, onRewarded, onDismissed, onUnavailable)
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
                     if (!resolved.compareAndSet(false, true)) return
                     mainHandler.removeCallbacks(timeout)
+                    onLoadingComplete()
                     Log.w(TAG, "Rewarded $placement failed to load: code=${error.code}, domain=${error.domain}, message=${error.message}, response=${error.responseInfo}")
                     loadRewarded(activity.applicationContext, placement)
                     onUnavailable()
