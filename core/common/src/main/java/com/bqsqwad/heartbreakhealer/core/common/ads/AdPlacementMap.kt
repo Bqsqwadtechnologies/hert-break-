@@ -16,7 +16,7 @@ object AdPlacementMap {
     val NATIVE_SCREENS = listOf(
         "NATIVE_AFFIRMATIONS — after every 8 affirmations",
         "NATIVE_REBUILD — after every 8 completed-program items",
-        "NATIVE_LIBRARY — within Healing Library articles and after roughly three story paragraphs (about 30 reading lines)",
+        "NATIVE_LIBRARY — every 6 Healing Library articles, on the Stories list, and after every 2 story paragraphs",
         "NATIVE_PATHS — within the 14-day path at the designated interval",
         "NATIVE_WEEKLY_REVIEW — below the weekly progress summary"
     )
