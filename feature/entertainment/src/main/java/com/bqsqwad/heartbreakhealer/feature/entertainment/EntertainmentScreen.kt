@@ -40,12 +40,8 @@ fun EntertainmentScreen(
     val unseenStories = EntertainmentCatalog.stories.filter { it.id !in viewedStoryIds }
     val unseenJokes = EntertainmentCatalog.jokes.indices.filter { "joke_${it + 1}" !in seenJokeIds }
 
-    LaunchedEffect(isUnlocking) {
-        if (isUnlocking) {
-            kotlinx.coroutines.delay(2500L)
-            isUnlocking = false
-        }
-    }
+    // Keep the unlock action locked until the rewarded-ad flow reports success/fallback.
+    // A short UI timer here used to re-enable the button while an ad was still loading.
     Column(Modifier.fillMaxSize()) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
