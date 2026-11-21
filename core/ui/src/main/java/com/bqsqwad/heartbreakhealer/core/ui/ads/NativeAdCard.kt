@@ -5,6 +5,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -54,7 +55,8 @@ fun NativeAdCard(unitId: String, modifier: Modifier = Modifier, enabled: Boolean
     DisposableEffect(nativeAd) {
         onDispose { nativeAd?.destroy() }
     }
-    val ad = nativeAd ?: run {
+    val ad = nativeAd
+    if (ad == null) {
         if (loading) {
             Card(modifier = modifier.fillMaxWidth()) {
                 androidx.compose.foundation.layout.Row(
