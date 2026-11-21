@@ -108,7 +108,7 @@ fun CompanionPromptDialog(onClose: () -> Unit, onPromoVideoFinished: (() -> Unit
     val context = LocalContext.current
     var showVideo by remember { mutableStateOf(false) }
     if (showVideo) {
-        HouseVideoAd(onClose = { showVideo = false; onPromoVideoFinished?.invoke(); onClose() })
+        HouseVideoAd(onCompleted = { onPromoVideoFinished?.invoke() }, onClose = { showVideo = false; onClose() })
     } else {
         Dialog(onDismissRequest = onClose) {
             CompanionCard(
@@ -129,7 +129,7 @@ private const val SKIP_AFTER_SECONDS = 10
  *  - Labeled "Ad" so nobody is surprised. Never shown on SOS, Support, Journal or Letters screens.
  */
 @Composable
-fun HouseVideoAd(onClose: () -> Unit) {
+fun HouseVideoAd(onCompleted: () -> Unit = {}, onClose: () -> Unit) {
     val context = LocalContext.current
     val resId = remember { context.resources.getIdentifier("bqsqwad_ai_promo", "raw", context.packageName) }
     if (resId == 0) {
@@ -144,6 +144,7 @@ fun HouseVideoAd(onClose: () -> Unit) {
     var playing by remember { mutableStateOf(true) }
     var muted by remember { mutableStateOf(false) }
     var ended by remember { mutableStateOf(false) }
+    var completionReported by remember { mutableStateOf(false) }
     var seconds by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(playing, ended) {
@@ -160,7 +161,14 @@ fun HouseVideoAd(onClose: () -> Unit) {
                     VideoView(ctx).apply {
                         setVideoURI(Uri.parse("android.resource://${ctx.packageName}/$resId"))
                         setOnPreparedListener { mp -> player = mp; mp.isLooping = false; start() }
-                        setOnCompletionListener { ended = true; playing = false }
+                        setOnCompletionListener {
+                            ended = true
+                            playing = false
+                            if (!completionReported) {
+                                completionReported = true
+                                onCompleted()
+                            }
+                        }
                         videoView = this
                     }
                 },
