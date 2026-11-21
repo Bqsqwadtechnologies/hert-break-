@@ -95,11 +95,15 @@ class AdManager @Inject constructor() {
     fun onConsentResolved(context: Context, canShowAds: Boolean) {
         consentResolved = true
         adsEnabled = canShowAds
+        Log.i(TAG, "Consent resolved; canRequestAds=$canShowAds")
         _adsAllowed.value = canShowAds
         if (!canShowAds || initialized) return
 
         initialized = true
-        MobileAds.initialize(context.applicationContext) {
+        MobileAds.initialize(context.applicationContext) { status ->
+            status.adapterStatusMap.forEach { (adapter, adapterStatus) ->
+                Log.d(TAG, "Adapter $adapter: state=${adapterStatus.initializationState}, latency=${adapterStatus.latency}, description=${adapterStatus.description}")
+            }
             val appContext = context.applicationContext
             InterstitialPlacement.values().forEach { loadInterstitial(appContext, it) }
             RewardedPlacement.values().forEach { loadRewarded(appContext, it) }
@@ -133,7 +137,7 @@ class AdManager @Inject constructor() {
                 override fun onAdFailedToLoad(error: LoadAdError) {
                     loadingInterstitials.remove(placement)
                     interstitials[placement] = null
-                    Log.w(TAG, "Interstitial $placement failed to load: ${error.message}")
+                    Log.w(TAG, "Interstitial $placement failed: code=${error.code}, domain=${error.domain}, message=${error.message}, response=${error.responseInfo}")
                 }
             }
         )
@@ -198,7 +202,7 @@ class AdManager @Inject constructor() {
                 override fun onAdFailedToLoad(error: LoadAdError) {
                     loadingRewardedPlacements.remove(placement)
                     rewardedAds[placement] = null
-                    Log.w(TAG, "Rewarded $placement failed to load: ${error.message}")
+                    Log.w(TAG, "Rewarded $placement failed: code=${error.code}, domain=${error.domain}, message=${error.message}, response=${error.responseInfo}")
                 }
             }
         )
@@ -288,7 +292,7 @@ class AdManager @Inject constructor() {
 
             override fun onAdFailedToShowFullScreenContent(error: AdError) {
                 isShowingFullScreenContent = false
-                Log.w(TAG, "Rewarded $placement failed to show: ${error.message}")
+                Log.w(TAG, "Rewarded $placement failed to show: code=${error.code}, domain=${error.domain}, message=${error.message}, response=${ad.responseInfo}")
                 loadRewarded(activity.applicationContext, placement)
                 onUnavailable()
                 onDismissed()
@@ -312,7 +316,7 @@ class AdManager @Inject constructor() {
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
                     appOpenAd = null
-                    Log.w(TAG, "App-open ad failed to load: ${error.message}")
+                    Log.w(TAG, "App-open ad failed: code=${error.code}, domain=${error.domain}, message=${error.message}, response=${error.responseInfo}")
                 }
             }
         )
