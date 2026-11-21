@@ -4,6 +4,14 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
+import android.util.Log
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
@@ -19,26 +27,47 @@ import com.google.android.gms.ads.nativead.NativeAdView
 fun NativeAdCard(unitId: String, modifier: Modifier = Modifier, enabled: Boolean = true) {
     if (!enabled) return
     var nativeAd by remember(unitId) { mutableStateOf<NativeAd?>(null) }
+    var loading by remember(unitId) { mutableStateOf(true) }
     val context = androidx.compose.ui.platform.LocalContext.current
     DisposableEffect(unitId) {
+        var disposed = false
         val loader = AdLoader.Builder(context, unitId)
             .forNativeAd { loaded ->
-                nativeAd?.destroy()
-                nativeAd = loaded
+                if (disposed) {
+                    loaded.destroy()
+                } else {
+                    nativeAd = loaded
+                    loading = false
+                }
             }
             .withAdListener(object : AdListener() {
                 override fun onAdFailedToLoad(error: LoadAdError) {
+                    loading = false
+                    Log.w(TAG, "Native ad failed for unit $unitId: code=${error.code}, domain=${error.domain}, message=${error.message}, response=${error.responseInfo}")
                     nativeAd = null
                 }
             })
             .build()
         loader.loadAd(AdRequest.Builder().build())
-        onDispose {
-            nativeAd?.destroy()
-            nativeAd = null
-        }
+        onDispose { disposed = true }
     }
-    val ad = nativeAd ?: return
+    DisposableEffect(nativeAd) {
+        onDispose { nativeAd?.destroy() }
+    }
+    val ad = nativeAd ?: run {
+        if (loading) {
+            Card(modifier = modifier.fillMaxWidth()) {
+                androidx.compose.foundation.layout.Row(
+                    modifier = Modifier.padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                    Text(" Loading ad…", style = MaterialTheme.typography.labelMedium)
+                }
+            }
+        }
+        return
+    }
     AndroidView(
         modifier = modifier.fillMaxWidth(),
         factory = { viewContext ->
@@ -80,3 +109,5 @@ fun NativeAdCard(unitId: String, modifier: Modifier = Modifier, enabled: Boolean
         }
     )
 }
+
+private const val TAG = "NativeAdCard"
