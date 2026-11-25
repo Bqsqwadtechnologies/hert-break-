@@ -66,7 +66,7 @@ object CompanionLinks {
 
 /** The explanation card with the three buttons the owner asked for. */
 @Composable
-fun CompanionCard(onProceed: () -> Unit, onNoThanks: () -> Unit, onUsingAlready: () -> Unit, modifier: Modifier = Modifier) {
+fun CompanionCard(onProceed: () -> Unit, onNoThanks: () -> Unit, onUsingAlready: () -> Unit, onWatchPromo: (() -> Unit)? = null, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
@@ -92,6 +92,16 @@ fun CompanionCard(onProceed: () -> Unit, onNoThanks: () -> Unit, onUsingAlready:
             Spacer(Modifier.height(12.dp))
             Button(onClick = onProceed, modifier = Modifier.fillMaxWidth().height(48.dp), shape = RoundedCornerShape(16.dp)) {
                 Text("Proceed with Companion")
+            }
+            if (onWatchPromo != null) {
+                Spacer(Modifier.height(8.dp))
+                OutlinedButton(
+                    onClick = onWatchPromo,
+                    modifier = Modifier.fillMaxWidth().height(46.dp),
+                    shape = RoundedCornerShape(14.dp),
+                ) {
+                    Text("Watch BQ Sqwad AI video · earn 15 Hearts")
+                }
             }
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -128,7 +138,7 @@ fun HouseVideoAd(onCompleted: () -> Unit = {}, onClose: () -> Unit) {
     val context = LocalContext.current
     val resId = remember { context.resources.getIdentifier("bqsqwad_ai_promo", "raw", context.packageName) }
     if (resId == 0) {
-        // The video has not been uploaded yet: show the same promotion as a simple end-card.
+        // Without an actual playable video, do not grant a completion reward.
         Dialog(onDismissRequest = onClose) {
             PromoEndCard(onOpen = { CompanionLinks.open(context); onClose() }, onClose = onClose)
         }
