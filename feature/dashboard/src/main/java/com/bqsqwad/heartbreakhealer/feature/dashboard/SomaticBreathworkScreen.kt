@@ -250,7 +250,7 @@ fun SomaticBreathworkScreen(
                     )
                     Spacer(Modifier.height(14.dp))
                     Text(
-                        "Watch a quick rewarded video or partner spotlight to unlock this premium deep somatic session.",
+                        "Watch the optional BQ Sqwad AI video to unlock the premium deep-breathwork session. It unlocks only after the video finishes; skipping or closing does not grant the unlock.",
                         style = MaterialTheme.typography.bodySmall,
                         color = ink,
                         textAlign = TextAlign.Center
@@ -276,7 +276,7 @@ fun SomaticBreathworkScreen(
                         modifier = Modifier.fillMaxWidth().height(44.dp),
                         shape = RoundedCornerShape(14.dp)
                     ) {
-                        Text("⭐  BQ Sqwad AI Partner Spotlight")
+                        Text("⭐  Watch BQ Sqwad AI video · unlock deep session")
                     }
                     Spacer(Modifier.height(8.dp))
                     TextButton(onClick = { showUnlockDialog = false }) {
