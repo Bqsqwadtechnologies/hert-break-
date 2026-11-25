@@ -6,6 +6,11 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.widget.VideoView
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -40,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -53,6 +59,13 @@ import kotlinx.coroutines.delay
 
 /** Opens BQ Sqwad AI: installed app first, then the store listing, then the website. Links come from config/companion.properties. */
 object CompanionLinks {
+    fun openSignup(context: Context) {
+        val signupUrl = BuildConfig.COMPANION_WEB_URL.trimEnd('/') + "/signup"
+        runCatching {
+            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(signupUrl)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        }
+    }
+
     fun open(context: Context) {
         val pkg = BuildConfig.COMPANION_PACKAGE
         val installed = if (pkg.isNotBlank()) context.packageManager.getLaunchIntentForPackage(pkg) else null
@@ -125,13 +138,13 @@ fun CompanionPromptDialog(onClose: () -> Unit, onPromoVideoFinished: (() -> Unit
     }
 }
 
-private const val SKIP_AFTER_SECONDS = 15
+private const val SKIP_AFTER_SECONDS = 30
 
 /**
  * The BQ Sqwad AI house video.
  *  - The video itself never redirects; only the clearly labeled Learn more action opens the companion.
- *  - A reward becomes eligible after 15 seconds of active playback; skipping afterwards keeps it.
- *  - Skip closes it after 15 seconds. Pause and Mute are real controls.
+ *  - A reward becomes eligible after 30 seconds of active playback; skipping afterwards keeps it.
+ *  - No countdown is shown. Skip appears after 30 seconds. Pause and Mute are real controls.
  *  - Labeled "Ad". Never shown on SOS, Support, Journal or Letters screens.
  */
 @Composable
@@ -152,9 +165,10 @@ fun HouseVideoAd(onRewardEligible: () -> Unit = {}, onClose: () -> Unit) {
     var ended by remember { mutableStateOf(false) }
     var rewardReported by remember { mutableStateOf(false) }
     var seconds by remember { mutableIntStateOf(0) }
+    var playbackStarted by remember { mutableStateOf(false) }
 
-    LaunchedEffect(playing, ended) {
-        while (playing && !ended) {
+    LaunchedEffect(playing, ended, playbackStarted) {
+        while (playing && !ended && playbackStarted) {
             delay(1000)
             val nextSeconds = seconds + 1
             seconds = nextSeconds
@@ -174,11 +188,11 @@ fun HouseVideoAd(onRewardEligible: () -> Unit = {}, onClose: () -> Unit) {
                 factory = { ctx ->
                     VideoView(ctx).apply {
                         setVideoURI(Uri.parse("android.resource://${ctx.packageName}/$resId"))
-                        setOnPreparedListener { mp -> player = mp; mp.isLooping = false; start() }
+                        setOnPreparedListener { mp -> player = mp; mp.isLooping = false; playbackStarted = true; start() }
                         setOnCompletionListener {
                             ended = true
                             playing = false
-                            // Covers a video that reaches its end on the 15-second boundary
+                            // Covers a video that reaches its end on the 30-second boundary
                             // before the one-second ticker gets its next turn.
                             if (seconds >= SKIP_AFTER_SECONDS && !rewardReported) {
                                 rewardReported = true
@@ -194,34 +208,48 @@ fun HouseVideoAd(onRewardEligible: () -> Unit = {}, onClose: () -> Unit) {
                 shape = RoundedCornerShape(8.dp), color = Color(0x99000000),
             ) { Text("Ad · BQ Sqwad AI", color = Color.White, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)) }
 
-            // Top-right Skip button (available after 15 seconds or when video ends) with live countdown badge
-            Box(
-                modifier = Modifier.align(Alignment.TopEnd).padding(14.dp)
+            // The countdown stays hidden. The skip action appears only after 30 seconds.
+            val arrowPulse = rememberInfiniteTransition(label = "skip-arrow")
+                .animateFloat(
+                    initialValue = 0.25f,
+                    targetValue = 1f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(durationMillis = 550),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "skip-arrow-alpha"
+                )
+            Column(
+                modifier = Modifier.align(Alignment.TopEnd).padding(14.dp),
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 if (seconds >= SKIP_AFTER_SECONDS || ended) {
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = Color(0xDD000000)
-                    ) {
-                        TextButton(
-                            onClick = onClose,
-                            modifier = Modifier.height(44.dp).padding(horizontal = 6.dp)
-                        ) {
-                            Text(if (ended) "Close ✕" else "Skip ›", color = Color.White, fontWeight = FontWeight.Bold)
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        if (!ended) {
+                            Text(
+                                "➜",
+                                color = Color(0xFFFFD54F),
+                                style = MaterialTheme.typography.headlineMedium,
+                                modifier = Modifier.alpha(arrowPulse.value)
+                            )
+                        }
+                        Surface(shape = RoundedCornerShape(12.dp), color = Color(0xDD000000)) {
+                            TextButton(
+                                onClick = onClose,
+                                modifier = Modifier.height(44.dp).padding(horizontal = 6.dp)
+                            ) {
+                                Text(if (ended) "Close ✕" else "Skip ›", color = Color.White, fontWeight = FontWeight.Bold)
+                            }
                         }
                     }
-                } else {
-                    Surface(
+                    OutlinedButton(
+                        onClick = { CompanionLinks.openSignup(context) },
+                        modifier = Modifier.height(42.dp),
                         shape = RoundedCornerShape(12.dp),
-                        color = Color(0x99000000)
+                        colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
                     ) {
-                        Text(
-                            "Skip in ${SKIP_AFTER_SECONDS - seconds}s",
-                            color = Color.White,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
-                        )
+                        Text("Sign up for BQ Sqwad AI", fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
@@ -248,6 +276,8 @@ fun HouseVideoAd(onRewardEligible: () -> Unit = {}, onClose: () -> Unit) {
                         if (ended) {
                             ended = false
                             seconds = 0
+                            rewardReported = false
+                            playbackStarted = true
                             v.seekTo(0)
                         }
                         v.start()
