@@ -16,6 +16,7 @@ fun OnboardingScreen(onComplete: (nickname: String, breakupDate: LocalDate, goal
     var step by remember { mutableStateOf(0) }
     var nickname by remember { mutableStateOf("") }
     var goals by remember { mutableStateOf(setOf<Goal>()) }
+    var ageConfirmed by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
@@ -27,8 +28,27 @@ fun OnboardingScreen(onComplete: (nickname: String, breakupDate: LocalDate, goal
                 Text("Welcome", style = MaterialTheme.typography.headlineLarge)
                 Spacer(Modifier.height(12.dp))
                 Text("A private space to heal, one day at a time.", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Spacer(Modifier.height(32.dp))
-                Button(onClick = { step = 1 }, modifier = Modifier.fillMaxWidth()) { Text("Continue") }
+                Spacer(Modifier.height(20.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = ageConfirmed,
+                        onCheckedChange = { ageConfirmed = it }
+                    )
+                    Text(
+                        "I confirm that I am 13 years old or older.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+                Spacer(Modifier.height(20.dp))
+                Button(
+                    onClick = { step = 1 },
+                    enabled = ageConfirmed,
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text("Continue") }
             }
             1 -> {
                 Text("What should we call you?", style = MaterialTheme.typography.headlineMedium)
