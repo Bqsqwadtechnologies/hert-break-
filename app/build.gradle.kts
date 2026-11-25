@@ -113,7 +113,9 @@ val generateOfficialBrandAssets by tasks.registering {
             cornerBrightness += (0.299 * red + 0.587 * green + 0.114 * blue)
         }
         val backgroundIsLight = cornerBrightness / corners.size >= 127.5
-        val notificationImage = java.awt.image.BufferedImage(width, height, java.awt.image.BufferedImage.TYPE_INT_ARGB)
+        // Reuse the decoded logo bitmap instead of constructing an AWT image type.
+        // The original monochrome asset was already written above; this copy is
+        // now converted to a transparent white silhouette for Android notifications.
         for (y in 0 until height) {
             for (x in 0 until width) {
                 val pixel = monoImage.getRGB(x, y)
@@ -123,10 +125,10 @@ val generateOfficialBrandAssets by tasks.registering {
                 val luminance = (0.299 * red + 0.587 * green + 0.114 * blue).toInt().coerceIn(0, 255)
                 val contrast = if (backgroundIsLight) 255 - luminance else luminance
                 val alpha = (contrast * 3).coerceIn(0, 255)
-                notificationImage.setRGB(x, y, (alpha shl 24) or 0x00ffffff)
+                monoImage.setRGB(x, y, (alpha shl 24) or 0x00ffffff)
             }
         }
-        check(ImageIO.write(notificationImage, "png", notificationOutput)) {
+        check(ImageIO.write(monoImage, "png", notificationOutput)) {
             "No PNG writer available for notification logo"
         }
     }
