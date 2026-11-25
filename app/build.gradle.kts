@@ -96,6 +96,38 @@ val generateOfficialBrandAssets by tasks.registering {
         check(ImageIO.write(monoImage, "png", monoOutput)) {
             "No PNG writer available for monochrome logo"
         }
+        // Android status-bar icons must be transparent alpha silhouettes.
+        // Derive the silhouette from the same official monochrome app mark.
+        val notificationOutput = generatedRes.get().file("drawable-nodpi/notification_hat_icon.png").asFile
+        val width = monoImage.width
+        val height = monoImage.height
+        var cornerBrightness = 0.0
+        val corners = listOf(
+            monoImage.getRGB(0, 0), monoImage.getRGB(width - 1, 0),
+            monoImage.getRGB(0, height - 1), monoImage.getRGB(width - 1, height - 1)
+        )
+        corners.forEach { pixel ->
+            val red = (pixel shr 16) and 0xff
+            val green = (pixel shr 8) and 0xff
+            val blue = pixel and 0xff
+            cornerBrightness += (0.299 * red + 0.587 * green + 0.114 * blue)
+        }
+        val backgroundIsLight = cornerBrightness / corners.size >= 127.5
+        val notificationImage = java.awt.image.BufferedImage(width, height, java.awt.image.BufferedImage.TYPE_INT_ARGB)
+        for (y in 0 until height) {
+            for (x in 0 until width) {
+                val pixel = monoImage.getRGB(x, y)
+                val red = (pixel shr 16) and 0xff
+                val green = (pixel shr 8) and 0xff
+                val blue = pixel and 0xff
+                val luminance = (0.299 * red + 0.587 * green + 0.114 * blue).toInt().coerceIn(0, 255)
+                val alpha = if (backgroundIsLight) 255 - luminance else luminance
+                notificationImage.setRGB(x, y, (alpha shl 24) or 0x00ffffff)
+            }
+        }
+        check(ImageIO.write(notificationImage, "png", notificationOutput)) {
+            "No PNG writer available for notification logo"
+        }
     }
 }
 android.sourceSets.getByName("main").res.srcDir(layout.buildDirectory.dir("generated/res/officialBrand"))
