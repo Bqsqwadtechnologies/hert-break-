@@ -127,7 +127,10 @@ fun HeartJourneyScreen(
         }
     }
     if (showCompanionVideo) HouseVideoAd(
-        onCompleted = { onPromoVideoFinished?.invoke() },
+        onRewardEligible = {
+            onPromoVideoFinished?.invoke()
+            showCompanionVideo = false
+        },
         onClose = { showCompanionVideo = false },
     )
 }
