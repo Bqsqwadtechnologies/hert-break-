@@ -1,6 +1,8 @@
 package com.bqsqwad.heartbreakhealer
 
 import com.bqsqwad.heartbreakhealer.core.data.journey.HeartJourneyRepository
+import com.bqsqwad.heartbreakhealer.core.data.prefs.UserPreferences
+import com.bqsqwad.heartbreakhealer.notifications.NotificationScheduler
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,6 +17,7 @@ import dagger.hilt.android.HiltAndroidApp
 @HiltAndroidApp
 class HeartbreakHealerApp : Application() {
     @Inject lateinit var journey: HeartJourneyRepository
+    @Inject lateinit var preferences: UserPreferences
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     override fun onCreate() {
@@ -22,6 +25,11 @@ class HeartbreakHealerApp : Application() {
         CrashReportStore.install(this)
         createNotificationChannels()
         journey.start(appScope) // counts a journey day the moment all three tasks are done
+        appScope.launch {
+            if (preferences.reactivateDailyRemindersOnce()) {
+                NotificationScheduler.scheduleDaily(this@HeartbreakHealerApp)
+            }
+        }
     }
 
     private fun createNotificationChannels() {
