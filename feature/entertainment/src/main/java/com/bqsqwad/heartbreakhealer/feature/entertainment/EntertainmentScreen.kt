@@ -206,6 +206,7 @@ fun EntertainmentScreen(
                     ) { Text("Back to Stories") }
                 }
             }
+            // Keep an adaptive AdMob banner on every individual story part.
             BannerAdView(unitId = AdsConfig.BANNER_LIBRARY, enabled = adsAllowed)
         }
 
