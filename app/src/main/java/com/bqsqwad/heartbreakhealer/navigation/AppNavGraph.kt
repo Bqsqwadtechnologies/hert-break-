@@ -591,7 +591,7 @@ fun AppNavGraph(
                 onOpenFeature = { route, free -> if (free) navController.navigate(route) else openFeature(route) },
                 onBack = { navController.popBackStack() },
                 adsAllowed = adsAllowed,
-                onPromoVideoFinished = {}
+                onPromoVideoFinished = { dashboardViewModel.onRewardedHearts() }
             )
         }
         composable(Routes.ENTERTAINMENT) {
