@@ -291,8 +291,10 @@ fun UnsentLettersScreen(
             }
         }
 
-        // Preserved Banner Ad in footer
-        Spacer(Modifier.height(10.dp))
-        BannerAdView(unitId = AdsConfig.BANNER_LIBRARY, enabled = adsAllowed)
+        // Keep third-party advertising completely outside the private letter composer.
+        if (!writing) {
+            Spacer(Modifier.height(10.dp))
+            BannerAdView(unitId = AdsConfig.BANNER_LIBRARY, enabled = adsAllowed)
+        }
     }
 }
