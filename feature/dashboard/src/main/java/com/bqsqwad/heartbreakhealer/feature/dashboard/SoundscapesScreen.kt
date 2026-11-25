@@ -378,7 +378,7 @@ fun SoundscapesScreen(
                     )
                     Spacer(Modifier.height(14.dp))
                     Text(
-                        "Watch a quick rewarded video or partner spotlight to unlock this premium restorative mix.",
+                        "Watch the optional BQ Sqwad AI video to unlock all four premium soundscapes. The tracks unlock only after the video finishes; skipping or closing does not grant the unlock.",
                         style = MaterialTheme.typography.bodySmall,
                         color = ink,
                         textAlign = TextAlign.Center
@@ -405,7 +405,7 @@ fun SoundscapesScreen(
                         modifier = Modifier.fillMaxWidth().height(44.dp),
                         shape = RoundedCornerShape(14.dp)
                     ) {
-                        Text("⭐  BQ Sqwad AI Partner Spotlight")
+                        Text("⭐  Watch BQ Sqwad AI video · unlock all 4 tracks")
                     }
                     Spacer(Modifier.height(8.dp))
                     TextButton(onClick = { pendingUnlockTrack = null }) {
