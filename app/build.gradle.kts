@@ -121,7 +121,8 @@ val generateOfficialBrandAssets by tasks.registering {
                 val green = (pixel shr 8) and 0xff
                 val blue = pixel and 0xff
                 val luminance = (0.299 * red + 0.587 * green + 0.114 * blue).toInt().coerceIn(0, 255)
-                val alpha = if (backgroundIsLight) 255 - luminance else luminance
+                val contrast = if (backgroundIsLight) 255 - luminance else luminance
+                val alpha = (contrast * 3).coerceIn(0, 255)
                 notificationImage.setRGB(x, y, (alpha shl 24) or 0x00ffffff)
             }
         }
