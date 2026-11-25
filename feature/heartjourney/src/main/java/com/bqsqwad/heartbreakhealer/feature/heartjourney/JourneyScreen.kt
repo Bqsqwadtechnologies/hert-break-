@@ -60,6 +60,7 @@ fun HeartJourneyScreen(
     val s: JourneyState = vm.state.collectAsState().value ?: return
     val context = LocalContext.current
     var showCompanionVideo by remember { mutableStateOf(false) }
+    var showCompanionCard by remember { mutableStateOf(true) }
     Scaffold(
         topBar = { TopAppBar(title = { Text("Heart Rebuild", fontWeight = FontWeight.Bold) }, navigationIcon = { TextButton(onClick = onBack) { Text("‹ Back") } }) },
         containerColor = MaterialTheme.colorScheme.background,
@@ -95,11 +96,12 @@ fun HeartJourneyScreen(
                     }
                 }
             }
-            item {
+            if (showCompanionCard) item {
                 CompanionCard(
-                    onProceed = { CompanionLinks.open(context) },
-                    onNoThanks = { showCompanionVideo = true },
-                    onUsingAlready = { showCompanionVideo = true },
+                    onProceed = { CompanionLinks.open(context); showCompanionCard = false },
+                    onNoThanks = { showCompanionCard = false },
+                    onUsingAlready = { showCompanionCard = false },
+                    onWatchPromo = { showCompanionCard = false; showCompanionVideo = true },
                 )
             }
             item {
@@ -124,7 +126,10 @@ fun HeartJourneyScreen(
             item { BannerAdView(unitId = AdsConfig.BANNER_LIST, enabled = adsAllowed) }
         }
     }
-    if (showCompanionVideo) HouseVideoAd(onClose = { showCompanionVideo = false; onPromoVideoFinished?.invoke() })
+    if (showCompanionVideo) HouseVideoAd(
+        onCompleted = { onPromoVideoFinished?.invoke() },
+        onClose = { showCompanionVideo = false },
+    )
 }
 
 @Composable
