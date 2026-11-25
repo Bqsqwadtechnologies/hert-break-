@@ -125,16 +125,17 @@ fun CompanionPromptDialog(onClose: () -> Unit, onPromoVideoFinished: (() -> Unit
     }
 }
 
-private const val SKIP_AFTER_SECONDS = 10
+private const val SKIP_AFTER_SECONDS = 15
 
 /**
  * The BQ Sqwad AI house video.
  *  - The video itself never redirects; only the clearly labeled Learn more action opens the companion.
- *  - Skip closes it after 10 seconds. Pause and Mute are real controls.
+ *  - A reward becomes eligible after 15 seconds of active playback; skipping afterwards keeps it.
+ *  - Skip closes it after 15 seconds. Pause and Mute are real controls.
  *  - Labeled "Ad". Never shown on SOS, Support, Journal or Letters screens.
  */
 @Composable
-fun HouseVideoAd(onCompleted: () -> Unit = {}, onClose: () -> Unit) {
+fun HouseVideoAd(onRewardEligible: () -> Unit = {}, onClose: () -> Unit) {
     val context = LocalContext.current
     val resId = remember { context.resources.getIdentifier("bqsqwad_ai_promo", "raw", context.packageName) }
     if (resId == 0) {
@@ -149,11 +150,19 @@ fun HouseVideoAd(onCompleted: () -> Unit = {}, onClose: () -> Unit) {
     var playing by remember { mutableStateOf(true) }
     var muted by remember { mutableStateOf(false) }
     var ended by remember { mutableStateOf(false) }
-    var completionReported by remember { mutableStateOf(false) }
+    var rewardReported by remember { mutableStateOf(false) }
     var seconds by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(playing, ended) {
-        while (playing && !ended) { delay(1000); seconds++ }
+        while (playing && !ended) {
+            delay(1000)
+            val nextSeconds = seconds + 1
+            seconds = nextSeconds
+            if (nextSeconds >= SKIP_AFTER_SECONDS && !rewardReported) {
+                rewardReported = true
+                onRewardEligible()
+            }
+        }
     }
     DisposableEffect(Unit) { onDispose { runCatching { videoView?.stopPlayback() } } }
     BackHandler { onClose() }
@@ -169,9 +178,11 @@ fun HouseVideoAd(onCompleted: () -> Unit = {}, onClose: () -> Unit) {
                         setOnCompletionListener {
                             ended = true
                             playing = false
-                            if (!completionReported) {
-                                completionReported = true
-                                onCompleted()
+                            // Covers a video that reaches its end on the 15-second boundary
+                            // before the one-second ticker gets its next turn.
+                            if (seconds >= SKIP_AFTER_SECONDS && !rewardReported) {
+                                rewardReported = true
+                                onRewardEligible()
                             }
                         }
                         videoView = this
@@ -183,7 +194,7 @@ fun HouseVideoAd(onCompleted: () -> Unit = {}, onClose: () -> Unit) {
                 shape = RoundedCornerShape(8.dp), color = Color(0x99000000),
             ) { Text("Ad · BQ Sqwad AI", color = Color.White, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)) }
 
-            // Top-right Skip button (available after 10s or when video ends) with live countdown badge
+            // Top-right Skip button (available after 15 seconds or when video ends) with live countdown badge
             Box(
                 modifier = Modifier.align(Alignment.TopEnd).padding(14.dp)
             ) {
