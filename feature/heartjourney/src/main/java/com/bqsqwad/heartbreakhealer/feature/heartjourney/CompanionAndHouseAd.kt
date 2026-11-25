@@ -179,7 +179,9 @@ fun HouseVideoAd(onRewardEligible: () -> Unit = {}, onClose: () -> Unit) {
         }
     }
     DisposableEffect(Unit) { onDispose { runCatching { videoView?.stopPlayback() } } }
-    BackHandler { onClose() }
+    // Keep the full-screen house ad modal until its own X control is tapped.
+    // System Back must not dismiss the ad or navigate to another screen.
+    BackHandler(enabled = true) { }
 
     Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = false)) {
         Box(Modifier.fillMaxSize().background(Color.Black)) {
@@ -208,58 +210,48 @@ fun HouseVideoAd(onRewardEligible: () -> Unit = {}, onClose: () -> Unit) {
                 shape = RoundedCornerShape(8.dp), color = Color(0x99000000),
             ) { Text("Ad · BQ Sqwad AI", color = Color.White, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)) }
 
-            // The countdown stays hidden. The skip action appears only after 30 seconds.
-            val arrowPulse = rememberInfiniteTransition(label = "skip-arrow")
+            // The arrow and gently pulsing signup CTA are visible from the first frame.
+            // The X appears only when the existing 30-second skip threshold is reached.
+            val signupPulse = rememberInfiniteTransition(label = "signup-pulse")
                 .animateFloat(
-                    initialValue = 0.25f,
+                    initialValue = 0.72f,
                     targetValue = 1f,
                     animationSpec = infiniteRepeatable(
-                        animation = tween(durationMillis = 550),
+                        animation = tween(durationMillis = 900),
                         repeatMode = RepeatMode.Reverse
                     ),
-                    label = "skip-arrow-alpha"
+                    label = "signup-pulse-alpha"
                 )
             Column(
                 modifier = Modifier.align(Alignment.TopEnd).padding(14.dp),
                 horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(7.dp)
             ) {
                 if (seconds >= SKIP_AFTER_SECONDS || ended) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        if (!ended) {
-                            Text(
-                                "➜",
-                                color = Color(0xFFFFD54F),
-                                style = MaterialTheme.typography.headlineMedium,
-                                modifier = Modifier.alpha(arrowPulse.value)
-                            )
-                        }
-                        Surface(shape = RoundedCornerShape(12.dp), color = Color(0xDD000000)) {
-                            TextButton(
-                                onClick = onClose,
-                                modifier = Modifier.height(44.dp).padding(horizontal = 6.dp)
-                            ) {
-                                Text(if (ended) "Close ✕" else "Skip ›", color = Color.White, fontWeight = FontWeight.Bold)
-                            }
-                        }
-                    }
-                    OutlinedButton(
-                        onClick = { CompanionLinks.openSignup(context) },
-                        modifier = Modifier.height(42.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+                    Surface(
+                        modifier = Modifier.size(38.dp).clickable(onClick = onClose),
+                        shape = CircleShape,
+                        color = Color(0xDD171717),
+                        contentColor = Color.White
                     ) {
-                        Text("Sign up for BQ Sqwad AI", fontWeight = FontWeight.SemiBold)
+                        Box(contentAlignment = Alignment.Center) {
+                            Text("×", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
-            }
-
-            Button(
-                onClick = { CompanionLinks.open(context) },
-                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 118.dp),
-                shape = RoundedCornerShape(14.dp),
-            ) {
-                Text("Learn more about BQ Sqwad AI")
+                Text(
+                    "↓",
+                    color = Color(0xFFFFD54F),
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.alpha(signupPulse.value)
+                )
+                Button(
+                    onClick = { CompanionLinks.openSignup(context) },
+                    modifier = Modifier.alpha(signupPulse.value).height(44.dp),
+                    shape = RoundedCornerShape(14.dp),
+                ) {
+                    Text("Sign up", fontWeight = FontWeight.Bold)
+                }
             }
 
             // Bottom controls: Pause / Play, Mute / Unmute
@@ -290,14 +282,6 @@ fun HouseVideoAd(onRewardEligible: () -> Unit = {}, onClose: () -> Unit) {
                         val vol = if (muted) 0f else 1f
                         mp.setVolume(vol, vol)
                     }
-                }
-            }
-            if (ended) {
-                Column(
-                    Modifier.align(Alignment.Center).padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Button(onClick = { CompanionLinks.open(context) }, shape = RoundedCornerShape(16.dp)) { Text("Learn more about BQ Sqwad AI") }
                 }
             }
         }
