@@ -102,21 +102,16 @@ fun CompanionCard(onProceed: () -> Unit, onNoThanks: () -> Unit, onUsingAlready:
     }
 }
 
-/** Dialog wrapper so the same card can pop up after a day is counted. Both "No thanks" and "I'm using it already" show the house video. */
+/** Declining or already using the companion simply dismisses the optional promotion. */
 @Composable
 fun CompanionPromptDialog(onClose: () -> Unit, onPromoVideoFinished: (() -> Unit)? = null) {
     val context = LocalContext.current
-    var showVideo by remember { mutableStateOf(false) }
-    if (showVideo) {
-        HouseVideoAd(onCompleted = { onPromoVideoFinished?.invoke() }, onClose = { showVideo = false; onClose() })
-    } else {
-        Dialog(onDismissRequest = onClose) {
-            CompanionCard(
-                onProceed = { CompanionLinks.open(context); onClose() },
-                onNoThanks = { showVideo = true },
-                onUsingAlready = { showVideo = true },
-            )
-        }
+    Dialog(onDismissRequest = onClose) {
+        CompanionCard(
+            onProceed = { CompanionLinks.open(context); onClose() },
+            onNoThanks = onClose,
+            onUsingAlready = onClose,
+        )
     }
 }
 
@@ -124,9 +119,9 @@ private const val SKIP_AFTER_SECONDS = 10
 
 /**
  * The BQ Sqwad AI house video.
- *  - Tapping ANY part of the video (outside the three small buttons) opens the link.
- *  - Skip closes it (appears after 5 seconds). Pause and Mute are real controls.
- *  - Labeled "Ad" so nobody is surprised. Never shown on SOS, Support, Journal or Letters screens.
+ *  - The video itself never redirects; only the clearly labeled Learn more action opens the companion.
+ *  - Skip closes it after 10 seconds. Pause and Mute are real controls.
+ *  - Labeled "Ad". Never shown on SOS, Support, Journal or Letters screens.
  */
 @Composable
 fun HouseVideoAd(onCompleted: () -> Unit = {}, onClose: () -> Unit) {
@@ -173,14 +168,6 @@ fun HouseVideoAd(onCompleted: () -> Unit = {}, onClose: () -> Unit) {
                     }
                 },
             )
-            // Tap anywhere on the video = redirect. The buttons below sit ABOVE this layer and keep their own taps.
-            Box(
-                Modifier.fillMaxSize().clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
-                    runCatching { videoView?.pause() }
-                    playing = false
-                    CompanionLinks.open(context)
-                },
-            )
             Surface(
                 modifier = Modifier.align(Alignment.TopStart).padding(16.dp),
                 shape = RoundedCornerShape(8.dp), color = Color(0x99000000),
@@ -216,6 +203,14 @@ fun HouseVideoAd(onCompleted: () -> Unit = {}, onClose: () -> Unit) {
                         )
                     }
                 }
+            }
+
+            Button(
+                onClick = { CompanionLinks.open(context) },
+                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 118.dp),
+                shape = RoundedCornerShape(14.dp),
+            ) {
+                Text("Learn more about BQ Sqwad AI")
             }
 
             // Bottom controls: Pause / Play, Mute / Unmute
