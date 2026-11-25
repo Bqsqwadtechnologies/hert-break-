@@ -30,7 +30,7 @@ class UserPreferences @Inject constructor(
     val noContactBest: Flow<Int> = ds.data.map { it[Keys.NC_BEST] ?: 0 }
     val noContactStartEpoch: Flow<Long?> = ds.data.map { it[Keys.NC_START_EPOCH] }
     val reduceMotion: Flow<Boolean> = ds.data.map { it[Keys.REDUCE_MOTION] ?: false }
-    val dailyRemindersEnabled: Flow<Boolean> = ds.data.map { it[Keys.DAILY_REMINDERS] ?: false }
+    val dailyRemindersEnabled: Flow<Boolean> = ds.data.map { it[Keys.DAILY_REMINDERS] ?: true }
     val isFirstLaunch: Flow<Boolean> = ds.data.map { it[Keys.FIRST_LAUNCH] ?: true }
     val ageConfirmed: Flow<Boolean> = ds.data.map { it[Keys.AGE_CONFIRMED] ?: false }
     val urgePassedCount: Flow<Int> = ds.data.map { it[Keys.URGE_PASSED] ?: 0 }
@@ -96,6 +96,22 @@ class UserPreferences @Inject constructor(
 
     suspend fun setDailyRemindersEnabled(enabled: Boolean) {
         ds.edit { it[Keys.DAILY_REMINDERS] = enabled }
+    }
+
+    /**
+     * One-time notification reactivation for existing installs. The migration
+     * enables reminders once, then respects every later choice made in Settings.
+     */
+    suspend fun reactivateDailyRemindersOnce(): Boolean {
+        var enabled = true
+        ds.edit { data ->
+            if (data[Keys.NOTIFICATIONS_REACTIVATED_V1] != true) {
+                data[Keys.DAILY_REMINDERS] = true
+                data[Keys.NOTIFICATIONS_REACTIVATED_V1] = true
+            }
+            enabled = data[Keys.DAILY_REMINDERS] ?: true
+        }
+        return enabled
     }
 
     suspend fun setReduceMotion(enabled: Boolean) {
@@ -246,6 +262,7 @@ class UserPreferences @Inject constructor(
         val NC_START_EPOCH = androidx.datastore.preferences.core.longPreferencesKey("nc_start_epoch")
         val REDUCE_MOTION = booleanPreferencesKey("reduce_motion")
         val DAILY_REMINDERS = booleanPreferencesKey("daily_reminders_enabled")
+        val NOTIFICATIONS_REACTIVATED_V1 = booleanPreferencesKey("notifications_reactivated_v1")
         val MEMORIES = stringSetPreferencesKey("saved_memories")
         val TRIGGERS = stringSetPreferencesKey("saved_triggers")
         val PATH_DAYS = stringSetPreferencesKey("completed_path_days")
