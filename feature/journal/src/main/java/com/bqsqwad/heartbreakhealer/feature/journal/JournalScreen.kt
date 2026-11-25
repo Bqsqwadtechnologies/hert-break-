@@ -320,8 +320,10 @@ fun JournalScreen(
             }
         }
 
-        // Preserved Banner Ad in footer
-        Spacer(Modifier.height(10.dp))
-        BannerAdView(unitId = AdsConfig.BANNER_LIBRARY, enabled = adsAllowed)
+        // Keep third-party advertising completely outside the private journal editor.
+        if (!showEditor) {
+            Spacer(Modifier.height(10.dp))
+            BannerAdView(unitId = AdsConfig.BANNER_LIBRARY, enabled = adsAllowed)
+        }
     }
 }
