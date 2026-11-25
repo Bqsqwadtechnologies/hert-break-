@@ -61,13 +61,18 @@ Enable GitHub Pages from `/docs`.
 ./gradlew :app:assembleRelease
 ```
 
-## Release checklist
-1. Replace test AdMob IDs in `AdsConfig` + Manifest
-2. Generate release keystore + GitHub secrets
-3. Enable GitHub Pages for `/docs`
-4. Data safety: on-device data, AdMob, no accounts
-5. Content rating 13+
-6. Play App Signing
-7. Upload AAB
+## Google Play release and policy checklist
+1. Confirm release AdMob app/unit IDs are registered to this app; debug builds must continue using Google's official test IDs.
+2. Generate/verify the existing release keystore and GitHub signing secrets. Never commit signing material.
+3. Enable GitHub Pages using the `/docs` folder and verify the privacy page is publicly accessible:
+   `https://bqsqwadtechnologies.github.io/hert-break-/privacy.html`
+4. Complete the Health apps declaration in Play Console because the app includes mental-wellbeing and self-reflection features. Do not claim diagnosis, treatment, cure, prevention, or medical-device functionality.
+5. Add the required health disclaimer to the Play Store description: “Heartbreak Healer is not a medical device and does not diagnose, treat, cure, or prevent any medical condition. Consult a healthcare professional for medical advice, diagnosis, or treatment.”
+6. Complete Data safety using the current AdMob/UMP SDK disclosures. The app's journal, letters, mood check-ins and journey content stay on-device and are not uploaded by Heartbreak Healer; Google advertising SDK data is separately disclosed in the privacy policy.
+7. Declare that the app contains ads (AdMob and clearly labeled BQ house promotions).
+8. Set the target audience accurately and do not target children under 13. Onboarding now asks users to confirm they are at least 13.
+9. Complete the content-rating questionnaire accurately, including the app's wellbeing/support content and advertising.
+10. Confirm the in-app Privacy Policy and Terms links work, Play App Signing is configured, then upload the signed AAB.
+11. Run the full release build and test the installed release build on a physical device before submitting.
 
 Repo: https://github.com/Bqsqwadtechnologies/hert-break-
