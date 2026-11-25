@@ -183,7 +183,7 @@ fun HouseVideoAd(onRewardEligible: () -> Unit = {}, onClose: () -> Unit) {
     // System Back must not dismiss the ad or navigate to another screen.
     BackHandler(enabled = true) { }
 
-    Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = false)) {
+    Dialog(onDismissRequest = {}, properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnBackPress = false, dismissOnClickOutside = false)) {
         Box(Modifier.fillMaxSize().background(Color.Black)) {
             AndroidView(
                 modifier = Modifier.fillMaxSize(),
