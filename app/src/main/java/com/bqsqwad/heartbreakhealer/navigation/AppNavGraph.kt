@@ -708,15 +708,15 @@ fun AppNavGraph(
         HouseVideoAd(
             onRewardEligible = {
                 // The house fallback earns the same pending reward as AdMob after
-                // 15 seconds of active playback. Consume it once; the user may now
+                // 30 seconds of active playback. Consume it once; the user may now
                 // skip the remaining video without losing the earned access/reward.
                 val earnedReward = pendingHouseAdReward
                 pendingHouseAdReward = null
                 earnedReward?.invoke()
             },
             onClose = {
-                // Closing before 15 seconds clears the unearned reward.
-                // After 15 seconds it is already consumed and remains granted.
+                // Closing before 30 seconds clears the unearned reward.
+                // After 30 seconds it is already consumed and remains granted.
                 pendingHouseAdReward = null
                 showHouseAdDialog = false
             }
