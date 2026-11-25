@@ -894,7 +894,9 @@ fun SupportScreen(onBack: () -> Unit) {
     ) {
         Text("Need more support?", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(16.dp))
-        Text("This app is not therapy or a crisis service.")
+        Text(
+            "This app is not a medical device and does not diagnose, treat, cure, or prevent any medical condition. It provides general self-reflection and wellbeing tools, not professional care. It is not therapy or a crisis service. For medical or mental-health advice, diagnosis, or treatment, speak with a qualified healthcare professional."
+        )
         Spacer(Modifier.height(12.dp))
         Text("If you feel unsafe or at risk of harming yourself, contact local emergency services right away.")
         Spacer(Modifier.height(16.dp))
