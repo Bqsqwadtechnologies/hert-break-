@@ -706,19 +706,17 @@ fun AppNavGraph(
 
     if (showHouseAdDialog) {
         HouseVideoAd(
-            onCompleted = {
-                // A completed house fallback fulfils the exact same reward callback
-                // as a completed Google rewarded ad, regardless of placement:
-                // story/joke continuation, Hearts, credits, gifts, or feature unlocks.
-                // Consume the callback once and close the player so the newly
-                // unlocked content is immediately visible.
-                val completedReward = pendingHouseAdReward
+            onRewardEligible = {
+                // The house fallback earns the same pending reward as AdMob after
+                // 15 seconds of active playback. Consume it once; the user may now
+                // skip the remaining video without losing the earned access/reward.
+                val earnedReward = pendingHouseAdReward
                 pendingHouseAdReward = null
-                showHouseAdDialog = false
-                completedReward?.invoke()
+                earnedReward?.invoke()
             },
             onClose = {
-                // Skipping/closing before completion never grants the pending reward.
+                // Closing before 15 seconds clears the unearned reward.
+                // After 15 seconds it is already consumed and remains granted.
                 pendingHouseAdReward = null
                 showHouseAdDialog = false
             }
