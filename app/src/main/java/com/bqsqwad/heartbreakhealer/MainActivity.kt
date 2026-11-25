@@ -73,9 +73,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        val notificationPermissionPrefs = getSharedPreferences("notification_permission", MODE_PRIVATE)
         if (Build.VERSION.SDK_INT >= 33 &&
-            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED &&
+            !notificationPermissionPrefs.getBoolean("requested_v1", false)
         ) {
+            notificationPermissionPrefs.edit().putBoolean("requested_v1", true).apply()
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 7001)
         }
         openStoriesFromReminder = intent?.getBooleanExtra(DailyReminderWorker.EXTRA_OPEN_STORIES, false) ?: false
